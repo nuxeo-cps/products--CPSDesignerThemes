@@ -1,0 +1,54 @@
+Measurements with version 0.1
+=============================
+All times expressed in Zope Profiler in real time mode
+(slower than reality, in a consistent manner, I hope)
+
+Using the current sample theme on an almost empty portal.
+All image, css resources didn't get loaded (browser cache)
+
+Host: 2 GHz MacBook (july 2008 entry model)
+
+View rendering of a news item document (page weight: 8.7 kB)
+--------------------------------------
+Total time : 440 ms  Actual time (time wget...): .137s
+
+Total time spent in the engine (renderCompat)   : 170 ms
+Time spent in CPSPortlets, lookup and rendering : 119 ms
+Specific engine time                            :  51 ms
+Of which, final serialization                   :  36 ms
+Engine time without serialization		:  15 ms
+For reference, doc.render()			: 130 ms
+
+Edit rendering of same document (page weight: 20.5 kB)
+-------------------------------
+Everything looks to be called twice in the profiler, but isn't.
+Probably a bug of the profiler itself, divide all profiler
+figures by 2.
+
+Total time : 1.2 s Actual time (time wget: ) : 190 ms
+
+Total time spent in the engine (renderCompat)   : 351 ms
+Time spent in CPSPortlets, lookup and rendering : 165 ms
+Specific engine time                            : 186 ms
+Of which, final serialization                   : 150 ms
+Engine time without serialization		:  36 ms
+Of which: initial parsing			:   1 ms
+          URI rewriting				:   7 ms
+
+Conclusion
+----------
+Apart from the switch to lxml, which is supposed
+to be quicker at serialization, not much room for improvement
+at this point.
+
+Reparsing the theme each time is negligible. This might
+change with ZODB themes
+
+
+
+
+
+
+
+
+

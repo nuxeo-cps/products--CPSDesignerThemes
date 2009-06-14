@@ -1,0 +1,74 @@
+<html xmlns:cps="http://xmlns.racinet.org/cps">
+<head>
+  <title>Sample theme page</title>
+  <link rel="stylesheet" type="text/css" href="sample.css" />
+</head>
+<body>
+  <div class="the_banner">
+    <img src="cps34.png" />
+  </div>
+
+  <!-- Current document will typically have some <h1> -->
+  <h2>This is a sample theme page for CPSDesignerTheme</h2>
+  <p>You can work on this page with your favorite browser and web development
+  tools, but absolute URIs are not recommended, in particular
+  if you want to try this with a 'file://' URL :
+    <img src="/cps34.png" width="24" height="16"/> See what I mean ?
+  </p>
+
+
+  <div cps:slot="doc_actions" style="float:left;">
+    <div cps:portlet="frame" style="border: 1px solid black;">
+      <span cps:portlet="title" style="font-size: 120%">The title</span>
+      <div cps:portlet="body">Typical portlet in the doc_actions slot</div>
+    </div>
+  </div>
+
+  <div cps:slot="user_actions" style="float:right">
+    <div cps:portlet="frame" style="border: 1px solid black;">
+      <span cps:portlet="title" style="font-size: 120%">The title</span>
+      <div cps:portlet="body">Typical portlet in the user_actions slot</div>
+    </div>
+  </div>
+
+  <div class="mainmarker">
+    <h3>Main content</h3>
+    <p>Of course you can put any stuff in your static html file,
+      we use this here to indicate that the main content starts just
+      below 
+    </p>
+
+    <div cps:main-content="here" style="border: 5px solid red;">
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean vitae
+aliquam ipsum. Fusce egestas quam scelerisque arcu tempor
+varius. Mauris vulputate tellus ac libero eleifend ornare. Class
+aptent taciti sociosqu ad litora torquent per conubia nostra, per
+inceptos himenaeos. Morbi ante lectus, sollicitudin ut iaculis at,
+suscipit feugiat nunc. Donec vitae aliquam lacus. Class aptent taciti
+sociosqu ad litora torquent per conubia nostra, per inceptos
+himenaeos. Nulla ut ante lectus, consectetur posuere arcu. Nunc
+imperdiet condimentum mi id lacinia. Curabitur quis velit a ligula
+venenatis rhoncus eget eu erat. Aliquam placerat placerat
+placerat. Suspendisse potenti. Quisque blandit varius ligula vitae
+volutpat. Nullam turpis tellus, tincidunt sit amet sollicitudin vitae,
+consequat in sapien. Donec fringilla faucibus tortor, eget cursus enim
+dictum sit amet.
+    </div>
+    <p>We are still in the div that enclosed the one for main content</p>
+  </div>
+
+  <div cps:slot="treeview">
+    <div cps:portlet="frame" style="float:left;width:50%;">
+      <span cps:portlet="title" style="font-size: 120%">The title</span>
+      <div cps:portlet="body">Typical portlet in the treeview slot</div>
+    </div>
+  </div>
+
+  <h3>URL rewriting demos</h3>
+  <div>
+    <p>An image from a subfolder: <img src="images/icons/start.png" /></p>
+    <p class="css_image">Background image linked from the stylesheet</p>
+  </div>
+
+</body>
+</html>

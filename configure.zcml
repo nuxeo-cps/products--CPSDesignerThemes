@@ -1,0 +1,27 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five">
+
+  <include file="browser.zcml"/>
+
+  <adapter
+      provides=".interfaces.IThemeEngine"
+      for="OFS.interfaces.IObjectManager
+	   zope.publisher.interfaces.http.IHTTPRequest"
+      factory=".negociator.ThemeNegociator"
+      />
+
+  <!-- Five specifics -->
+
+  <five:implements class=".themecontainer.FSThemeContainer"
+		   interface=".interfaces.IThemeContainer" />
+
+  <five:registerClass
+      class=".themecontainer.FSThemeContainer"
+      meta_type="Filesystem Theme Container"
+      addview="addFSThemeContainer.html"
+      permission="cmf.ManagePortal"
+      global="False"
+      />
+
+</configure>

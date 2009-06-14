@@ -1,0 +1,36 @@
+CPSDesignerThemes INSTALL
+=========================
+
+Dependencies
+------------
+   cElementTree or plain Elementree (the latter not tested)
+
+Installing
+----------
+   Import the CPS Designer Themes default profile
+
+Where are the themes ?
+----------------------
+  They are loaded from Products/CPSDesignerThemes/doc/sample_themes
+  To change that, go in ZMI to the .cps_themes object at the portal root
+
+Disabling
+---------
+  In ZMI, go to the "Properties" tab of portal_skins.
+  Remove 'cps_designer_themes_compat' from the two lists of layers
+
+BUGS
+====
+
+As of 0.1, the main blockers for early testing purposes are:
+
+  - error if CPS generated content includes XML entities
+    other than &nbsp and the three XML common ones.
+    (due to ElementTree)
+
+  - error if you have a reference to the xhtml name space in
+    your <html> tag. Just remove it as in doc/sample_themes/index.html
+
+These should be fixed or behave diffently once the switch to lxml is
+done. Fixing them at this point is a waste of time.
+

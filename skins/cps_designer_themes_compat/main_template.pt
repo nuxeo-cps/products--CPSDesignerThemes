@@ -1,0 +1,46 @@
+<cpsdesigner-themes-compat>
+<metal:slot-recorder define-macro="master"
+  tal:define="showthirdcol showthirdcol|python:1;
+              emptybody emptybody|request/emptybody|nothing;
+              mtool here/portal_membership;
+              utool nocall:here/portal_url;
+              atool here/portal_actions;
+              ttool here/portal_trees;
+              wtool here/portal_workflow;
+              context_url python:here.getContextUrl(utool=utool);
+              base_url here/cpsskins_getBaseUrl;
+              here_url here/absolute_url;
+              member mtool/getAuthenticatedMember;
+              isAnon mtool/isAnonymousUser;
+              isHomeless python:isAnon or member.getProperty('homeless', 0);
+              isHomeless python:(isHomeless == '0' and [0] or [isHomeless])[0];
+              actions python:atool.listFilteredActionsFor(here);
+              wf_state python:wtool.getInfoFor(here,'review_state','');
+              uname python: isAnon and 'Guest' or member.getUserName();
+              checkPerm nocall: mtool/checkPermission;
+              cpsmcat nocall:here/translation_service;
+              locale here/translation_service/getSelectedLanguage;
+              in_ws here/isInWorkspace;
+              dummy python: request.set('cpsskins_cmfactions', actions);
+">
+
+  <metal:block use-macro="here/cpsskins_global_defines/macros/defines"/>
+  <head>
+      <metal:block use-macro="here/header_lib_header/macros/header|here/header_lib/macros/header"/>
+  </head>
+
+  <body tal:attributes="onload here/getOnLoad|string:setFocus();
+			class cpsskins_bodyclass;
+			style cpsskins_bodystyle"/>
+
+  <metal:block define-slot="doctype"/>
+  <metal:block define-slot="base"/>
+  <metal:block define-slot="head_slot"/>
+  <metal:block define-slot="style_slot"/>
+  <metal:block define-slot="javascript_head_slot"/>
+  <metal:block define-slot="body" tal:condition="emptybody"/>
+  <metal:block define-slot="header" />
+  <metal:block define-slot="main" />
+  <metal:block define-slot="sub" tal:condition="not:emptybody"/>
+</metal:slot-recorder>
+</cpsdesigner-themes-compat>

@@ -1,0 +1,15 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+  <configure package="Products.GenericSetup.browser">
+    <browser:page
+	for="zope.app.container.interfaces.IAdding"
+	name="addFSThemeContainer.html"
+	template="addWithPresettings.pt"
+	class="Products.CPSDesignerThemes.browser.addviews.FSThemeContainerAddView"
+	permission="cmf.ManagePortal"
+	/>
+  </configure>
+
+</configure>

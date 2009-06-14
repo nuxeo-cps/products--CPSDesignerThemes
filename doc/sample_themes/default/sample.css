@@ -1,0 +1,8 @@
+div.the_banner {
+   text-align: center;
+}
+
+p.css_image {
+   background: url(images/icons/start.png);
+   font-size: 130%;
+}

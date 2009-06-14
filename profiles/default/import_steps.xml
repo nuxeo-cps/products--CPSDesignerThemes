@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<import-steps>
+ <import-step
+     id="root-themes" version="20090613-1"
+     handler="Products.CPSDesignerThemes.exportimport.importRootThemesContainer"
+     title="Root themes container">
+   Create and import CPSDesignerThemes' root themes container
+ </import-step>
+</import-steps>
