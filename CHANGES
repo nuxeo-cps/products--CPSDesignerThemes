@@ -3,12 +3,10 @@ Requires
 -
 New features
 ~~~~~~~~~~~~
-- Compatibility mode for standard CPS pages (main_template)
-- Almost full URI rewriting in html and css
-- File system theme container
+-
 Bug fixes
 ~~~~~~~~~
 -
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
-- First package
+- 

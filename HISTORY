@@ -1,4 +1,26 @@
 ===========================================================
+Package: CPSDesignerThemes 0.1.0
+===========================================================
+First release built by: gracinet at: 2009-06-15T23:44:51
+SVN Tag: https://svn.nuxeo.org/pub/CPS3/products/CPSDesignerThemes/tags/0.1.0
+Build from: https://svn.nuxeo.org/pub/CPS3/products/CPSDesignerThemes/trunk@53661
+
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+- Compatibility mode for standard CPS pages (main_template)
+- Almost full URI rewriting in html and css
+- File system theme container
+Bug fixes
+~~~~~~~~~
+-
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- First package
+
+===========================================================
 Package: CPSDesignerThemes 0.0.1
 ===========================================================
 First release built by: gracinet at: 2009-06-14T16:41:19
