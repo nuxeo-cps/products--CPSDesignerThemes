@@ -25,9 +25,9 @@ from zope.interface import implements
 
 from Products.CMFCore.utils import getToolByName
 
-from interfaces import IThemeEngine
-from constants import NS_URI, ENCODING
-from utils import rewrite_uri
+from Products.CPSDesignerThemes.interfaces import IThemeEngine
+from Products.CPSDesignerThemes.constants import NS_URI, ENCODING
+from Products.CPSDesignerThemes.utils import rewrite_uri
 
 try:
     import cElementTree as ET
