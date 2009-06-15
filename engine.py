@@ -289,10 +289,12 @@ class ElementTreeEngine(object):
                 continue
             ptl_elt = deepcopy(frame)
 
-            title_elt = find_by_attribute(
-                ptl_elt, PORTLET_ATTR, value='title').next()
-            del title_elt.attrib[PORTLET_ATTR]
-            title_elt.text = portlet.title_or_id() # TODO i18n title etc.
+            elts = tuple(find_by_attribute(ptl_elt, PORTLET_ATTR,
+                                           value='title'))
+            if elts:
+                title_elt = elts[0]
+                del title_elt.attrib[PORTLET_ATTR]
+                title_elt.text = portlet.title_or_id() # TODO i18n title etc.
 
             body_elt = find_by_attribute(
                 ptl_elt, PORTLET_ATTR, value='body').next()
