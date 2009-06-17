@@ -120,7 +120,7 @@ class ElementTreeEngine(BaseEngine):
         return parsed.find('.//head'), parsed.find('.//body')
 
     @classmethod
-    def parseFragment(self, content, enclosing='pt-slot'):
+    def parseFragment(self, content, enclosing=None):
         # TODO GR: this works around the fact that entity support in
         # my ElementTree version doesn't work as advertised
         content = content.replace('&nbsp;', ' ')
@@ -129,9 +129,11 @@ class ElementTreeEngine(BaseEngine):
         # TODO load all entities, and do it just once
         parser.entity['nbsp'] = unichr(160)
         parser.feed(self.XML_HEADER)
-        parser.feed("<%s>" % enclosing)
+        if enclosing is not None:
+            parser.feed("<%s>" % enclosing)
         parser.feed(content)
-        parser.feed("</%s>" % enclosing)
+        if enclosing is not None:
+            parser.feed("</%s>" % enclosing)
         try:
             return parser.close()
         except SyntaxError, e:
@@ -233,14 +235,16 @@ class ElementTreeEngine(BaseEngine):
                 del title_elt.attrib[PORTLET_ATTR]
                 title_elt.text = portlet.title_or_id() # TODO i18n title etc.
 
-            body_elt = find_by_attribute(
-                ptl_elt, PORTLET_ATTR, value='body').next()
-            del body_elt.attrib[PORTLET_ATTR]
-            body_elt.text = ''
-            for child in body_elt:
-                body_elt.remove(child)
-            body_elt.append(ET.fromstring(
-                self.XML_HEADER + portlet.render_cache()))
+            elts = tuple(find_by_attribute(ptl_elt, PORTLET_ATTR,
+                                             value='body'))
+
+            if elts:
+                body_elt = elts[0]
+                del body_elt.attrib[PORTLET_ATTR]
+                body_elt.text = ''
+                for child in body_elt:
+                    body_elt.remove(child)
+                body_elt.append(self.parseFragment(portlet.render_cache()))
 
             frame_parent.append(ptl_elt)
 

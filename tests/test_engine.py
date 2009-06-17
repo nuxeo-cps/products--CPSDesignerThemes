@@ -66,7 +66,7 @@ class EngineTestCase(unittest.TestCase):
         p_no_wt = WT_REGEXP.sub('', PORTLET1.render_cache())
         self.assertEquals(rendered, '<div><p><div>%s</div></p></div>' % p_no_wt)
 
-    def xtest_no_portlet_body(self):
+    def test_no_portlet_body(self):
         # engine must accept a missing cps:portlet="body"
         engine = self.getEngine('theme1', 'no_portlet_body.html')
         slot_name, slot = engine.extractSlotElements().next()
@@ -74,8 +74,7 @@ class EngineTestCase(unittest.TestCase):
         engine.mergePortlets(frame_parent, frame, [PORTLET1])
 
         rendered = WT_REGEXP.sub('', engine.dumpElement(slot))
-        p_no_wt = WT_REGEXP.sub('', PORTLET1.render_cache())
-        self.assertEquals(rendered, '<div><p><div>%s</div></p></div>' % p_no_wt)
+        self.assertEquals(rendered, '<div><p><span>portlet1</span></p></div>')
 
 class TestElementTreeEngine(EngineTestCase):
 

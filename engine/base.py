@@ -116,8 +116,13 @@ class BaseEngine(object):
         raise NotImplementedError
 
     @classmethod
-    def parseFragment(self, content, enclosing='pt-slot'):
-        """Convert a string fragment to an xml tree"""
+    def parseFragment(self, content, enclosing=None):
+        """Convert a string fragment to an xml tree
+
+        If enclosing is None, it is assumed that the fragment has a root element
+        otherwise one will be produced, as specified by 'enclosing'
+        This is useful for some ZPT outputs.
+        """
         raise NotImplementedError
 
     def render(self, main_content='', head_content='',
