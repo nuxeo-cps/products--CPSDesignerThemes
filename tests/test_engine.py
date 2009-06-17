@@ -18,17 +18,71 @@
 # $Id$
 
 import unittest
+import os
+import re
 
-class TestEngine(unittest.TestCase):
-    """High level compatibility test.
+from Products.CPSDesignerThemes.engine.etreeengine import ElementTreeEngine
 
-    This test checks that the compatibility mode is working, without referring
-    to any Zope version specific code.
-    """
-    pass
+THEMES_PATH = os.path.join(INSTANCE_HOME, 'Products', 'CPSDesignerThemes',
+                           'tests')
+
+class FakePortlet:
+    def __init__(self, title, rendered):
+        self.title = title
+        self.rendered = rendered
+
+    def Title(self):
+        return self.title
+
+    def title_or_id(self):
+        return self.title
+
+    def render_cache(self):
+        return self.rendered
+
+PORTLET1 = FakePortlet('portlet1', '<ul id="portlet1"><li>foo</li></ul>')
+
+WT_REGEXP = re.compile(r'[\n ]*')
+
+class EngineTestCase(unittest.TestCase):
+    """Base test case for all engines."""
+
+    EngineClass = None
+
+    def getEngine(self, theme, page='index.html'):
+        f = open(os.path.join(THEMES_PATH, theme, page), 'r')
+        return self.EngineClass(html_file=f,
+                                 theme_base_uri='/thm_base',
+                                 page_uri=page)
+
+    def test_no_portlet_title(self):
+        # engine must accept a missing cps:portlet="title"
+        engine = self.getEngine('theme1', 'no_portlet_title.html')
+        slot_name, slot = engine.extractSlotElements().next()
+        frame_parent, frame = engine.extractSlotFrame(slot)
+        engine.mergePortlets(frame_parent, frame, [PORTLET1])
+
+        rendered = WT_REGEXP.sub('', engine.dumpElement(slot))
+        p_no_wt = WT_REGEXP.sub('', PORTLET1.render_cache())
+        self.assertEquals(rendered, '<div><p><div>%s</div></p></div>' % p_no_wt)
+
+    def xtest_no_portlet_body(self):
+        # engine must accept a missing cps:portlet="body"
+        engine = self.getEngine('theme1', 'no_portlet_body.html')
+        slot_name, slot = engine.extractSlotElements().next()
+        frame_parent, frame = engine.extractSlotFrame(slot)
+        engine.mergePortlets(frame_parent, frame, [PORTLET1])
+
+        rendered = WT_REGEXP.sub('', engine.dumpElement(slot))
+        p_no_wt = WT_REGEXP.sub('', PORTLET1.render_cache())
+        self.assertEquals(rendered, '<div><p><div>%s</div></p></div>' % p_no_wt)
+
+class TestElementTreeEngine(EngineTestCase):
+
+    EngineClass = ElementTreeEngine
 
 
 def test_suite():
     return unittest.TestSuite((
-        unittest.makeSuite(TestEngine),
+        unittest.makeSuite(TestElementTreeEngine),
         ))

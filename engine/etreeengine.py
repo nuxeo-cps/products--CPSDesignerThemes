@@ -21,6 +21,11 @@ import logging
 from copy import deepcopy
 from StringIO import StringIO # use TAL's faster StringIO ?
 
+try:
+    import cElementTree as ET
+except ImportError:
+        import elementtree.ElementTree as ET
+
 from zope.interface import implements
 
 from Products.CMFCore.utils import getToolByName
@@ -28,11 +33,7 @@ from Products.CMFCore.utils import getToolByName
 from Products.CPSDesignerThemes.interfaces import IThemeEngine
 from Products.CPSDesignerThemes.constants import NS_URI, ENCODING
 from Products.CPSDesignerThemes.utils import rewrite_uri
-
-try:
-    import cElementTree as ET
-except ImportError:
-        import elementtree.ElementTree as ET
+from base import BaseEngine
 
 def ns_prefix(name):
     return '{%s}%s' % (NS_URI, name)
@@ -63,7 +64,7 @@ LINK_HTML_DOCUMENTS = {'img' : 'src',
                        'param' : 'value',
                        }
 
-class ElementTreeEngine(object):
+class ElementTreeEngine(BaseEngine):
     """An engine based on ElementTree API
 
     http://effbot.org/zone/element-index.htm
@@ -88,10 +89,12 @@ class ElementTreeEngine(object):
     def __init__(self, html_file=None, theme_base_uri='', page_uri=''):
         self.tree = ET.parse(html_file)
         self.root = self.tree.getroot()
-        self.theme_base_uri = theme_base_uri
-        self.page_uri = page_uri
+        BaseEngine.__init__(self, theme_base_uri=theme_base_uri,
+                            page_uri=page_uri)
 
-        self.rewriteUris()
+    #
+    # Internal engine API implementation. For docstrings, see BaseEngine
+    #
 
     def rewriteUris(self):
         for tag, attr in LINK_HTML_DOCUMENTS.items():
@@ -107,48 +110,14 @@ class ElementTreeEngine(object):
                 elt.attrib[attr] = new_uri
                 self.logger.debug("URI Rewrite %s -> %s" % (uri, new_uri))
 
-    def renderCompat(self, metal_slots=None, pt_output='',
-                     context=None, request=None):
-        """Rendering method for compat mode.
+    def extractSlotElements(self):
+        return ((slot.attrib.pop(SLOT_ATTR), slot)
+                for slot in find_by_attribute(self.root, SLOT_ATTR))
 
-        Receives the what the callers page templates of the main_template's
-        master macro have put in the slots, and the main output of said macro.
-
-        pt_output is supposed to be xml looking like this:
-          <cpsdesigner-themes-compat>
-            <head>...</head>
-            <body onload="..."/>
-          </cpsdesigner-themes-compat>
-
-        This is used to reproduced what CPSSkins main template used to do
-        (simplified extract):
-          <head>
-            <metal:block use-macro="here/header_lib_header/macros/header">
-              <metal:block fill-slot="head_slot">
-                <metal:block define-slot="head_slot"</metal:block>
-              </metal:block>
-            </metal:block>
-          </head>
-
-        The slot recording hack does not work for these nested macro calls,
-        and it would be much trickier to do so.
-        Therefore we have our main template render the part that's supposed to
-        be called from there directly in the output, define the slots in the
-        simplest manner near top level, and this method merges all of this."""
-
+    @classmethod
+    def parseHeadBody(self, pt_output):
         parsed = self.parseFragment(pt_output)
-        head_element = parsed.find('.//head')
-        body_element = parsed.find('.//body')
-
-        head_content = '\n'.join((metal_slots.get(slot, '')
-                                  for slot in METAL_HEAD_SLOTS))
-
-        return self.render(main_content=metal_slots.get('main', ''),
-                           head_content=head_content,
-                           head_element=head_element,
-                           body_element=body_element,
-                           context=context, request=None)
-
+        return parsed.find('.//head'), parsed.find('.//body')
 
     @classmethod
     def parseFragment(self, content, enclosing='pt-slot'):
@@ -167,38 +136,6 @@ class ElementTreeEngine(object):
             return parser.close()
         except SyntaxError, e:
             self.logger.error("Problematic xml snippet:\n", content)
-
-    def render(self, main_content='', head_content='',
-               body_element=None, head_element=None,
-               context=None, request=None):
-        """General rendering method.
-
-        Supposed to be used for compat mode and direct mode."""
-
-        ptool = getToolByName(context, 'portal_cpsportlets')
-
-        # portlet slots
-        for slot in find_by_attribute(self.root, SLOT_ATTR):
-            slot_name = slot.attrib.pop(SLOT_ATTR)
-            portlets = ptool.getPortlets(context, slot_name)
-            self.logger.debug('Rendering slot %s with portlets %s',
-                              slot_name, portlets)
-            frame_parent, frame = self.extractSlotFrame(slot)
-            self.mergePortlets(frame_parent, frame, portlets)
-
-        if body_element is not None:
-            self.mergeBodyElement(from_cps=body_element)
-        if main_content:
-            self.renderMainContent(main_content)
-        self.mergeHeads(head_content=head_content,
-                        cps_global=head_element)
-
-        # XXX hack avoiding the empty textarea and script traps (sigh)
-        self.protectEmptyElements('textarea', 'script')
-
-        out = StringIO()
-        self.tree.write(out)
-        return out.getvalue()
 
     def mergeBodyElement(self, from_cps=None):
         """Merge the body element issued by CPS' ZPTs in the theme's
@@ -315,3 +252,13 @@ class ElementTreeEngine(object):
                 if not elt.text:
                     elt.text = ' '
 
+    def serialize(self):
+        self.protectEmptyElements('script', 'div', 'textarea')
+
+        out = StringIO()
+        self.tree.write(out)
+        return out.getvalue()
+
+    @classmethod
+    def dumpElement(self, elt):
+        return ET.tostring(elt)
