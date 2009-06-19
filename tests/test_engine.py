@@ -22,6 +22,7 @@ import os
 import re
 
 from Products.CPSDesignerThemes.engine.etreeengine import ElementTreeEngine
+from Products.CPSDesignerThemes.constants import NS_XHTML
 
 THEMES_PATH = os.path.join(INSTANCE_HOME, 'Products', 'CPSDesignerThemes',
                            'tests')
@@ -63,8 +64,11 @@ class EngineTestCase(unittest.TestCase):
         engine.mergePortlets(frame_parent, frame, [PORTLET1])
 
         rendered = WT_REGEXP.sub('', engine.dumpElement(slot))
-        p_no_wt = WT_REGEXP.sub('', PORTLET1.render_cache())
-        self.assertEquals(rendered, '<div><p><div>%s</div></p></div>' % p_no_wt)
+        expected = WT_REGEXP.sub('',
+                                 '<div xmlns="%s"><p><div>%s</div>'
+                                 '</p></div>' % (NS_XHTML,
+                                                 PORTLET1.render_cache()))
+        self.assertEquals(rendered, expected)
 
     def test_no_portlet_body(self):
         # engine must accept a missing cps:portlet="body"
@@ -74,7 +78,8 @@ class EngineTestCase(unittest.TestCase):
         engine.mergePortlets(frame_parent, frame, [PORTLET1])
 
         rendered = WT_REGEXP.sub('', engine.dumpElement(slot))
-        self.assertEquals(rendered, '<div><p><span>portlet1</span></p></div>')
+        self.assertEquals(
+            rendered, '<divxmlns="%s"><p><span>portlet1</span></p></div>' % NS_XHTML)
 
 class TestElementTreeEngine(EngineTestCase):
 

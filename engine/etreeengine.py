@@ -25,18 +25,22 @@ try:
     import cElementTree as ET
 except ImportError:
         import elementtree.ElementTree as ET
+import patchetree
 
 from zope.interface import implements
 
 from Products.CMFCore.utils import getToolByName
 
 from Products.CPSDesignerThemes.interfaces import IThemeEngine
-from Products.CPSDesignerThemes.constants import NS_URI, ENCODING
+from Products.CPSDesignerThemes.constants import NS_URI, NS_XHTML, ENCODING
 from Products.CPSDesignerThemes.utils import rewrite_uri
 from base import BaseEngine
 
 def ns_prefix(name):
     return '{%s}%s' % (NS_URI, name)
+
+HEAD = '{%s}head' % NS_XHTML
+BODY = '{%s}body' % NS_XHTML
 
 PORTLET_ATTR = ns_prefix('portlet')
 SLOT_ATTR = ns_prefix('slot')
@@ -98,7 +102,7 @@ class ElementTreeEngine(BaseEngine):
 
     def rewriteUris(self):
         for tag, attr in LINK_HTML_DOCUMENTS.items():
-            for elt in self.tree.findall('//%s' % tag):
+            for elt in self.root.findall('.//{%s}%s' % (NS_XHTML, tag)):
                 uri = elt.attrib[attr]
                 try:
                     new_uri = rewrite_uri(uri=uri,
@@ -117,7 +121,7 @@ class ElementTreeEngine(BaseEngine):
     @classmethod
     def parseHeadBody(self, pt_output):
         parsed = self.parseFragment(pt_output)
-        return parsed.find('.//head'), parsed.find('.//body')
+        return (parsed.find('.//' + elt) for elt in (HEAD, BODY))
 
     @classmethod
     def parseFragment(self, content, enclosing=None):
@@ -129,15 +133,23 @@ class ElementTreeEngine(BaseEngine):
         # TODO load all entities, and do it just once
         parser.entity['nbsp'] = unichr(160)
         parser.feed(self.XML_HEADER)
-        if enclosing is not None:
-            parser.feed("<%s>" % enclosing)
+
+        # We always need an enclosing tag to bear the xhtml namespace
+        if enclosing is None:
+            enclosing = 'default-document'
+            remove_enclosing = True
+        else:
+            remove_enclosing = False
+        parser.feed('<%s xmlns="%s">' % (enclosing, NS_XHTML))
         parser.feed(content)
-        if enclosing is not None:
-            parser.feed("</%s>" % enclosing)
+        parser.feed("</%s>" % enclosing)
+
         try:
-            return parser.close()
+            parsed = parser.close()
         except SyntaxError, e:
             self.logger.error("Problematic xml snippet:\n", content)
+
+        return remove_enclosing and parsed[0] or parsed
 
     def mergeBodyElement(self, from_cps=None):
         """Merge the body element issued by CPS' ZPTs in the theme's
@@ -145,7 +157,7 @@ class ElementTreeEngine(BaseEngine):
         This processes attributes only. Typically, these are onload, class, and
         style. Any attribute defined by the theme takes precedence.
         """
-        body = self.tree.find('//body')
+        body = self.tree.find(BODY)
         for k, v in from_cps.attrib.items():
             if k not in body.attrib:
                 body.attrib[k] = v
@@ -160,7 +172,7 @@ class ElementTreeEngine(BaseEngine):
           - actually merge cps_global with the theme's head (we should first
             define a policy about this).
         """
-        in_theme = self.tree.find('//head')
+        in_theme = self.tree.find(HEAD)
         parsed = self.parseFragment(head_content, enclosing='head')
 
         if cps_global is not None:
@@ -252,7 +264,7 @@ class ElementTreeEngine(BaseEngine):
         # maybe lxml can do this better
         # there's also a recent option in ElementTree, but not in my version
         for tag in tags:
-            for elt in self.root.findall('.//%s' % tag):
+            for elt in self.root.findall('.//{%s}%s' % (NS_XHTML, tag)):
                 if not elt.text:
                     elt.text = ' '
 
@@ -260,9 +272,12 @@ class ElementTreeEngine(BaseEngine):
         self.protectEmptyElements('script', 'div', 'textarea')
 
         out = StringIO()
-        self.tree.write(out)
+        self.tree.write(out, default_namespace=NS_XHTML)
         return out.getvalue()
 
     @classmethod
     def dumpElement(self, elt):
-        return ET.tostring(elt)
+        tree = ET.ElementTree(elt)
+        out = StringIO()
+        tree.write(out, default_namespace=NS_XHTML)
+        return out.getvalue()
