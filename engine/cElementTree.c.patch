@@ -1,0 +1,12 @@
+Index: cElementTree.c
+===================================================================
+--- cElementTree.c	(revision 528)
++++ cElementTree.c	(working copy)
+@@ -2469,6 +2469,7 @@
+ 
+     /* configure parser */
+     EXPAT(SetUserData)(self->parser, self);
++    XML_UseForeignDTD(self->parser, XML_TRUE); /* GR */
+     EXPAT(SetElementHandler)(
+         self->parser,
+         (XML_StartElementHandler) expat_start_handler,

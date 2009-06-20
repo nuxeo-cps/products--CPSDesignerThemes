@@ -18,14 +18,25 @@
 # $Id$
 
 import logging
+logger = logging.getLogger(
+        'Products.CPSDesignerThemes.engine.ElementTreeEngine')
+
 from copy import deepcopy
 from StringIO import StringIO # use TAL's faster StringIO ?
 
 try:
     import cElementTree as ET
+    C_ELEMENT_TREE = True
+    logger.warn("On cElementTree, apply cElementtree.c.patch to get rid of "
+                "issues with entities.")
+
 except ImportError:
-        import elementtree.ElementTree as ET
+    import elementtree.ElementTree as ET
+    C_ELEMENT_TREE = False
+
 import patchetree
+
+import htmlentitydefs
 
 from zope.interface import implements
 
@@ -54,6 +65,9 @@ LINK_HTML_DOCUMENTS = {'img' : 'src',
                        'param' : 'value',
                        }
 
+HTML_ENTITIES = dict((n, unichr(v))
+                     for n, v in htmlentitydefs.name2codepoint.items())
+
 class ElementTreeEngine(BaseEngine):
     """An engine based on ElementTree API
 
@@ -70,9 +84,6 @@ class ElementTreeEngine(BaseEngine):
     """
 
     implements(IThemeEngine)
-
-    logger = logging.getLogger(
-        'Products.CPSDesignerThemes.engine.ElementTreeEngine')
 
     XML_HEADER = '<?xml version="1.0" encoding="%s"?>' % ENCODING
 
@@ -126,13 +137,14 @@ class ElementTreeEngine(BaseEngine):
 
     @classmethod
     def parseFragment(self, content, enclosing=None):
-        # TODO GR: this works around the fact that entity support in
-        # my ElementTree version doesn't work as advertised
-        content = content.replace('&nbsp;', ' ')
-
         parser = ET.XMLParser()
-        # TODO load all entities, and do it just once
-        parser.entity['nbsp'] = unichr(160)
+        # entity declarations and voodoo to make it work
+        if not C_ELEMENT_TREE:
+            parser.entity = HTML_ENTITIES # avoid copying all over
+            parser.parser.UseForeignDTD() # unlock entity problems (pfeew)
+        else:
+            parser.entity.update(HTML_ENTITIES)
+
         parser.feed(self.XML_HEADER)
 
         # We always need an enclosing tag to bear the xhtml namespace
@@ -150,7 +162,9 @@ class ElementTreeEngine(BaseEngine):
         except SyntaxError, e:
             self.logger.error("Problematic xml snippet:\n", content)
 
-        return remove_enclosing and parsed[0] or parsed
+        if remove_enclosing:
+            return parsed[0]
+        return parsed
 
     def mergeBodyElement(self, from_cps=None):
         """Merge the body element issued by CPS' ZPTs in the theme's

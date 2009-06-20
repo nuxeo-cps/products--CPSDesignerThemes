@@ -71,6 +71,23 @@ class EngineTestCase(unittest.TestCase):
                                                  PORTLET1.render_cache()))
         self.assertEquals(rendered, expected)
 
+    def test_entities(self):
+        engine = self.getEngine('theme1', 'simple_slot.html')
+        slot_name, slot = engine.extractSlotElements().next()
+        frame_parent, frame = engine.extractSlotFrame(slot)
+        portlet = FakePortlet('entity_portlet', '<spoon>&nbsp;</spoon>')
+        engine.mergePortlets(frame_parent, frame, [portlet])
+
+        rendered = WT_REGEXP.sub('', engine.dumpElement(slot))
+        expected = WT_REGEXP.sub(
+            '', '<div xmlns="%s"><p>'
+            '<span>%s</span><div>%s</div>'
+            '</p></div>' % (NS_XHTML,
+                            portlet.title_or_id(),
+                            portlet.render_cache()))
+        expected = expected.replace('&nbsp;', '&#160;')
+        self.assertEquals(rendered, expected)
+
     def test_no_portlet_body(self):
         # engine must accept a missing cps:portlet="body"
         engine = self.getEngine('theme1', 'no_portlet_body.html')
