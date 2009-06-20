@@ -22,6 +22,7 @@ import os
 import re
 
 from Products.CPSDesignerThemes.engine.etreeengine import ElementTreeEngine
+from Products.CPSDesignerThemes.engine.lxmlengine import LxmlEngine
 from Products.CPSDesignerThemes.constants import NS_XHTML
 
 THEMES_PATH = os.path.join(INSTANCE_HOME, 'Products', 'CPSDesignerThemes',
@@ -54,7 +55,7 @@ class EngineTestCase(unittest.TestCase):
         f = open(os.path.join(THEMES_PATH, theme, page), 'r')
         return self.EngineClass(html_file=f,
                                  theme_base_uri='/thm_base',
-                                 page_uri=page)
+                                 page_uri='/'+page)
 
     def test_no_portlet_title(self):
         # engine must accept a missing cps:portlet="title"
@@ -81,12 +82,31 @@ class EngineTestCase(unittest.TestCase):
         self.assertEquals(
             rendered, '<divxmlns="%s"><p><span>portlet1</span></p></div>' % NS_XHTML)
 
+    def findTag(self, engine, tag):
+        raise NotImplementedError
+
+    def test_uri_rewrite(self):
+        # engine must accept a missing cps:portlet="body"
+        engine = self.getEngine('theme1', 'uris.html')
+        img = self.findTag(engine, 'img')
+        self.assertEquals(img.attrib['src'], '/thm_base/pretty.png')
+
+
 class TestElementTreeEngine(EngineTestCase):
 
     EngineClass = ElementTreeEngine
+
+    @classmethod
+    def findTag(self, engine, tag):
+        return engine.root.find('.//{%s}%s' % (NS_XHTML, tag))
+
+class TestLxmlEngine(TestElementTreeEngine):
+
+    EngineClass = LxmlEngine
 
 
 def test_suite():
     return unittest.TestSuite((
         unittest.makeSuite(TestElementTreeEngine),
+        unittest.makeSuite(TestLxmlEngine),
         ))

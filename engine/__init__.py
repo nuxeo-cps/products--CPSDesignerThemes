@@ -17,8 +17,5 @@
 #
 # $Id$
 
-try:
-  from lxmlengine import LxmlEngine as PageEngine
-except ImportError:
-  from etreeengine import ElementTreeEngine as PageEngine
+from etreeengine import ElementTreeEngine as PageEngine
 

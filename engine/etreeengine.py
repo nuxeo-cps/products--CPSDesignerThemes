@@ -48,20 +48,6 @@ MAIN_CONTENT_ATTR = ns_prefix('main-content')
 METAL_HEAD_SLOTS = ( # the passed slots that end up in the <head> element
     'base', 'head_slot', 'style_slot', 'javascript_head_slot')
 
-def find_by_attribute(elt, attr_name, value=None):
-    """Shameless implementation of search by attribute.
-
-    Workaround the fact that attribute xpath expressions are supported
-    with elementtree >= 1.3, which is unreleased and unavailable for me."""
-
-    presence = value is None
-    all = elt.findall('.//*')
-
-    if presence:
-        return (e for e in all if attr_name in e.keys())
-    else:
-        return (e for e in all if e.get(attr_name) == value)
-
 LINK_HTML_DOCUMENTS = {'img' : 'src',
                        'link'    : 'href',
                        'object'  : 'data',
@@ -96,6 +82,21 @@ class ElementTreeEngine(BaseEngine):
         BaseEngine.__init__(self, theme_base_uri=theme_base_uri,
                             page_uri=page_uri)
 
+    @classmethod
+    def findByAttribute(self, elt, attr_name, value=None):
+        """Shameless implementation of search by attribute.
+
+        Workaround the fact that attribute xpath expressions are supported
+        with elementtree >= 1.3, which is unreleased and unavailable for me."""
+
+        presence = value is None
+        all = elt.findall('.//*')
+
+        if presence:
+            return (e for e in all if attr_name in e.keys())
+        else:
+            return (e for e in all if e.get(attr_name) == value)
+
     #
     # Internal engine API implementation. For docstrings, see BaseEngine
     #
@@ -116,7 +117,7 @@ class ElementTreeEngine(BaseEngine):
 
     def extractSlotElements(self):
         return ((slot.attrib.pop(SLOT_ATTR), slot)
-                for slot in find_by_attribute(self.root, SLOT_ATTR))
+                for slot in self.findByAttribute(self.root, SLOT_ATTR))
 
     @classmethod
     def parseHeadBody(self, pt_output):
@@ -187,11 +188,11 @@ class ElementTreeEngine(BaseEngine):
             in_theme.append(child)
 
     def renderMainContent(self, main_content):
-        main_elt = find_by_attribute(self.root, MAIN_CONTENT_ATTR).next()
+        main_elt = self.findByAttribute(self.root, MAIN_CONTENT_ATTR).next()
         # TODO make main-content element not mandatory
 
         # cleaning up
-        del main_elt.attrib[ns_prefix('main-content')]
+        del main_elt.attrib[MAIN_CONTENT_ATTR]
         for child in main_elt:
             main_elt.remove(child)
 
@@ -221,7 +222,7 @@ class ElementTreeEngine(BaseEngine):
             # XXX awful style
             for elt in slot.findall('.//*'):
                 for child in elt:
-                    if child.get(ns_prefix('portlet')) == 'frame':
+                    if child.get(PORTLET_ATTR) == 'frame':
                         if frame is None:
                             frame = child
                         elt.remove(child)
@@ -240,14 +241,14 @@ class ElementTreeEngine(BaseEngine):
                 continue
             ptl_elt = deepcopy(frame)
 
-            elts = tuple(find_by_attribute(ptl_elt, PORTLET_ATTR,
+            elts = tuple(self.findByAttribute(ptl_elt, PORTLET_ATTR,
                                            value='title'))
             if elts:
                 title_elt = elts[0]
                 del title_elt.attrib[PORTLET_ATTR]
                 title_elt.text = portlet.title_or_id() # TODO i18n title etc.
 
-            elts = tuple(find_by_attribute(ptl_elt, PORTLET_ATTR,
+            elts = tuple(self.findByAttribute(ptl_elt, PORTLET_ATTR,
                                              value='body'))
 
             if elts:
