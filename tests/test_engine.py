@@ -52,6 +52,23 @@ class EngineTestCase(unittest.TestCase):
     def findTag(self, engine, tag):
         raise NotImplementedError
 
+    def assertXhtmlTagEquals(self, element, tag):
+        raise NotImplementedError
+
+    def getChild(self, element, i):
+        raise NotImplementedError
+
+    @classmethod
+    def getAttribs(self, element):
+        raise NotImplementedError
+
+    def test_extractSlotFrame(self):
+        engine = self.getEngine('theme1', 'simple_slot.html')
+        slot_name, slot = engine.extractSlotElements().next()
+        frame_parent, frame = engine.extractSlotFrame(slot)
+        self.assertXhtmlTagEquals(frame, 'p')
+        self.assertEquals(self.getAttribs(frame), {})
+
     def test_entities(self):
         engine = self.getEngine('theme1', 'simple_slot.html')
         slot_name, slot = engine.extractSlotElements().next()
@@ -83,6 +100,17 @@ class TestElementTreeEngine(EngineTestCase):
     @classmethod
     def findTag(self, engine, tag):
         return engine.root.find('.//{%s}%s' % (NS_XHTML, tag))
+
+    def assertXhtmlTagEquals(self, element, tag):
+        self.assertEquals(element.tag, '{%s}%s' % (NS_XHTML, tag))
+
+    @classmethod
+    def getChild(self, element, i):
+        return element[i]
+
+    @classmethod
+    def getAttribs(self, element):
+        return element.attrib
 
 class TestLxmlEngine(TestElementTreeEngine):
 
