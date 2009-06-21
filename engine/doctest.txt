@@ -1,18 +1,33 @@
 PREPARATIONS
 >>> import os
 >>> from lxml import usedoctest
->>> from Products.CPSDesignerThemes.tests.test_engine import FakePortlet
->>> from Products.CPSDesignerThemes.tests.test_engine import THEMES_PATH
->>> def getEngine(theme, page='index.html'):
-...         f = open(os.path.join(THEMES_PATH, theme, page), 'r')
-...         return PageEngine(html_file=f, theme_base_uri='/thm_base',
-...                           page_uri='/'+page)
+>>> from Products.CPSPortlets.DummyPortlet import DummyPortlet
+>>> from Products.CPSDesignerThemes.tests.test_engine import get_engine
+>>> from Products.CPSDesignerThemes.interfaces import IThemeEngine
 
-Let's keep a basic portlet around
->>> PORTLET1 = FakePortlet('ptl_1', '<ul id="portlet1"><li>foo</li></ul>')
+In the context of this test, we should have a predefined engine class
+(PageEngine). Let's demonstrate that:
+>>> IThemeEngine.implementedBy(PageEngine)
+True
+
+We'll keep a basic portlet around to feed the examples.
+>>> PORTLET1 = DummyPortlet('ptl_1', '<ul id="portlet1"><li>foo</li></ul>',
+...                         title="Portlet One")
+
+Let's see what it does:
+>>> print PORTLET1.render_cache()
+<ul id="portlet1">
+ <li>foo</li>
+</ul>
+>>> PORTLET1.getId()
+'ptl_1'
+>>> PORTLET1.Title()
+'Portlet One'
+>>> PORTLET1.title_or_id()
+'Portlet One'
 
 The engine must accept a missing cps:portlet='title' in slot:
->>> engine = getEngine('theme1', 'no_portlet_title.html')
+>>> engine = get_engine(PageEngine, 'theme1', page='no_portlet_title.html')
 >>> slot_name, slot = engine.extractSlotElements().next()
 >>> frame_parent, frame = engine.extractSlotFrame(slot)
 >>> engine.mergePortlets(frame_parent, frame, [PORTLET1])
@@ -28,13 +43,13 @@ The engine must accept a missing cps:portlet='title' in slot:
 </div>
 
 Similarly, the engine must accept a missing cps:portlet='body' in slot:
->>> engine = getEngine('theme1', 'no_portlet_body.html')
+>>> engine = get_engine(PageEngine, 'theme1', page='no_portlet_body.html')
 >>> slot_name, slot = engine.extractSlotElements().next()
 >>> frame_parent, frame = engine.extractSlotFrame(slot)
 >>> engine.mergePortlets(frame_parent, frame, [PORTLET1])
 >>> print engine.dumpElement(slot)
 <div xmlns="http://www.w3.org/1999/xhtml">
  <p>
-  <span>ptl_1</span>
+  <span>Portlet One</span>
  </p>
 </div>

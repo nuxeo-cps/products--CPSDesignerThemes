@@ -22,6 +22,8 @@ from zope.testing import doctest
 import os
 import re
 
+from Products.CPSPortlets.DummyPortlet import DummyPortlet
+
 from Products.CPSDesignerThemes.engine.etreeengine import ElementTreeEngine
 from Products.CPSDesignerThemes.engine.lxmlengine import LxmlEngine
 from Products.CPSDesignerThemes.constants import NS_XHTML
@@ -29,26 +31,15 @@ from Products.CPSDesignerThemes.constants import NS_XHTML
 THEMES_PATH = os.path.join(INSTANCE_HOME, 'Products', 'CPSDesignerThemes',
                            'tests')
 
-class FakePortlet:
-    def __init__(self, title, rendered):
-        self.title = title
-        self.rendered = rendered
-
-    def getId(self):
-        return self.title
-
-    def Title(self):
-        return self.title
-
-    def title_or_id(self):
-        return self.title
-
-    def render_cache(self, **kw):
-        return self.rendered
-
-PORTLET1 = FakePortlet('portlet1', '<ul id="portlet1"><li>foo</li></ul>')
+PORTLET1 = DummyPortlet('portlet1', '<ul id="portlet1"><li>foo</li></ul>')
 
 WT_REGEXP = re.compile(r'[\n ]*')
+
+def get_engine(EngineClass, theme, page='index.html'):
+    f = open(os.path.join(THEMES_PATH, theme, page), 'r')
+    return EngineClass(html_file=f,
+                       theme_base_uri='/thm_base',
+                       page_uri='/'+page)
 
 class EngineTestCase(unittest.TestCase):
     """Base test case for all engines."""
@@ -56,10 +47,7 @@ class EngineTestCase(unittest.TestCase):
     EngineClass = None
 
     def getEngine(self, theme, page='index.html'):
-        f = open(os.path.join(THEMES_PATH, theme, page), 'r')
-        return self.EngineClass(html_file=f,
-                                 theme_base_uri='/thm_base',
-                                 page_uri='/'+page)
+        return get_engine(self.EngineClass, theme, page=page)
 
     def findTag(self, engine, tag):
         raise NotImplementedError
@@ -68,7 +56,7 @@ class EngineTestCase(unittest.TestCase):
         engine = self.getEngine('theme1', 'simple_slot.html')
         slot_name, slot = engine.extractSlotElements().next()
         frame_parent, frame = engine.extractSlotFrame(slot)
-        portlet = FakePortlet('entity_portlet', '<spoon>&nbsp;</spoon>')
+        portlet = DummyPortlet('entity_portlet', '<spoon>&nbsp;</spoon>')
         engine.mergePortlets(frame_parent, frame, [portlet])
 
         rendered = WT_REGEXP.sub('', engine.dumpElement(slot))
@@ -83,7 +71,7 @@ class EngineTestCase(unittest.TestCase):
 
     def test_uri_rewrite(self):
         # engine must accept a missing cps:portlet="body"
-        engine = self.getEngine('theme1', 'uris.html')
+        engine = self.getEngine('theme1', page='uris.html')
         img = self.findTag(engine, 'img')
         self.assertEquals(img.attrib['src'], '/thm_base/pretty.png')
 
