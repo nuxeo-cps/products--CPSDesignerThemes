@@ -56,6 +56,7 @@ BODY = '{%s}body' % NS_XHTML
 PORTLET_ATTR = ns_prefix('portlet')
 SLOT_ATTR = ns_prefix('slot')
 MAIN_CONTENT_ATTR = ns_prefix('main-content')
+REMOVE_ATTR = ns_prefix('remove')
 METAL_HEAD_SLOTS = ( # the passed slots that end up in the <head> element
     'base', 'head_slot', 'style_slot', 'javascript_head_slot')
 
@@ -253,6 +254,7 @@ class ElementTreeEngine(BaseEngine):
             rendered = portlet.render_cache().strip()
             if not rendered:
                 continue
+            
             ptl_elt = deepcopy(frame)
 
             elts = tuple(self.findByAttribute(ptl_elt, PORTLET_ATTR,
@@ -273,7 +275,18 @@ class ElementTreeEngine(BaseEngine):
                     body_elt.remove(child)
                 body_elt.append(self.parseFragment(portlet.render_cache()))
 
-            frame_parent.append(ptl_elt)
+            remove = ptl_elt.attrib.pop(REMOVE_ATTR, None)
+            if not remove:
+                frame_parent.append(ptl_elt)
+            else:
+                if len(frame_parent):
+                    # the frame parent already has children
+                    frame_parent[-1].tail += ptl_elt.text
+                else:
+                    frame_parent.text += ptl_elt.text
+                for elt in ptl_elt:
+                    frame_parent.append(elt)
+                elt.tail += ptl_elt.tail
 
     def protectEmptyElements(self, *tags):
         # maybe lxml can do this better
