@@ -1,0 +1,40 @@
+PREPARATIONS
+>>> import os
+>>> from lxml import usedoctest
+>>> from Products.CPSDesignerThemes.tests.test_engine import FakePortlet
+>>> from Products.CPSDesignerThemes.tests.test_engine import THEMES_PATH
+>>> def getEngine(theme, page='index.html'):
+...         f = open(os.path.join(THEMES_PATH, theme, page), 'r')
+...         return PageEngine(html_file=f, theme_base_uri='/thm_base',
+...                           page_uri='/'+page)
+
+Let's keep a basic portlet around
+>>> PORTLET1 = FakePortlet('ptl_1', '<ul id="portlet1"><li>foo</li></ul>')
+
+The engine must accept a missing cps:portlet='title' in slot:
+>>> engine = getEngine('theme1', 'no_portlet_title.html')
+>>> slot_name, slot = engine.extractSlotElements().next()
+>>> frame_parent, frame = engine.extractSlotFrame(slot)
+>>> engine.mergePortlets(frame_parent, frame, [PORTLET1])
+>>> print engine.dumpElement(slot)
+<div xmlns="http://www.w3.org/1999/xhtml">
+ <p>
+   <div>
+    <ul id="portlet1">
+      <li>foo</li>
+    </ul>
+   </div>
+ </p>
+</div>
+
+Similarly, the engine must accept a missing cps:portlet='body' in slot:
+>>> engine = getEngine('theme1', 'no_portlet_body.html')
+>>> slot_name, slot = engine.extractSlotElements().next()
+>>> frame_parent, frame = engine.extractSlotFrame(slot)
+>>> engine.mergePortlets(frame_parent, frame, [PORTLET1])
+>>> print engine.dumpElement(slot)
+<div xmlns="http://www.w3.org/1999/xhtml">
+ <p>
+  <span>ptl_1</span>
+ </p>
+</div>

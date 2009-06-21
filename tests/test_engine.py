@@ -18,6 +18,7 @@
 # $Id$
 
 import unittest
+from zope.testing import doctest
 import os
 import re
 
@@ -33,13 +34,16 @@ class FakePortlet:
         self.title = title
         self.rendered = rendered
 
+    def getId(self):
+        return self.title
+
     def Title(self):
         return self.title
 
     def title_or_id(self):
         return self.title
 
-    def render_cache(self):
+    def render_cache(self, **kw):
         return self.rendered
 
 PORTLET1 = FakePortlet('portlet1', '<ul id="portlet1"><li>foo</li></ul>')
@@ -57,19 +61,8 @@ class EngineTestCase(unittest.TestCase):
                                  theme_base_uri='/thm_base',
                                  page_uri='/'+page)
 
-    def test_no_portlet_title(self):
-        # engine must accept a missing cps:portlet="title"
-        engine = self.getEngine('theme1', 'no_portlet_title.html')
-        slot_name, slot = engine.extractSlotElements().next()
-        frame_parent, frame = engine.extractSlotFrame(slot)
-        engine.mergePortlets(frame_parent, frame, [PORTLET1])
-
-        rendered = WT_REGEXP.sub('', engine.dumpElement(slot))
-        expected = WT_REGEXP.sub('',
-                                 '<div xmlns="%s"><p><div>%s</div>'
-                                 '</p></div>' % (NS_XHTML,
-                                                 PORTLET1.render_cache()))
-        self.assertEquals(rendered, expected)
+    def findTag(self, engine, tag):
+        raise NotImplementedError
 
     def test_entities(self):
         engine = self.getEngine('theme1', 'simple_slot.html')
@@ -87,20 +80,6 @@ class EngineTestCase(unittest.TestCase):
                             portlet.render_cache()))
         expected = expected.replace('&nbsp;', '&#160;')
         self.assertEquals(rendered, expected)
-
-    def test_no_portlet_body(self):
-        # engine must accept a missing cps:portlet="body"
-        engine = self.getEngine('theme1', 'no_portlet_body.html')
-        slot_name, slot = engine.extractSlotElements().next()
-        frame_parent, frame = engine.extractSlotFrame(slot)
-        engine.mergePortlets(frame_parent, frame, [PORTLET1])
-
-        rendered = WT_REGEXP.sub('', engine.dumpElement(slot))
-        self.assertEquals(
-            rendered, '<divxmlns="%s"><p><span>portlet1</span></p></div>' % NS_XHTML)
-
-    def findTag(self, engine, tag):
-        raise NotImplementedError
 
     def test_uri_rewrite(self):
         # engine must accept a missing cps:portlet="body"
@@ -126,4 +105,12 @@ def test_suite():
     return unittest.TestSuite((
         unittest.makeSuite(TestElementTreeEngine),
         unittest.makeSuite(TestLxmlEngine),
+        doctest.DocFileTest('engine/doctest.txt',
+                            package='Products.CPSDesignerThemes',
+                            optionflags=doctest.ELLIPSIS,
+                            globs=dict(PageEngine=ElementTreeEngine)),
+        doctest.DocFileTest('engine/doctest.txt',
+                            package='Products.CPSDesignerThemes',
+                            optionflags=doctest.ELLIPSIS,
+                            globs=dict(PageEngine=LxmlEngine)),
         ))
