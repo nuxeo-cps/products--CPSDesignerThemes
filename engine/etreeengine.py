@@ -189,16 +189,21 @@ class ElementTreeEngine(BaseEngine):
             define a policy about this).
         """
         in_theme = self.tree.find(HEAD)
+        in_theme_last = None
+        if len(in_theme):
+            in_theme_last = in_theme[-1]
+        if in_theme_last is not None:
+            in_theme_last.tail = ''
         parsed = self.parseFragment(head_content, enclosing='head')
 
         if cps_global is not None:
-            if cps_global.text:
-                in_theme[-1].tail += cps_global.text
+            if in_theme_last is not None and cps_global.text:
+                in_theme_last.tail += cps_global.text
             for child in cps_global:
                 in_theme.append(child)
 
-        if parsed.text:
-            in_theme[-1].tail += parsed.text
+        if in_theme_last is not None and parsed.text:
+            in_theme_last.tail += parsed.text
         for child in parsed:
             in_theme.append(child)
 
@@ -254,7 +259,7 @@ class ElementTreeEngine(BaseEngine):
             rendered = portlet.render_cache().strip()
             if not rendered:
                 continue
-            
+
             ptl_elt = deepcopy(frame)
 
             elts = tuple(self.findByAttribute(ptl_elt, PORTLET_ATTR,
