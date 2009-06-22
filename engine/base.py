@@ -125,6 +125,12 @@ class BaseEngine(object):
         """
         raise NotImplementedError
 
+    @classmethod
+    def renderPortlets(self, portlets, context=None, request=None):
+        return ( (portlet.title_or_id(),
+                  portlet.render_cache(context_obj=context))
+                for portlet in portlets)
+
     def render(self, main_content='', head_content='',
                body_element=None, head_element=None,
                context=None, request=None):
@@ -140,11 +146,17 @@ class BaseEngine(object):
             self.logger.debug('Rendering slot %s with portlets %s',
                               slot_name, portlets)
             frame_parent, frame = self.extractSlotFrame(slot_elt)
-            portlets_rendered = (
-                (portlet.title_or_id(),
-                 portlet.render_cache(context_obj=context))
-                for portlet in portlets)
-            self.mergePortlets(frame_parent, frame, portlets_rendered)
+            rendered = self.renderPortlets(portlets,
+                                           context=context, request=request)
+            self.mergePortlets(frame_parent, frame, rendered)
+
+        # isolated portlets (should appear mostly in CPSSkins exports)
+        for ptl_id, elt in self.extractIsolatedPortletElements():
+            portlet = ptool.getPortletById(ptl_id)
+            frame_parent, frame = self.extractSlotFrame(elt)
+            rendered = self.renderPortlets([portlet],
+                                           context=context, request=request)
+            self.mergePortlets(frame_parent, frame, rendered)
 
         if body_element is not None:
             self.mergeBodyElement(from_cps=body_element)
@@ -159,6 +171,12 @@ class BaseEngine(object):
         """Produce the final page to be sent over HTTP."""
 
     def extractSlotElements(self):
+        """Return an iterable over pairs (slot name, slot xml element)
+        Side effect: cleanup the slot element to make it xhtml compliant
+        """
+        raise NotImplementedError
+
+    def extractIsolatedPortletsElements(self):
         """Return an iterable over pairs (slot name, slot xml element)
         Side effect: cleanup the slot element to make it xhtml compliant
         """

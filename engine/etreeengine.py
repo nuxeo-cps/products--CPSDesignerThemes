@@ -56,6 +56,7 @@ BODY = '{%s}body' % NS_XHTML
 
 PORTLET_ATTR = ns_prefix('portlet')
 SLOT_ATTR = ns_prefix('slot')
+ISOLATED_PORTLET_ATTR = ns_prefix('isolated-portlet')
 MAIN_CONTENT_ATTR = ns_prefix('main-content')
 REMOVE_ATTR = ns_prefix('remove')
 METAL_HEAD_SLOTS = ( # the passed slots that end up in the <head> element
@@ -145,6 +146,11 @@ class ElementTreeEngine(BaseEngine):
     def extractSlotElements(self):
         return ((slot.attrib.pop(SLOT_ATTR), slot)
                 for slot in self.findByAttribute(self.root, SLOT_ATTR))
+
+    def extractIsolatedPortletElements(self):
+        return ((ptl.attrib.pop(ISOLATED_PORTLET_ATTR), ptl)
+                for ptl in self.findByAttribute(self.root,
+                                                ISOLATED_PORTLET_ATTR))
 
     @classmethod
     def parseHeadBody(self, pt_output):
