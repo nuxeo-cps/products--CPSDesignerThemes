@@ -95,6 +95,42 @@ cps:remove attribute:
  </div>
 </div>
 
+Similarly, if either the element bearing the cps:portlet="title" or
+the cps:porlet="body" also has a "cps:remove", it is omitted. This is
+mostly useful to ease the work of automatic themes generator, like
+CPSSkins'exporter. Let's try the title first:
+>>> engine = get_engine(PageEngine, 'theme1', page='portlet_remove_title.html')
+>>> slot_name, slot = engine.extractSlotElements().next()
+>>> frame_parent, frame = engine.extractSlotFrame(slot)
+>>> engine.mergePortlets(frame_parent, frame, [PORTLET1,])
+>>> print engine.dumpElement(slot)
+<div xmlns="http://www.w3.org/1999/xhtml">
+<p>
+ Portlet One
+ <div>
+  <ul id="portlet1">
+    <li>foo</li>
+  </ul>
+ </div>
+</p>
+</div>
+
+Now cps:remove on the body:
+>>> engine = get_engine(PageEngine, 'theme1', page='portlet_remove_body.html')
+>>> extracted_slots = engine.extractSlotElements()
+>>> slot_name, slot = engine.extractSlotElements().next()
+>>> frame_parent, frame = engine.extractSlotFrame(slot)
+>>> engine.mergePortlets(frame_parent, frame, [PORTLET1,])
+>>> print engine.dumpElement(slot)
+<div xmlns="http://www.w3.org/1999/xhtml">
+ <p>
+  <span>Portlet One</span>
+  <ul id="portlet1">
+    <li>foo</li>
+  </ul>
+ </p>
+</div>
+
 The engine must accept a missing cps:portlet='title' in slot:
 >>> engine = get_engine(PageEngine, 'theme1', page='no_portlet_title.html')
 >>> slot_name, slot = engine.extractSlotElements().next()

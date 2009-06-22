@@ -21,6 +21,7 @@ import logging
 logger = logging.getLogger(
         'Products.CPSDesignerThemes.engine.ElementTreeEngine')
 
+import re
 from copy import deepcopy
 from StringIO import StringIO # use TAL's faster StringIO ?
 
@@ -69,6 +70,10 @@ LINK_HTML_DOCUMENTS = {'img' : 'src',
 HTML_ENTITIES = dict((n, unichr(v))
                      for n, v in htmlentitydefs.name2codepoint.items())
 
+# GR Duplicated from themecontainer.StyleSheet
+CSS_LINKS_RE = re.compile(r'url\((.*)\)')
+
+
 class ElementTreeEngine(BaseEngine):
     """An engine based on ElementTree API
 
@@ -113,6 +118,12 @@ class ElementTreeEngine(BaseEngine):
     # Internal engine API implementation. For docstrings, see BaseEngine
     #
 
+    def styleAtImportRewriteUri(self, match_obj):
+        return 'url(%s)' % rewrite_uri(uri=match_obj.group(1),
+                                       absolute_base=self.theme_base_uri,
+                                       referer_uri=self.page_uri,
+                                       cps_base_url=self.cps_base_url)
+
     def rewriteUris(self):
         for tag, attr in LINK_HTML_DOCUMENTS.items():
             for elt in self.root.findall('.//{%s}%s' % (NS_XHTML, tag)):
@@ -127,7 +138,10 @@ class ElementTreeEngine(BaseEngine):
                         "Missing attribute %s on <%s> element" % (attr, tag))
                 elt.attrib[attr] = new_uri
                 self.logger.debug("URI Rewrite %s -> %s" % (uri, new_uri))
-
+        for style_elt in self.root.findall('.//{%s}%s' % (NS_XHTML, 'style')):
+            if style_elt.text:
+                style_elt.text = CSS_LINKS_RE.sub(self.styleAtImportRewriteUri,
+                                              style_elt.text)
     def extractSlotElements(self):
         return ((slot.attrib.pop(SLOT_ATTR), slot)
                 for slot in self.findByAttribute(self.root, SLOT_ATTR))
@@ -254,6 +268,35 @@ class ElementTreeEngine(BaseEngine):
         return frame_parent, frame
 
     @classmethod
+    def findIndex(self, parent, elt):
+        """Return the index of elt in parent, or -1"""
+        try:
+            return list(parent).index(elt)
+        except ValueError:
+            return -1
+
+    @classmethod
+    def findParent(self, elt, inside=None):
+        """Starting from 'inside', find the parent of elt, and the index.
+
+        raise KeyError if not found.
+        """
+        if inside is None:
+            raise ValueError("inside must be specified")
+
+        # trying directly in the element inside, because the findall call
+        # below does not yield it
+        i = self.findIndex(inside, elt)
+        if i != -1:
+            return inside, i
+        try:
+            indexes = ((self.findIndex(e, elt),e)
+                       for e in inside.findall('.//*'))
+            return ((e, i) for i, e in indexes if i != -1).next()
+        except StopIteration:
+            raise KeyError
+
+    @classmethod
     def mergePortlets(self, frame_parent, frame, portlets_rendered):
         for title, body in portlets_rendered:
             if not body:
@@ -266,18 +309,36 @@ class ElementTreeEngine(BaseEngine):
             if elts:
                 title_elt = elts[0]
                 del title_elt.attrib[PORTLET_ATTR]
-                title_elt.text = title
+                if not title_elt.attrib.pop(REMOVE_ATTR, None):
+                    title_elt.text = title
+                else:
+                    parent, index = self.findParent(title_elt, inside=ptl_elt)
+                    if index == 0:
+                        if parent.text is None:
+                            parent.text = ''
+                        parent.text += title
+                    else:
+                        elder = parent[index-1]
+                        if elder.tail is None:
+                            elder.tail = ''
+                        elder.tail += title
+                    del parent[index]
 
             elts = tuple(self.findByAttribute(ptl_elt, PORTLET_ATTR,
                                              value='body'))
 
             if elts:
                 body_elt = elts[0]
-                del body_elt.attrib[PORTLET_ATTR]
-                body_elt.text = ''
-                for child in body_elt:
-                    body_elt.remove(child)
-                body_elt.append(self.parseFragment(body))
+                if not body_elt.attrib.pop(REMOVE_ATTR, None):
+                    del body_elt.attrib[PORTLET_ATTR]
+                    body_elt.text = ''
+                    for child in body_elt:
+                        body_elt.remove(child)
+                    body_elt.append(self.parseFragment(body))
+                else:
+                    parent, index = self.findParent(body_elt, inside=ptl_elt)
+                    del parent[index]
+                    parent.insert(index, self.parseFragment(body))
 
             remove = ptl_elt.attrib.pop(REMOVE_ATTR, None)
             if not remove:
