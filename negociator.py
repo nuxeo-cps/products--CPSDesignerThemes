@@ -49,6 +49,7 @@ class ThemeNegociator(EngineAdapter):
     def __init__(self, context, request):
         self.context = context
         self.request = request
+        self.cps_base_url = getToolByName(context, 'portal_url').getBaseUrl()
 
     def lookupContainer(self):
         # For now, the first FS container found at the root
@@ -60,5 +61,6 @@ class ThemeNegociator(EngineAdapter):
         return containers[0]
 
     def getEngine(self):
-        return self.lookupContainer().getPageEngine('default', 'index')
+        return self.lookupContainer().getPageEngine(
+            'default', 'index', cps_base_url=self.cps_base_url)
 

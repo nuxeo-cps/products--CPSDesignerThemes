@@ -35,6 +35,9 @@ class FakeUrlTool(Implicit):
     def getPortalObject(self):
         return self.aq_inner.aq_parent
 
+    def getBaseUrl(self):
+        return '/'
+
 class TestNegociator(ZopeTestCase.ZopeTestCase):
 
     def afterSetUp(self):

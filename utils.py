@@ -17,7 +17,8 @@
 #
 # $Id$
 
-def rewrite_uri(absolute_base='', referer_uri='/index.html', uri=''):
+def rewrite_uri(absolute_base='', referer_uri='/index.html', uri='',
+                cps_base_url=None):
     """Shared URI rewriting logic.
 
 
@@ -42,11 +43,31 @@ def rewrite_uri(absolute_base='', referer_uri='/index.html', uri=''):
     ...             uri='x.png')
     '/cont/thm/graph/x.png'
 
+    There is a cps:// url scheme to access content from the cps object
+    directly
+    >>> rewrite_uri(uri='cps://workspaces/renderCSS.css', cps_base_url='/cps')
+    '/cps/workspaces/renderCSS.css'
+    >>> rewrite_uri(uri='cps://workspaces/renderCSS.css', cps_base_url='/')
+    '/workspaces/renderCSS.css'
+    >>> rewrite_uri(uri='cps://sections/renderCSS.css',
+    ...             cps_base_url='/deep/virtual/hosting')
+    '/deep/virtual/hosting/sections/renderCSS.css'
+
+    You can't use that without providing the current CPS base url
+    >>> try: rewrite_uri(uri='cps://workspaces/renderCSS.css')
+    ... except ValueError: print 'ValueError'
+    ValueError
     """
     # TODO refactor using standard lib
 
     if uri.startswith('http://'):
         return uri
+    if uri.startswith('cps://'):
+        if cps_base_url is None:
+            raise ValueError("Need the CPS base URL to use the cps:// scheme")
+        if cps_base_url == '/':
+            return '/' + uri[6:]
+        return cps_base_url + '/' + uri[6:]
     if uri.startswith('/'):
         local_base = ''
     else:

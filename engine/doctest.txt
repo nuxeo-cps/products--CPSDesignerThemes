@@ -10,23 +10,12 @@ In the context of this test, we should have a predefined engine class
 >>> IThemeEngine.implementedBy(PageEngine)
 True
 
-We'll keep some basic portlets around to feed the examples.
->>> PORTLET1 = DummyPortlet('ptl_1', '<ul id="portlet1"><li>foo</li></ul>',
-...                         title="Portlet One")
->>> PORTLET2 = DummyPortlet('ptl_2', '<div id="portlet2">Hello, eggs</div>',
-...                         title="Portlet Two")
+We'll keep the output of some basic portlets around to feed the
+examples. The first element of each pair is the portlet title, the
+second is the portlet output itself.
+>>> PORTLET1 = ('Portlet One', '<ul id="portlet1"><li>foo</li></ul>')
+>>> PORTLET2 = ('Portlet Two', '<div id="portlet2">Hello, eggs</div>')
 
-Let's see what this does:
->>> print PORTLET1.render_cache()
-<ul id="portlet1">
- <li>foo</li>
-</ul>
->>> PORTLET1.getId()
-'ptl_1'
->>> PORTLET1.Title()
-'Portlet One'
->>> PORTLET1.title_or_id()
-'Portlet One'
 
 Let's demonstrate how the engine looks for the 'cps:slot' attributes
 and merges the portlets in there. In this case, the frame element is

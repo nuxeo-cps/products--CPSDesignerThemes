@@ -88,11 +88,11 @@ class ElementTreeEngine(BaseEngine):
 
     XML_HEADER = '<?xml version="1.0" encoding="%s"?>' % ENCODING
 
-    def __init__(self, html_file=None, theme_base_uri='', page_uri=''):
+    def __init__(self, html_file=None, theme_base_uri='', page_uri='', **kw):
         self.tree = ET.parse(html_file)
         self.root = self.tree.getroot()
         BaseEngine.__init__(self, theme_base_uri=theme_base_uri,
-                            page_uri=page_uri)
+                            page_uri=page_uri, **kw)
 
     @classmethod
     def findByAttribute(self, elt, attr_name, value=None):
@@ -119,8 +119,9 @@ class ElementTreeEngine(BaseEngine):
                 uri = elt.attrib[attr]
                 try:
                     new_uri = rewrite_uri(uri=uri,
-                        absolute_base=self.theme_base_uri,
-                        referer_uri=self.page_uri)
+                                          absolute_base=self.theme_base_uri,
+                                          referer_uri=self.page_uri,
+                                          cps_base_url=self.cps_base_url)
                 except KeyError:
                     raise ValueError(
                         "Missing attribute %s on <%s> element" % (attr, tag))
@@ -253,11 +254,9 @@ class ElementTreeEngine(BaseEngine):
         return frame_parent, frame
 
     @classmethod
-    def mergePortlets(self, frame_parent, frame, portlets):
-        # now merging the portlets
-        for portlet in portlets:
-            rendered = portlet.render_cache().strip()
-            if not rendered:
+    def mergePortlets(self, frame_parent, frame, portlets_rendered):
+        for title, body in portlets_rendered:
+            if not body:
                 continue
 
             ptl_elt = deepcopy(frame)
@@ -267,7 +266,7 @@ class ElementTreeEngine(BaseEngine):
             if elts:
                 title_elt = elts[0]
                 del title_elt.attrib[PORTLET_ATTR]
-                title_elt.text = portlet.title_or_id() # TODO i18n title etc.
+                title_elt.text = title
 
             elts = tuple(self.findByAttribute(ptl_elt, PORTLET_ATTR,
                                              value='body'))
@@ -278,7 +277,7 @@ class ElementTreeEngine(BaseEngine):
                 body_elt.text = ''
                 for child in body_elt:
                     body_elt.remove(child)
-                body_elt.append(self.parseFragment(portlet.render_cache()))
+                body_elt.append(self.parseFragment(body))
 
             remove = ptl_elt.attrib.pop(REMOVE_ATTR, None)
             if not remove:

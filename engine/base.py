@@ -59,7 +59,7 @@ class BaseEngine(object):
 
     XML_HEADER = '<?xml version="1.0" encoding="%s"?>' % ENCODING
 
-    def __init__(self, theme_base_uri='', page_uri=''):
+    def __init__(self, theme_base_uri='', page_uri='', cps_base_url=None):
         """Subclasses accept another argument: theme xml source.
 
         When we'll cache xml parsing and URI rewriting, this constructor will
@@ -67,7 +67,7 @@ class BaseEngine(object):
         """
         self.theme_base_uri = theme_base_uri
         self.page_uri = page_uri
-
+        self.cps_base_url = cps_base_url
         self.rewriteUris()
 
     def renderCompat(self, metal_slots=None, pt_output='',
@@ -140,7 +140,11 @@ class BaseEngine(object):
             self.logger.debug('Rendering slot %s with portlets %s',
                               slot_name, portlets)
             frame_parent, frame = self.extractSlotFrame(slot_elt)
-            self.mergePortlets(frame_parent, frame, portlets)
+            portlets_rendered = (
+                (portlet.title_or_id(),
+                 portlet.render_cache(context_obj=context))
+                for portlet in portlets)
+            self.mergePortlets(frame_parent, frame, portlets_rendered)
 
         if body_element is not None:
             self.mergeBodyElement(from_cps=body_element)
@@ -195,9 +199,10 @@ class BaseEngine(object):
         raise NotImplementedError
 
     @classmethod
-    def mergePortlets(self, frame_parent, frame, portlets):
+    def mergePortlets(self, frame_parent, frame, portlets_rendered):
         """Merge the portlets in their frame.
 
+        portlets_rendered is a pair (title, body)
         frame's parent is passed because it's needed for frame repetition"""
         raise NotImplementedError
 

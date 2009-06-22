@@ -22,8 +22,6 @@ from zope.testing import doctest
 import os
 import re
 
-from Products.CPSPortlets.DummyPortlet import DummyPortlet
-
 from Products.CPSDesignerThemes.engine.etreeengine import ElementTreeEngine
 from Products.CPSDesignerThemes.engine.lxmlengine import LxmlEngine
 from Products.CPSDesignerThemes.constants import NS_XHTML
@@ -31,7 +29,7 @@ from Products.CPSDesignerThemes.constants import NS_XHTML
 THEMES_PATH = os.path.join(INSTANCE_HOME, 'Products', 'CPSDesignerThemes',
                            'tests')
 
-PORTLET1 = DummyPortlet('portlet1', '<ul id="portlet1"><li>foo</li></ul>')
+PORTLET1 = ('portlet1', '<ul id="portlet1"><li>foo</li></ul>')
 
 WT_REGEXP = re.compile(r'[\n ]*')
 
@@ -73,16 +71,14 @@ class EngineTestCase(unittest.TestCase):
         engine = self.getEngine('theme1', 'simple_slot.html')
         slot_name, slot = engine.extractSlotElements().next()
         frame_parent, frame = engine.extractSlotFrame(slot)
-        portlet = DummyPortlet('entity_portlet', '<spoon>&nbsp;</spoon>')
+        portlet = ('entity_portlet', '<spoon>&nbsp;</spoon>')
         engine.mergePortlets(frame_parent, frame, [portlet])
 
         rendered = WT_REGEXP.sub('', engine.dumpElement(slot))
         expected = WT_REGEXP.sub(
             '', '<div xmlns="%s"><p>'
             '<span>%s</span><div>%s</div>'
-            '</p></div>' % (NS_XHTML,
-                            portlet.title_or_id(),
-                            portlet.render_cache()))
+            '</p></div>' % (NS_XHTML, portlet[0], portlet[1]))
         expected = expected.replace('&nbsp;', '&#160;')
         self.assertEquals(rendered, expected)
 
