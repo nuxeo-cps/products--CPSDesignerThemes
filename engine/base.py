@@ -25,7 +25,6 @@ from zope.interface import implements
 
 from Products.CMFCore.utils import getToolByName
 
-from Products.CPSPortlets.DummyPortlet import DummyPortlet
 from Products.CPSDesignerThemes.interfaces import IThemeEngine
 from Products.CPSDesignerThemes.constants import NS_URI, ENCODING
 from Products.CPSDesignerThemes.utils import rewrite_uri
@@ -38,6 +37,25 @@ LINK_HTML_DOCUMENTS = {'img' : 'src',
                        'object'  : 'data',
                        'param' : 'value',
                        }
+
+class MainContentPortlet(object):
+    """Simulates the Main Content Portlet for CPSSkins exported themes."""
+
+    def __init__(self, portlet, main_content):
+        self.portlet = portlet
+        self.content = main_content
+
+    def getId(self):
+        return self.portlet.getId()
+
+    def Title(self):
+        return self.portlet.Title()
+
+    def title_or_id(self):
+        return self.portlet.title_or_id()
+
+    def render_cache(self, **kw):
+        return '<div id="%s">%s</div>' % (self.getId(), self.content)
 
 def find_by_attribute(elt, attr_name, value=None):
     """For subclass."""
@@ -147,7 +165,7 @@ class BaseEngine(object):
             # in themes exported from CPSSkins, the main content
             # is supposed to be in a special portlet
             portlets = (portlet.portal_type == 'Main Content Portlet' and \
-                        DummyPortlet('main_content', main_content) or portlet
+                        MainContentPortlet(portlet, main_content) or portlet
                         for portlet in portlets)
 
             self.logger.debug('Rendering slot %s with portlets %s',
