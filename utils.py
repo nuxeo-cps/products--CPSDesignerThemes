@@ -45,12 +45,12 @@ def rewrite_uri(absolute_base='', referer_uri='/index.html', uri='',
 
     There is a cps:// url scheme to access content from the cps object
     directly
-    >>> rewrite_uri(uri='cps://workspaces/renderCSS.css', cps_base_url='/cps')
+    >>> rewrite_uri(uri='cps://workspaces/renderCSS.css', cps_base_url='/cps/')
     '/cps/workspaces/renderCSS.css'
     >>> rewrite_uri(uri='cps://workspaces/renderCSS.css', cps_base_url='/')
     '/workspaces/renderCSS.css'
     >>> rewrite_uri(uri='cps://sections/renderCSS.css',
-    ...             cps_base_url='/deep/virtual/hosting')
+    ...             cps_base_url='/deep/virtual/hosting/')
     '/deep/virtual/hosting/sections/renderCSS.css'
 
     You can't use that without providing the current CPS base url
@@ -65,9 +65,8 @@ def rewrite_uri(absolute_base='', referer_uri='/index.html', uri='',
     if uri.startswith('cps://'):
         if cps_base_url is None:
             raise ValueError("Need the CPS base URL to use the cps:// scheme")
-        if cps_base_url == '/':
-            return '/' + uri[6:]
-        return cps_base_url + '/' + uri[6:]
+        print cps_base_url
+        return cps_base_url + uri[6:]
     if uri.startswith('/'):
         local_base = ''
     else:
