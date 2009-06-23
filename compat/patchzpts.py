@@ -51,7 +51,7 @@ def pt_render(self, source=0, extra_context={}):
     interp()
 
     slots = interp.getRecordedSlots()
-    if slots:
+    if slots is not None:
         # We're assuming the sole use of <metal:slot-recorder>
         # is to pass to the rendering theme engine
         # XXX maybe restore some flexibility by using a named utility/adpater ?

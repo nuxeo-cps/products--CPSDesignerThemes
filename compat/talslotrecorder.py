@@ -36,11 +36,15 @@ class TALSlotRecordingInterpreter(TALInterpreter):
 
     def __init__(self, *args, **kwargs):
         TALInterpreter.__init__(self, *args, **kwargs)
-        self._slots_recorded = {}
+        self._slots_recorded = None
         self.slot_record_level = -1 # initially disabled
         self._current_slot = None
 
     def getRecordedSlots(self):
+        """Return what's been recorded in the slots.
+
+        None means that no <metal:slot-recorder> has been met.
+        """
         return self._slots_recorded
 
     def do_startTag(self, (name, attrList),
@@ -48,6 +52,8 @@ class TALSlotRecordingInterpreter(TALInterpreter):
         if name == 'metal:slot-recorder':
             self.slot_record_level = self.level + 1
             self._current_slot = None
+            if self._slots_recorded is None:
+                self._slots_recorded = {}
         else:
             sll = self.slot_record_level
             if self._current_slot is None and sll != -1 and sll == self.level:
