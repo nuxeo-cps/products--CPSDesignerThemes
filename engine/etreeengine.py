@@ -268,12 +268,12 @@ class ElementTreeEngine(BaseEngine):
         parsed = self.parseFragment(head_content, enclosing='head')
         self._accumulateJavaScript(parsed, js_acc)
 
-        offset = 0
         if cps_global is not None:
             self._accumulateJavaScript(cps_global, js_acc)
-            offset = self._mergeElement(0, in_theme, cps_global)
+            offset = self._mergeElement(len(in_theme), in_theme, cps_global)
 
-        offset = self._mergeElement(offset, in_theme, parsed)
+        # the same ordering as what CPS header_lib_header does
+        self._mergeElement(len(in_theme), in_theme, parsed)
 
         self._mergeElement(len(in_theme), in_theme, js_acc)
 
