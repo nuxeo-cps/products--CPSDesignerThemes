@@ -1,7 +1,6 @@
 PREPARATIONS
 >>> import os
 >>> from lxml import usedoctest
->>> from Products.CPSPortlets.DummyPortlet import DummyPortlet
 >>> from Products.CPSDesignerThemes.tests.test_engine import get_engine
 >>> from Products.CPSDesignerThemes.interfaces import IThemeEngine
 
