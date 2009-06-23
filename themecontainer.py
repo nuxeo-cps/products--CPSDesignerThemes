@@ -79,7 +79,6 @@ class OpenFile(File):
         res = File.index_html(self, REQUEST, RESPONSE)
         RESPONSE.setHeader(
             'Cache-Control', 'public, max-age=36000, must-revalidate')
-        self.data = raw_data
         return res
 
 InitializeClass(OpenFile)
@@ -105,6 +104,7 @@ class StyleSheet(File):
         self.data = self.links_re.sub(self.rewriteUrl, self.data)
         res = File.index_html(self, REQUEST, RESPONSE)
         add_caching_headers(RESPONSE)
+        self.data = raw_data
         return res
 
 class ResourceTraverser(Acquisition.Explicit):
