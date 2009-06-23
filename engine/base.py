@@ -25,6 +25,7 @@ from zope.interface import implements
 
 from Products.CMFCore.utils import getToolByName
 
+from Products.CPSPortlets.DummyPortlet import DummyPortlet
 from Products.CPSDesignerThemes.interfaces import IThemeEngine
 from Products.CPSDesignerThemes.constants import NS_URI, ENCODING
 from Products.CPSDesignerThemes.utils import rewrite_uri
@@ -143,6 +144,12 @@ class BaseEngine(object):
         # portlet slots
         for slot_name, slot_elt in self.extractSlotElements():
             portlets = ptool.getPortlets(context, slot_name)
+            # in themes exported from CPSSkins, the main content
+            # is supposed to be in a special portlet
+            portlets = (portlet.portal_type == 'Main Content Portlet' and \
+                        DummyPortlet('main_content', main_content) or portlet
+                        for portlet in portlets)
+
             self.logger.debug('Rendering slot %s with portlets %s',
                               slot_name, portlets)
             frame_parent, frame = self.extractSlotFrame(slot_elt)
