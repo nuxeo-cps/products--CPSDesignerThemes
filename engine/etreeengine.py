@@ -98,6 +98,7 @@ class ElementTreeEngine(BaseEngine):
 
     def __init__(self, html_file=None, theme_base_uri='', page_uri='', **kw):
         self.tree = ET.parse(html_file)
+
         self.root = self.tree.getroot()
         BaseEngine.__init__(self, theme_base_uri=theme_base_uri,
                             page_uri=page_uri, **kw)
@@ -201,6 +202,54 @@ class ElementTreeEngine(BaseEngine):
             if k not in body.attrib:
                 body.attrib[k] = v
 
+    @classmethod
+    def _appendTextBefore(self, offset, target, text):
+        """Appends text to element before element at offset in target.
+
+        If offset == 0, does it to target.text
+        text can be None (use-case: comes from some element)
+        """
+        if not text:
+            return
+
+        if not offset:
+            if not target.text:
+                target.text = text
+            else:
+                target.text += text
+            return
+
+        # general case
+        previous = target[offset-1]
+        if not previous.tail:
+            previous.tail = text
+        else:
+            previous.tail += text
+
+    @classmethod
+    def _mergeElement(self, offset, target, elt):
+        """Insert the given element content at given offset in target.
+        Takes care of subtleties with .text and .tail.
+        Return a new offset for further merging."""
+
+        if elt is None:
+            return offset
+
+        self._appendTextBefore(offset, target, elt.text)
+
+        i = -1
+        for i, child in enumerate(elt):
+            target.insert(offset+i, child)
+        return i+offset+1
+
+    @classmethod
+    def _accumulateJavaScript(self, src, target):
+        """Move all JS script calls from src to target."""
+        for i, child in enumerate(src):
+            if child.tag == '{%s}script' % NS_XHTML:
+                target.append(child)
+                del src[i]
+
     def mergeHeads(self, head_content='', cps_global=None):
         """Merge the contextual head_content with cps' global and the theme's.
 
@@ -211,24 +260,22 @@ class ElementTreeEngine(BaseEngine):
           - actually merge cps_global with the theme's head (we should first
             define a policy about this).
         """
+        js_acc = ET.Element('js-acc')
+
         in_theme = self.tree.find(HEAD)
-        in_theme_last = None
-        if len(in_theme):
-            in_theme_last = in_theme[-1]
-        if in_theme_last is not None:
-            in_theme_last.tail = ''
+        self._accumulateJavaScript(in_theme, js_acc)
+
         parsed = self.parseFragment(head_content, enclosing='head')
+        self._accumulateJavaScript(parsed, js_acc)
 
+        offset = 0
         if cps_global is not None:
-            if in_theme_last is not None and cps_global.text:
-                in_theme_last.tail += cps_global.text
-            for child in cps_global:
-                in_theme.append(child)
+            self._accumulateJavaScript(cps_global, js_acc)
+            offset = self._mergeElement(0, in_theme, cps_global)
 
-        if in_theme_last is not None and parsed.text:
-            in_theme_last.tail += parsed.text
-        for child in parsed:
-            in_theme.append(child)
+        offset = self._mergeElement(offset, in_theme, parsed)
+
+        self._mergeElement(len(in_theme), in_theme, js_acc)
 
     def renderMainContent(self, main_content):
         main_elt = self.findByAttribute(self.root, MAIN_CONTENT_ATTR).next()

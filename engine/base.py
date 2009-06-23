@@ -169,6 +169,7 @@ class BaseEngine(object):
 
     def serialize(self):
         """Produce the final page to be sent over HTTP."""
+        raise NotImplementedError
 
     def extractSlotElements(self):
         """Return an iterable over pairs (slot name, slot xml element)
@@ -192,6 +193,11 @@ class BaseEngine(object):
 
     def mergeHeads(self, head_content='', cps_global=None):
         """Merge the contextual head_content with cps' global and the theme's.
+
+        To illustrate, in the case of the traditional CPS rendering, namely
+        a call to main_template with slot filling, then
+        head_content would be what comes from the slot filling
+        while cps_global would be what comes from the main_template
 
         For now, this is stupid concatenation.
         TODO: this should:

@@ -1,0 +1,54 @@
+Merging logic for the <head> element
+====================================
+The engine has to use three different sources to dump the <head>
+element:
+ - the theme page itself
+ - the "cps global" defined head. This is for example what comes from
+   main_template
+ - "head content": what comes from the current zope page template, for example
+   cpsdocument_edit_form
+
+PREPARATIONS
+>>> import os
+>>> from lxml import usedoctest
+>>> from Products.CPSDesignerThemes.tests.test_engine import get_engine
+>>> from Products.CPSDesignerThemes.interfaces import IThemeEngine
+
+In the context of this test, we should have a predefined engine class
+(PageEngine). Let's demonstrate that:
+>>> IThemeEngine.implementedBy(PageEngine)
+True
+
+Let's define some string constants
+>>> LINK = '<link rel="Stylesheet" type="text/css" href="document.css" />'
+
+>>> cps_global, thm_body = PageEngine.parseHeadBody("""
+... <html xmlns="http://www.w3.org/1999/xhtml">
+...  <head>
+...    <link rel="stylesheet" type="text/css" href="http://ex/main.css"/>
+...    <script src="/functions.js"></script>
+...  </head>
+...  <body></body>
+... </html>""")
+
+Now let's see how our sources get merged. See how the head_content
+part and cps_global parts go straight while URIs from the theme get rewritten:
+>>> engine = get_engine(PageEngine, 'theme1', page='simple_head.html',
+...  	                cps_base_url='/cps_portal/')
+>>> engine.mergeHeads(head_content=LINK, cps_global=cps_global)
+>>> print engine.serialize() # TODO JS ordering as well
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+   <link rel="stylesheet" type="text/css" href="http://ex/main.css"/>
+   <link href="document.css" rel="Stylesheet" type="text/css" />
+   <title>The title from the theme</title>
+   <link href="/cps_portal/portal_themes/default/icons/cps_favicon_4.png"
+         rel="icon" type="image/png" />
+   <link href="/thm_base/test.css" rel="Stylesheet" type="text/css" />
+   <script src="/thm_base/eye_candi.js" type="text/javascript"> </script>
+   <script src="/functions.js"></script>
+  </head>
+  <body>
+  </body>
+</html>
+

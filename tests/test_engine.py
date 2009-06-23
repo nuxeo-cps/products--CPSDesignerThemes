@@ -33,11 +33,11 @@ PORTLET1 = ('portlet1', '<ul id="portlet1"><li>foo</li></ul>')
 
 WT_REGEXP = re.compile(r'[\n ]*')
 
-def get_engine(EngineClass, theme, page='index.html'):
+def get_engine(EngineClass, theme, page='index.html', cps_base_url=None):
     f = open(os.path.join(THEMES_PATH, theme, page), 'r')
     return EngineClass(html_file=f,
                        theme_base_uri='/thm_base',
-                       page_uri='/'+page)
+                       page_uri='/'+page, cps_base_url=cps_base_url)
 
 class EngineTestCase(unittest.TestCase):
     """Base test case for all engines."""
@@ -127,9 +127,10 @@ def engines2test_case():
 def test_suite():
     suite = unittest.TestSuite()
 
-    for PageEngine in (ElementTreeEngine, LxmlEngine):
+    for PageEngine in (ElementTreeEngine,):#, LxmlEngine):
         suite.addTest(unittest.makeSuite(engines2test_case()[PageEngine]))
-        for test_file in ('engine/portlets_merging.txt',):
+        for test_file in ('engine/portlets_merging.txt',
+                          'engine/heads_merging.txt'):
             suite.addTest(
                 doctest.DocFileTest(test_file,
                                     package='Products.CPSDesignerThemes',
