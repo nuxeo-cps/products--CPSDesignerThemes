@@ -8,7 +8,7 @@
       provides=".interfaces.IThemeEngine"
       for="OFS.interfaces.IObjectManager
 	   zope.publisher.interfaces.http.IHTTPRequest"
-      factory=".negociator.ThemeNegociator"
+      factory=".negociator.CPSSkinsThemeNegociator"
       />
 
   <!-- Five specifics -->

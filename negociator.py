@@ -18,6 +18,7 @@
 # $Id$
 
 import os
+import logging
 
 from zope.interface import implements
 from zope.component import adapts
@@ -31,18 +32,11 @@ from Products.CMFCore.utils import getToolByName
 
 from interfaces import IThemeEngine
 
+logger = logging.getLogger('CPSDesignerThemes.negociator')
+
 class EngineAdapter(object):
     """Some boiler plate logic."""
-    def renderCompat(self, **kw):
-        return self.getEngine().renderCompat(context=self.context,
-                                             request=self.request, **kw)
 
-class ThemeNegociator(EngineAdapter):
-    """General theme negociator.
-
-    For now, filesystem based, no negociation at all. Just one page and theme:
-    default/index.html
-    """
     adapts(IObjectManager, IHTTPRequest)
     implements(IThemeEngine)
 
@@ -51,8 +45,13 @@ class ThemeNegociator(EngineAdapter):
         self.request = request
         self.cps_base_url = getToolByName(context, 'portal_url').getBaseUrl()
 
+    def renderCompat(self, **kw):
+        return self.getEngine().renderCompat(context=self.context,
+                                             request=self.request, **kw)
+class RootContainerFinder:
+    """This class uses the first container found at root."""
+
     def lookupContainer(self):
-        # For now, the first FS container found at the root
         portal = getToolByName(self.context, 'portal_url').getPortalObject()
         containers = portal.objectValues(['Filesystem Theme Container',
                                           'Theme Container'])
@@ -60,7 +59,27 @@ class ThemeNegociator(EngineAdapter):
             raise KeyError('No theme container found')
         return containers[0]
 
+class FixedFSThemeEngine(RootContainerFinder, EngineAdapter):
     def getEngine(self):
+        theme, page = self.getRequestedThemeAndPageName()
         return self.lookupContainer().getPageEngine(
-            'default', 'index', cps_base_url=self.cps_base_url)
+            'default', 'index', cps_base_url=self.cps_base_url, fallback=True)
+
+class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
+    """Full negociator that applies CPSSkins rules and uses a root container.
+    """
+
+    def getRequestedThemeAndPageName(self):
+        """Pure indirection to CPSSkins."""
+        thmtool = getToolByName(self.context, 'portal_themes')
+        theme, page = thmtool.getRequestedThemeAndPageName(
+            context_obj=self.context)
+        logger.debug('CPSSkinsThemeNegociator: requesting (%s,%s)', theme, page)
+        return theme, page
+
+    def getEngine(self):
+        """The fallback is up to the container."""
+        theme, page = self.getRequestedThemeAndPageName()
+        return self.lookupContainer().getPageEngine(
+            theme, page, cps_base_url=self.cps_base_url, fallback=True)
 

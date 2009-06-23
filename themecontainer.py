@@ -177,8 +177,17 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
     _properties = (
         dict(id='title', type='string', mode='w', label='Title'),
         dict(id='relative_path', type='string', mode='w',
-             label='Path (relative to INSTANCE_HOME)')
+             label='Path (relative to INSTANCE_HOME)'),
+        dict(id='default_theme', type='string', mode='w',
+             label='default theme (directory name)'),
+        dict(id='default_page', type='string', mode='w',
+             label='default page (file name)'),
         )
+    # GR. actually, the default_page should be specified per theme, but
+    # that's enough for now.
+
+    default_theme = 'default'
+    default_page = 'index'
 
     _propertiesBaseClass = SimpleItemWithProperties
 
@@ -201,16 +210,30 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
     def getBaseUri(self):
         return self.absolute_url_path()
 
-    def getPageEngine(self, theme, page, cps_base_url=None):
-        page_uri = '/%s.html' % page
-        page_path = os.path.join(self.path, theme, page_uri[1:])
+    def getPageEngine(self, theme, page, cps_base_url=None, fallback=False):
+        if page is None:
+            page = self.default_page
+        if theme is None:
+            theme = self.default_theme
+        alternatives = ((theme, page),
+                        (theme, self.default_page),
+                        (self.default_theme, self.default_page))
+
+        for page_path, final_page in (
+                (os.path.join(self.path, t, p + '.html'), p)
+                 for t, p in alternatives):
+            if os.path.exists(page_path):
+                break
+        else:
+            return ValueError("Could not find suitables themes and page for"
+                              "the required %s and %s" % (theme, page))
 
         # TODO, here we could also make use of the component architecture
         # to swap engines ?
-        return PageEngine(
-            html_file=page_path,
-            theme_base_uri=self.absolute_url_path() + '/' + theme,
-            page_uri=page_uri, cps_base_url=cps_base_url)
+        return PageEngine(html_file=page_path,
+                          theme_base_uri=self.absolute_url_path() + '/' + theme,
+                          page_uri='/%s.html' % final_page,
+                          cps_base_url=cps_base_url)
 
     def invalidate(self, theme, page=None):
         """No cache yet."""

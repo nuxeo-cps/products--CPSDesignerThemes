@@ -23,7 +23,7 @@ from Testing import ZopeTestCase
 from Acquisition import Implicit
 
 from Products.CPSDesignerThemes.themecontainer import FSThemeContainer
-from Products.CPSDesignerThemes.negociator import ThemeNegociator
+from Products.CPSDesignerThemes.negociator import FixedFSThemeEngine
 
 from Products.CPSDesignerThemes.interfaces import IThemeContainer
 
@@ -38,14 +38,14 @@ class FakeUrlTool(Implicit):
     def getBaseUrl(self):
         return '/'
 
-class TestNegociator(ZopeTestCase.ZopeTestCase):
+class TestFixedFSThemeEngine(ZopeTestCase.ZopeTestCase):
 
     def afterSetUp(self):
         self.folder.portal_url = FakeUrlTool().__of__(self.folder)
         self.folder._setObject('container', FSThemeContainer('container'))
 
     def testLookupContainer(self):
-        negociator = ThemeNegociator(self.folder, self.app.REQUEST)
+        negociator = FixedFSThemeEngine(self.folder, self.app.REQUEST)
         container = negociator.lookupContainer()
         self.assertTrue(IThemeContainer.providedBy(container))
         self.assertEquals(container.getId(), 'container')
@@ -53,5 +53,5 @@ class TestNegociator(ZopeTestCase.ZopeTestCase):
 
 def test_suite():
     return unittest.TestSuite((
-        unittest.makeSuite(TestNegociator),
+        unittest.makeSuite(TestFixedFSThemeEngine),
         ))
