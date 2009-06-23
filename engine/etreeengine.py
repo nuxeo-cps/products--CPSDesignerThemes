@@ -157,7 +157,7 @@ class ElementTreeEngine(BaseEngine):
 
     @classmethod
     def parseHeadBody(self, pt_output):
-        parsed = self.parseFragment(pt_output)
+        parsed = self.parseFragment(pt_output, enclosing='default-document')
         return (parsed.find('.//' + elt) for elt in (HEAD, BODY))
 
     @classmethod
