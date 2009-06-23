@@ -278,8 +278,10 @@ class ElementTreeEngine(BaseEngine):
         self._mergeElement(len(in_theme), in_theme, js_acc)
 
     def renderMainContent(self, main_content):
-        main_elt = self.findByAttribute(self.root, MAIN_CONTENT_ATTR).next()
-        # TODO make main-content element not mandatory
+        try:
+            main_elt = self.findByAttribute(self.root, MAIN_CONTENT_ATTR).next()
+        except StopIteration:
+            return
 
         # cleaning up
         del main_elt.attrib[MAIN_CONTENT_ATTR]
