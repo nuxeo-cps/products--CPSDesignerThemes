@@ -148,7 +148,7 @@ class BaseEngine(object):
     def renderPortlets(self, portlets, context=None, request=None):
         return ( (portlet.title_or_id(),
                   portlet.render_cache(context_obj=context))
-                for portlet in portlets)
+                for portlet in portlets if portlet is not None)
 
     def render(self, main_content='', head_content='',
                body_element=None, head_element=None,
