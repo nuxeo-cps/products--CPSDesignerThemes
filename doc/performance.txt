@@ -45,6 +45,23 @@ Reparsing the theme each time is negligible. This might
 change with ZODB themes
 
 
+Performance on the CPSSkins exported CPS 3.4 theme
+--------------------------------------------------
+We are close to version 0.2.
+This is still cElementTree
+
+Total time: 610 ms
+Actual time 170 ms (first try at 245 ms)
+
+Total time spent in the engine (renderCompat)   : 316 ms
+Time spent in CPSPortlets, lookup and rendering : 160 ms
+Specific engine time                            : 256 ms
+Of which, final serialization                   :  95 ms
+Engine time without serialization		: 161 ms
+Of which: initial parsing			:   1 ms
+          URI rewriting				:  18 ms
+
+
 
 
 
