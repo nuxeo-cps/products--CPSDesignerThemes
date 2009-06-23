@@ -167,7 +167,7 @@ class BaseEngine(object):
 
         if body_element is not None:
             self.mergeBodyElement(from_cps=body_element)
-        if main_content:
+        if main_content is not None:
             self.renderMainContent(main_content)
         self.mergeHeads(head_content=head_content,
                         cps_global=head_element)
