@@ -113,16 +113,26 @@ class TestLxmlEngine(TestElementTreeEngine):
     EngineClass = LxmlEngine
 
 
+def engines2test_case():
+    res = dict()
+    for klass in globals().values():
+        if type(klass) != type(EngineTestCase):
+            continue
+        engine_class = getattr(klass, 'EngineClass', None)
+        if engine_class is not None:
+            res[engine_class] = klass
+    return res
+
+
 def test_suite():
-    return unittest.TestSuite((
-        unittest.makeSuite(TestElementTreeEngine),
-        unittest.makeSuite(TestLxmlEngine),
-        doctest.DocFileTest('engine/doctest.txt',
-                            package='Products.CPSDesignerThemes',
-                            optionflags=doctest.ELLIPSIS,
-                            globs=dict(PageEngine=ElementTreeEngine)),
-        doctest.DocFileTest('engine/doctest.txt',
-                            package='Products.CPSDesignerThemes',
-                            optionflags=doctest.ELLIPSIS,
-                            globs=dict(PageEngine=LxmlEngine)),
-        ))
+    suite = unittest.TestSuite()
+
+    for PageEngine in (ElementTreeEngine, LxmlEngine):
+        suite.addTest(unittest.makeSuite(engines2test_case()[PageEngine]))
+        for test_file in ('engine/portlets_merging.txt',):
+            suite.addTest(
+                doctest.DocFileTest(test_file,
+                                    package='Products.CPSDesignerThemes',
+                                    optionflags=doctest.ELLIPSIS,
+                                    globs=dict(PageEngine=PageEngine)))
+    return suite
