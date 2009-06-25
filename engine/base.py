@@ -192,6 +192,16 @@ class BaseEngine(object):
 
         return self.serialize()
 
+    def rewriteUris(self, rewriter_func=None):
+        """Rewrite all URIs in the meaningful elements.
+
+        The optional rewriter function allows different treatments to be made
+        while keeping exactly the same selection logic of URIs to be treated.
+        This is useful for automatic theme preparation procedures, like the
+        current final stages of the CPSSkins export process
+        """
+        raise NotImplementedError
+
     def serialize(self):
         """Produce the final page to be sent over HTTP."""
         raise NotImplementedError
