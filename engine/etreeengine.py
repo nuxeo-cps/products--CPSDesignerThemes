@@ -128,15 +128,17 @@ class ElementTreeEngine(BaseEngine):
                                        referer_uri=self.page_uri,
                                        cps_base_url=self.cps_base_url)
 
-    def rewriteUris(self):
+    def rewriteUris(self, rewriter_func=None):
+        if rewriter_func is None:
+            retwriter_func=rewrite_uri
         for tag, attr in LINK_HTML_DOCUMENTS.items():
             for elt in self.root.findall('.//{%s}%s' % (NS_XHTML, tag)):
                 uri = elt.attrib[attr]
                 try:
-                    new_uri = rewrite_uri(uri=uri,
-                                          absolute_base=self.theme_base_uri,
-                                          referer_uri=self.page_uri,
-                                          cps_base_url=self.cps_base_url)
+                    new_uri = rewriter_func(uri=uri,
+                                            absolute_base=self.theme_base_uri,
+                                            referer_uri=self.page_uri,
+                                            cps_base_url=self.cps_base_url)
                 except KeyError:
                     raise ValueError(
                         "Missing attribute %s on <%s> element" % (attr, tag))
