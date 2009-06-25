@@ -405,12 +405,16 @@ class ElementTreeEngine(BaseEngine):
             else:
                 if len(frame_parent):
                     # the frame parent already has children
-                    frame_parent[-1].tail += ptl_elt.text
+                    last = frame_parent[-1]
+                    if last.tail is None:
+                        last.tail = ''
+                    last.tail += ptl_elt.text
                 else:
                     frame_parent.text += ptl_elt.text
                 for elt in ptl_elt:
                     frame_parent.append(elt)
-                elt.tail += ptl_elt.tail
+                if ptl_elt.tail is not None:
+                    elt.tail += ptl_elt.tail
 
     def protectEmptyElements(self, *tags):
         # maybe lxml can do this better
