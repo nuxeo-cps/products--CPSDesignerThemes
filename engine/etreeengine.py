@@ -35,8 +35,6 @@ except ImportError:
     import elementtree.ElementTree as ET
     C_ELEMENT_TREE = False
 
-import patchetree
-
 import htmlentitydefs
 
 from zope.interface import implements
@@ -47,6 +45,8 @@ from Products.CPSDesignerThemes.interfaces import IThemeEngine
 from Products.CPSDesignerThemes.constants import NS_URI, NS_XHTML, ENCODING
 from Products.CPSDesignerThemes.utils import rewrite_uri
 from base import BaseEngine
+import patchetree
+from twophase import TwoPhaseEngine
 
 def ns_prefix(name):
     return '{%s}%s' % (NS_URI, name)
@@ -117,6 +117,36 @@ class ElementTreeEngine(BaseEngine):
             return (e for e in all if attr_name in e.keys())
         else:
             return (e for e in all if e.get(attr_name) == value)
+
+    #
+    # Inclusion methods for dynamical content (main content and portlets)
+    #
+
+    def appendFragment(self, elt, fragment, is_element=False):
+        """Include a fragment in some element.
+        If is_element is True, the fragment is assumed to be a unique, parseable
+        XML element."""
+        if is_element:
+            enclosing = None
+        else:
+            enclosing = 'include-fragment'
+
+        parsed = self.parseFragment(fragment, enclosing=enclosing)
+        main_elt.text = parsed.text
+        for child in parsed:
+            main_elt.append(child)
+
+    def insertFragment(self, index, elt, fragment, is_element=False):
+        """Include a fragment in some element.
+        If is_element is True, the fragment is assumed to be a unique, parseable
+        XML element."""
+        if is_element:
+            enclosing = None
+        else:
+            enclosing = 'include-fragment'
+            raise NotImplementedError
+
+        elt.insert(index, self.parseFragment(fragment, enclosing=enclosing))
 
     #
     # Internal engine API implementation. For docstrings, see BaseEngine
@@ -290,10 +320,7 @@ class ElementTreeEngine(BaseEngine):
         for child in main_elt:
             main_elt.remove(child)
 
-        parsed_main = self.parseFragment(main_content, enclosing='main-content')
-        main_elt.text = parsed_main.text
-        for child in parsed_main:
-            main_elt.append(child)
+        self.appendFragment(main_elt, main_content, is_element=False)
 
     @classmethod
     def extractSlotFrame(self, slot):
@@ -355,7 +382,6 @@ class ElementTreeEngine(BaseEngine):
         except StopIteration:
             raise KeyError
 
-    @classmethod
     def mergePortlets(self, frame_parent, frame, portlets_rendered):
         for title, body in portlets_rendered:
             if not body:
@@ -393,11 +419,11 @@ class ElementTreeEngine(BaseEngine):
                     body_elt.text = ''
                     for child in body_elt:
                         body_elt.remove(child)
-                    body_elt.append(self.parseFragment(body))
+                    self.insertFragment(0, body_elt, body, is_element=True)
                 else:
                     parent, index = self.findParent(body_elt, inside=ptl_elt)
                     del parent[index]
-                    parent.insert(index, self.parseFragment(body))
+                    self.insertFragment(index, parent, body, is_element=True)
 
             remove = ptl_elt.attrib.pop(REMOVE_ATTR, None)
             if not remove:
@@ -437,3 +463,12 @@ class ElementTreeEngine(BaseEngine):
         out = StringIO()
         tree.write(out, default_namespace=NS_XHTML)
         return out.getvalue()
+
+class TwoPhaseElementTreeEngine(TwoPhaseEngine, ElementTreeEngine):
+    """Two phase version"""
+
+    def appendFragment(self, elt, fragment, is_element=False):
+        elt.append(ET.Element(self.computeInclusionMarkerTag(fragment)))
+
+    def insertFragment(self, index, elt, fragment, is_element=False):
+        elt.insert(index, ET.Element(self.computeInclusionMarkerTag(fragment)))

@@ -22,7 +22,10 @@ from zope.testing import doctest
 import os
 import re
 
-from Products.CPSDesignerThemes.engine.etreeengine import ElementTreeEngine
+from Products.CPSDesignerThemes.engine.etreeengine import (
+    ElementTreeEngine,
+    TwoPhaseElementTreeEngine,
+    )
 from Products.CPSDesignerThemes.engine.lxmlengine import LxmlEngine
 from Products.CPSDesignerThemes.constants import NS_XHTML
 
@@ -112,6 +115,10 @@ class TestLxmlEngine(TestElementTreeEngine):
 
     EngineClass = LxmlEngine
 
+class TestTwoPhaseElementTreeEngine(TestElementTreeEngine):
+
+    EngineClass = TwoPhaseElementTreeEngine
+
 
 def engines2test_case():
     res = dict()
@@ -127,7 +134,7 @@ def engines2test_case():
 def test_suite():
     suite = unittest.TestSuite()
 
-    for PageEngine in (ElementTreeEngine,):#, LxmlEngine):
+    for PageEngine in (ElementTreeEngine, TwoPhaseElementTreeEngine):#, LxmlEngine):
         suite.addTest(unittest.makeSuite(engines2test_case()[PageEngine]))
         for test_file in ('engine/portlets_merging.txt',
                           'engine/heads_merging.txt'):
