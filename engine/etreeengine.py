@@ -132,9 +132,9 @@ class ElementTreeEngine(BaseEngine):
             enclosing = 'include-fragment'
 
         parsed = self.parseFragment(fragment, enclosing=enclosing)
-        main_elt.text = parsed.text
+        elt.text = parsed.text
         for child in parsed:
-            main_elt.append(child)
+            elt.append(child)
 
     def insertFragment(self, index, elt, fragment, is_element=False):
         """Include a fragment in some element.
