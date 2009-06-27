@@ -130,7 +130,7 @@ class ElementTreeEngine(BaseEngine):
 
     def rewriteUris(self, rewriter_func=None):
         if rewriter_func is None:
-            retwriter_func=rewrite_uri
+            rewriter_func=rewrite_uri
         for tag, attr in LINK_HTML_DOCUMENTS.items():
             for elt in self.root.findall('.//{%s}%s' % (NS_XHTML, tag)):
                 uri = elt.attrib[attr]
