@@ -4,7 +4,12 @@ All times expressed in Zope Profiler in real time mode
 (slower than reality, in a consistent manner, I hope)
 
 Using the current sample theme on an almost empty portal.
-All image, css resources didn't get loaded (browser cache)
+All image, css resources didn't get loaded (browser cache or wget)
+
+Warning: these measurements have been made at different stages of
+the development, to see the global trends and check for obvious
+bottlenecks. We didn't even take the time to ensure that the host
+doesn't do anything else, so do not take them as proper scientific benchmarking.
 
 Host: 2 GHz MacBook (july 2008 entry model)
 
@@ -60,6 +65,41 @@ Of which, final serialization                   :  95 ms
 Engine time without serialization		: 161 ms
 Of which: initial parsing			:   1 ms
           URI rewriting				:  18 ms
+
+
+Performance of TwoPhaseElementTreeEngine (CPS 3.4 theme)
+--------------------------------------------------------
+
+Total time: 558 ms
+Actual time: 161 ms
+
+Total time spent in the engine (renderCompat)   : 300 ms
+Time spent in CPSPortlets, lookup and rendering : 176 ms
+Specific engine time                            : 134 ms
+Of which, portlets merging			:  20 ms
+Of which, final serialization                   :  54 ms
+Of which, second phase				:   0 ms
+Engine time without serialization		:  80 ms
+
+
+As we were hoping the serialisation is faster. The second phase runs
+even in non measurable time
+
+Performance of TwoPhaseElementTreeEngine (sample theme)
+--------------------------------------------------------
+
+Total time: 558 ms
+Actual time: 122 ms
+
+Total time spent in the engine (renderCompat)   : 100 ms
+Time spent in CPSPortlets, lookup and rendering :  71 ms
+Specific engine time                            :  29 ms
+Of which, portlets merging			:   8 ms
+Of which, final serialization                   :  17 ms
+Of which, second phase				:   0 ms
+Engine time without serialization		:  12 ms
+
+
 
 
 
