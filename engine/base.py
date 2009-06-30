@@ -145,8 +145,17 @@ class BaseEngine(object):
         raise NotImplementedError
 
     @classmethod
-    def renderPortlets(self, portlets, context=None, request=None):
-        return ( (portlet.title_or_id(),
+    def renderPortlets(self, portlets, context=None, request=None, i18n=False):
+        if not i18n or context is None:
+            def titleI18n(portlet):
+                return portlet.title_or_id()
+        else:
+            mcat = getToolByName(context, 'translation_service')
+            def titleI18n(portlet):
+               # TODO UNICODE options
+               return mcat(portlet.title_or_id()).encode('iso-8859-15')
+
+        return ( (titleI18n(portlet),
                   portlet.render_cache(context_obj=context))
                 for portlet in portlets if portlet is not None)
 
@@ -172,7 +181,9 @@ class BaseEngine(object):
                               slot_name, portlets)
             frame_parent, frame = self.extractSlotFrame(slot_elt)
             rendered = self.renderPortlets(portlets,
-                                           context=context, request=request)
+                                           context=context, request=request,
+                                           i18n=self.isPortletTitleI18n(slot_elt
+                                                                        ))
             self.mergePortlets(frame_parent, frame, rendered)
 
         # isolated portlets (should appear mostly in CPSSkins exports)
@@ -255,6 +266,10 @@ class BaseEngine(object):
         as a convenience for web designers wanting to check their output
         with several portlets TODO: move this to general doc."""
 
+        raise NotImplementedError
+
+    @classmethod
+    def isPortletTitleI18n(self, slot):
         raise NotImplementedError
 
     @classmethod

@@ -58,7 +58,9 @@ dictum sit amet.
     <p>We are still in the div that enclosed the one for main content</p>
   </div>
 
-  <div cps:slot="treeview">
+  <div cps:slot="treeview" cps:translate-titles="true">
+    Use the cps:translate-titles attribute to trigger translation of
+    portlet titles
     <div cps:portlet="frame" style="float:left;width:50%;">
       <span cps:portlet="title" style="font-size: 120%">The title</span>
       <div cps:portlet="body">Typical portlet in the treeview slot</div>

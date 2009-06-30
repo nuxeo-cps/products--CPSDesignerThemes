@@ -55,6 +55,7 @@ HEAD = '{%s}head' % NS_XHTML
 BODY = '{%s}body' % NS_XHTML
 
 PORTLET_ATTR = ns_prefix('portlet')
+PORTLET_TITLE_I18N_ATTR = ns_prefix('translate-titles')
 SLOT_ATTR = ns_prefix('slot')
 ISOLATED_PORTLET_ATTR = ns_prefix('isolated-portlet')
 MAIN_CONTENT_ATTR = ns_prefix('main-content')
@@ -321,6 +322,10 @@ class ElementTreeEngine(BaseEngine):
             main_elt.remove(child)
 
         self.appendFragment(main_elt, main_content, is_element=False)
+
+    @classmethod
+    def isPortletTitleI18n(self, slot):
+        return bool(slot.attrib.pop(PORTLET_TITLE_I18N_ATTR, None))
 
     @classmethod
     def extractSlotFrame(self, slot):
