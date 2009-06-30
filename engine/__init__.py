@@ -17,5 +17,5 @@
 #
 # $Id$
 
-from etreeengine import ElementTreeEngine as PageEngine
+from etreeengine import TwoPhaseElementTreeEngine as PageEngine
 
