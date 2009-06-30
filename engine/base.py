@@ -152,8 +152,7 @@ class BaseEngine(object):
         else:
             mcat = getToolByName(context, 'translation_service')
             def titleI18n(portlet):
-               # TODO UNICODE options
-               return mcat(portlet.title_or_id()).encode('iso-8859-15')
+               return mcat(portlet.title_or_id())
 
         return ( (titleI18n(portlet),
                   portlet.render_cache(context_obj=context))
