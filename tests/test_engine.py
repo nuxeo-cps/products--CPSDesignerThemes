@@ -82,7 +82,8 @@ class EngineTestCase(unittest.TestCase):
             '', '<div xmlns="%s"><p>'
             '<span>%s</span><div>%s</div>'
             '</p></div>' % (NS_XHTML, portlet[0], portlet[1]))
-        expected = expected.replace('&nbsp;', '&#160;')
+        if not hasattr(self.EngineClass, 'secondPhase'):
+            expected = expected.replace('&nbsp;', '&#160;')
         self.assertEquals(rendered, expected)
 
     def test_uri_rewrite(self):
