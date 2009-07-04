@@ -176,8 +176,6 @@ class BaseEngine(object):
                         MainContentPortlet(portlet, main_content) or portlet
                         for portlet in portlets)
 
-            self.logger.debug('Rendering slot %s with portlets %s',
-                              slot_name, portlets)
             frame_parent, frame = self.extractSlotFrame(slot_elt)
             rendered = self.renderPortlets(portlets,
                                            context=context, request=request,
