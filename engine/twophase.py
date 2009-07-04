@@ -57,7 +57,7 @@ class TwoPhaseEngine(object):
         index = len(postponed)
         postponed.append(fragment)
         return self.makeSimpleElement(self.fragment_inclusion_marker,
-                                      str(index))
+                                      content=str(index))
 
     def appendFragment(self, elt, fragment, is_element=False):
         elt.append(self.computeInclusionMarker(fragment))

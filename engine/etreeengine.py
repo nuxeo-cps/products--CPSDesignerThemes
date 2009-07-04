@@ -294,7 +294,7 @@ class ElementTreeEngine(BaseEngine):
           - actually merge cps_global with the theme's head (we should first
             define a policy about this).
         """
-        js_acc = ET.Element('js-acc')
+        js_acc = self.makeSimpleElement('js-acc')
 
         in_theme = self.tree.find(HEAD)
         self._accumulateJavaScript(in_theme, js_acc)
@@ -473,13 +473,17 @@ class ElementTreeEngine(BaseEngine):
         tree.write(out, default_namespace=NS_XHTML, encoding='iso-8859-15')
         return out.getvalue()
 
-class TwoPhaseElementTreeEngine(TwoPhaseEngine, ElementTreeEngine):
-    """Two phase version"""
-
     @classmethod
     def makeSimpleElement(self, tag, content):
+        """Useful to avoid code duplication and over-complicated inheritances.
+        """
         element = ET.Element(tag)
         if content:
             element.text = content
         return element
+
+class TwoPhaseElementTreeEngine(TwoPhaseEngine, ElementTreeEngine):
+    """Two phase version"""
+
+
 

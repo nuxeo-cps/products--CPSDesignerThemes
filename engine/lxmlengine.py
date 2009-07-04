@@ -158,13 +158,13 @@ class LxmlEngine(ElementTreeEngine):
         return out.getvalue().replace(
             'xmlns:cps="http://xmlns.racinet.org/cps"', '', 1)
 
-class TwoPhaseLxmlEngine(TwoPhaseEngine, LxmlEngine):
-    """Two phase version"""
-
     @classmethod
-    def makeSimpleElement(self, tag, content):
+    def makeSimpleElement(self, tag, content=None):
         element = etree.Element(tag)
         if content:
             element.text = content
         return element
+
+class TwoPhaseLxmlEngine(TwoPhaseEngine, LxmlEngine):
+    """Two phase version"""
 
