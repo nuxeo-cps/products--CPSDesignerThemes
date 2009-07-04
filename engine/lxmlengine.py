@@ -131,6 +131,13 @@ class LxmlEngine(ElementTreeEngine):
 
         return frame_parent, frame
 
+    @classmethod
+    def _accumulateJavaScript(self, src, target):
+        """Move all JS script calls from src to target."""
+        for i, child in enumerate(src):
+            if child.tag == '{%s}script' % NS_XHTML:
+                target.append(child) # will remove from source
+
     def serialize(self):
         self.protectEmptyElements('script', 'div', 'textarea')
 
