@@ -476,8 +476,10 @@ class ElementTreeEngine(BaseEngine):
 class TwoPhaseElementTreeEngine(TwoPhaseEngine, ElementTreeEngine):
     """Two phase version"""
 
-    def appendFragment(self, elt, fragment, is_element=False):
-        elt.append(ET.Element(self.computeInclusionMarkerTag(fragment)))
+    @classmethod
+    def makeSimpleElement(self, tag, content):
+        element = ET.Element(tag)
+        if content:
+            element.text = content
+        return element
 
-    def insertFragment(self, index, elt, fragment, is_element=False):
-        elt.insert(index, ET.Element(self.computeInclusionMarkerTag(fragment)))

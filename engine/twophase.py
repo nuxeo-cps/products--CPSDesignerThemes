@@ -43,11 +43,12 @@ import re
 class TwoPhaseEngine(object):
     """Mixin class for two phase theme engines."""
 
-    fragment_inclusion_marker = 'CPSDesignerThemes-postponed-'
+    fragment_inclusion_marker = 'CPSDesignerThemes-postponed'
 
-    fragment_re = re.compile(r'<%s(\d+)[ ]*/>' % fragment_inclusion_marker)
+    fragment_re = re.compile(r'<%s>(\d+)</%s>' % (fragment_inclusion_marker,
+                                                  fragment_inclusion_marker))
 
-    def computeInclusionMarkerTag(self, fragment):
+    def computeInclusionMarker(self, fragment):
         """Provide the name of tag to use and store the fragment."""
         postponed = getattr(self, 'postponed_inclusions', None)
         if postponed is None:
@@ -55,7 +56,14 @@ class TwoPhaseEngine(object):
 
         index = len(postponed)
         postponed.append(fragment)
-        return self.fragment_inclusion_marker + str(index)
+        return self.makeSimpleElement(self.fragment_inclusion_marker,
+                                      str(index))
+
+    def appendFragment(self, elt, fragment, is_element=False):
+        elt.append(self.computeInclusionMarker(fragment))
+
+    def insertFragment(self, index, elt, fragment, is_element=False):
+        elt.insert(index, self.computeInclusionMarker(fragment))
 
     def _doIncludeForMatch(self, match_obj):
         """Perform the inclusion from a regexp match object."""

@@ -58,6 +58,40 @@ Now with two portlets:
  </p>
 </div>
 
+Now with two slots, and one portlet per slot:
+>>> engine = get_engine(PageEngine, 'theme1', page='two_slots.html')
+>>> slots = engine.extractSlotElements()
+>>> slot_name, slot = engine.extractSlotElements().next()
+>>> frame_parent, frame = engine.extractSlotFrame(slot)
+>>> engine.mergePortlets(frame_parent, frame, [PORTLET1])
+>>> slot_name, slot = engine.extractSlotElements().next()
+>>> frame_parent, frame = engine.extractSlotFrame(slot)
+>>> engine.mergePortlets(frame_parent, frame, [PORTLET2])
+
+To demonstrate, we'll have to dump the whole page, this time
+>>> print engine.serialize()
+ <body xmlns="http://www.w3.org/1999/xhtml">
+   <div>
+     <p>
+       <span>Portlet One</span>
+       <div>
+         <ul id="portlet1">
+	   <li>foo</li>
+	 </ul>
+       </div>
+     </p>
+   </div>
+   <div>
+     <p class="slot2">
+       <span>Portlet Two</span>
+       <div>
+          <div id="portlet2">Hello, eggs</div>
+       </div>
+     </p>
+   </div>
+ </body>
+
+
 If the frame has a cps:remove attribute, the frame enclosing tag will
 be omitted.
 >>> engine = get_engine(PageEngine, 'theme1', page='slot_remove_simple.html')

@@ -62,14 +62,13 @@ class LxmlEngine(ElementTreeEngine):
     @classmethod
     def findByAttribute(self, elt, attr_name, value=None):
         if value is None:
-            return elt.iterfind('.//*[@%s]' % attr_name)
+            # need an iterable, iterfind misses slot
+            return (e for e in elt.findall('.//*[@%s]' % attr_name))
         return (e for e in elt.iterfind('.//*[@%s]' % attr_name)
                 if e.get(attr_name) == value)
+
     @classmethod
     def parseFragment(self, content, enclosing=None):
-        # TODO GR: this works around the fact that entity support in
-        # my ElementTree version doesn't work as advertised
-
         parser = etree.XMLParser()
         parser.feed(self.XML_HEADER)
 
@@ -151,9 +150,10 @@ class LxmlEngine(ElementTreeEngine):
 class TwoPhaseLxmlEngine(TwoPhaseEngine, LxmlEngine):
     """Two phase version"""
 
-    def appendFragment(self, elt, fragment, is_element=False):
-        elt.append(etree.Element(self.computeInclusionMarkerTag(fragment)))
+    @classmethod
+    def makeSimpleElement(self, tag, content):
+        element = etree.Element(tag)
+        if content:
+            element.text = content
+        return element
 
-    def insertFragment(self, index, elt, fragment, is_element=False):
-        elt.insert(index,
-                   etree.Element(self.computeInclusionMarkerTag(fragment)))
