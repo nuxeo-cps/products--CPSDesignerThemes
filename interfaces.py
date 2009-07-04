@@ -18,6 +18,7 @@
 # $Id$
 
 from zope.interface import Interface
+import zope.configuration
 
 class IThemeEngine(Interface):
     """A theme engine is initiated from a theme page and does the rendering."""
@@ -41,5 +42,15 @@ class IThemeContainer(Interface):
         """Invalidates the preprocessing cache for theme pages.
 
         if no page is specified, the whole theme is being invalidated."""
+
+
+# ZCML directives
+
+class IEngineDirective(Interface):
+
+    class_ = zope.configuration.fields.GlobalObject(
+        title=u'Engine class',
+        description=u'Dotted name of the engine class',
+        required=True)
 
 

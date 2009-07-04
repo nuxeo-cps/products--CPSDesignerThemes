@@ -98,6 +98,7 @@ class ElementTreeEngine(BaseEngine):
     XML_HEADER = '<?xml version="1.0" encoding="%s"?>' % ENCODING
 
     def __init__(self, html_file=None, theme_base_uri='', page_uri='', **kw):
+        self.logger.debug("Engine : %s", self.__class__)
         self.tree = ET.parse(html_file)
 
         self.root = self.tree.getroot()

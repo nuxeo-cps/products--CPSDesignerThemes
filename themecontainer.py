@@ -28,7 +28,7 @@ import Acquisition
 from OFS.Image import Image, File
 
 from zope.interface import implements
-from engine import PageEngine
+from engine import get_engine_class
 from interfaces import IThemeContainer
 
 from Products.CMFCore.utils import SimpleItemWithProperties
@@ -228,8 +228,7 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
             return ValueError("Could not find suitables themes and page for"
                               "the required %s and %s" % (theme, page))
 
-        # TODO, here we could also make use of the component architecture
-        # to swap engines ?
+        PageEngine = get_engine_class()
         return PageEngine(html_file=page_path,
                           theme_base_uri=self.absolute_url_path() + '/' + theme,
                           page_uri='/%s.html' % final_page,

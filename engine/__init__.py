@@ -16,6 +16,13 @@
 # 02111-1307, USA.
 #
 # $Id$
+from etreeengine import TwoPhaseElementTreeEngine
 
-from etreeengine import TwoPhaseElementTreeEngine as PageEngine
+engine_class = TwoPhaseElementTreeEngine
 
+def engineClassDirective(context, class_):
+    global engine_class
+    engine_class = class_
+
+def get_engine_class():
+    return engine_class

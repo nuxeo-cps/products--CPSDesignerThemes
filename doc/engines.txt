@@ -1,0 +1,50 @@
+Engines for CPSDesignerThemes
+=============================
+
+  What is an engine
+  -----------------
+
+  Engines provide the core functionality of CPSDesigner themes:
+  merging a theme page (XHTML extended by cps specific attributes)
+  with dynamical content coming from CPS (main content and portlets).
+
+  Actually, the portlets are called from the engines, since the slots
+  to include are read from the theme page. Such kind of
+  functionalities that don't involve any actual XML or HTML processing
+  are provided by the engine base class (engine.base.BaseEngine)
+
+  Why several engines
+  -------------------
+
+  Because XML processing libraries have different properties that
+  might suit differently a given installation. Also, some builds are
+  not so easy to find of make on a few platforms.
+
+  On a design note, this made room to make a reference
+  implementation, while working on improvements.
+
+  Overriding the default engine
+  -----------------------------
+
+  Check the "<theme:engine>" directive in CPSDesignerThemes'
+  configure.zcml and override it in your product (in your overrides.zcml).
+
+  Available engines
+  -----------------
+
+  Currently, this product comes with the engines described below. See
+  "INSTALL.txt" for more detailed on required versions
+
+    - engine.etreeengine.ElementTreeEngine: based on the ElementTree package.
+      Expects all dynamical content from CPS to be XML valid
+    - engine.lxmlengine.Lxmlengine.lxmlengine: based on the lxml package.
+
+  There are two-phase variants. They use XML processing first, and
+  then include dynamical content coming from CPS by a pure string
+  manipulation. Therefore the dynamical content doesn't have to be
+  fully XML compliant (and there is some performance
+  improvement). These are:
+
+    - engine.etreeengine.TwoPhaseElementTreeEngine
+    - engine.lxmlengine.TwoPhaseLxmlEngine
+

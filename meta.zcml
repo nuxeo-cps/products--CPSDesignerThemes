@@ -1,0 +1,15 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:meta="http://namespaces.zope.org/meta">
+
+  <meta:directives namespace="http://xmlns.racinet.org/zcml/designer-themes">
+
+    <meta:directive
+       name="engine"
+       schema=".interfaces.IEngineDirective"
+       handler=".engine.engineClassDirective"
+       />
+
+  </meta:directives>
+
+</configure>
