@@ -33,6 +33,7 @@ from twophase import TwoPhaseEngine
 from etreeengine import ElementTreeEngine
 from etreeengine import PORTLET_ATTR
 from etreeengine import LINK_HTML_DOCUMENTS
+from etreeengine import CSS_LINKS_RE
 
 NAMESPACES = dict(cps=NS_URI, xhtml=NS_XHTML)
 
@@ -93,7 +94,11 @@ class LxmlEngine(ElementTreeEngine):
         return parsed
 
     def rewriteUris(self, rewriter_func=None):
-        """implementation: lxml.html has helpers for this. """
+        """implementation: lxml.html has helpers for this.
+
+        For now the only difference with ET is the use of iterfind.
+        findall() on lxml returns a list. Is that really a big matter for perf?
+        """
         if rewriter_func is None:
             rewriter_func=rewrite_uri
         for tag, attr in LINK_HTML_DOCUMENTS.items():
@@ -109,6 +114,12 @@ class LxmlEngine(ElementTreeEngine):
                         "Missing attribute %s on <%s> element" % (attr, tag))
                 elt.attrib[attr] = new_uri
                 self.logger.debug("URI Rewrite %s -> %s" % (uri, new_uri))
+        for style_elt in self.root.iterfind('.//{%s}%s' % (NS_XHTML, 'style')):
+            if style_elt.text:
+                style_elt.text = CSS_LINKS_RE.sub(self.styleAtImportRewriteUri,
+                                                  style_elt.text)
+
+
 
     @classmethod
     def extractSlotFrame(self, slot):
