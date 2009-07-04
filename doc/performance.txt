@@ -100,6 +100,59 @@ Of which, second phase				:   0 ms
 Engine time without serialization		:  12 ms
 
 
+Comparison TwoPhaseElementTreeEngine vs TwoPhaseLxmlEngine
+----------------------------------------------------------
+(this is on a different host, with the CPS 3.4 exported theme)
+
+ElementTree (total time: 406 ms)
+
+Total time spent in the engine (renderCompat)   : 192 ms
+Time spent in CPSPortlets, lookup and rendering : 116 ms
+Specific engine time                            :  76 ms
+Of which, portlets merging			:  14 ms
+Of which, final serialization                   :  46 ms
+Of which, second phase				:   0 ms
+Engine time without serialization		:  30 ms
+
+
+lxml (total time: 346 ms)
+
+Total time spent in the engine (renderCompat)   : 142 ms
+Time spent in CPSPortlets, lookup and rendering : 115 ms
+Specific engine time                            :  31 ms
+Of which, portlets merging			:   5 ms
+Of which, final serialization                   :   1 ms
+Of which, second phase				:   0 ms
+Engine time without serialization		:  30 ms
+
+
+For the record, lxml on the sample theme (total time: 267 ms)
+
+Total time spent in the engine (renderCompat)   :  60 ms
+Time spent in CPSPortlets, lookup and rendering :  55 ms
+Specific engine time                            :   5 ms
+Of which, portlets merging			:   1 s
+Of which, final serialization                   :   1 ms
+Of which, second phase				:   0 ms
+Engine time without serialization		:   4 ms
+
+Conclusion: lxml serialization is indeed faster and it also seems that the
+double referencing parent-children provides a better performance in
+our case.
+
+The benefit of the TwoPhase approach is negligible with lxml, but it's
+still useful for robustness.
+
+With engine specific time being 1/11th of the doc view on the (heavy)
+CPS 3.4 exported theme and 2/300th with the (light) sample theme,
+performance questions at the theme level are negligible anyway. A
+real dedicated theme would sit between the two of them.
+
+
+
+
+
+
 
 
 
