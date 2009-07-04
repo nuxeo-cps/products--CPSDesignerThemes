@@ -4,7 +4,7 @@
     xmlns:theme="http://xmlns.racinet.org/zcml/designer-themes">
 
   <!-- Engine class registration -->
-  <theme:engine class=".engine.lxmlengine.TwoPhaseLxmlEngine"/>
+  <theme:engine class=".engine.etreeengine.TwoPhaseElementTreeEngine"/>
 
   <include file="browser.zcml"/>
 
