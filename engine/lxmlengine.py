@@ -29,16 +29,12 @@ from Products.CPSDesignerThemes.interfaces import IThemeEngine
 from Products.CPSDesignerThemes.constants import NS_URI, NS_XHTML, ENCODING
 from Products.CPSDesignerThemes.utils import rewrite_uri
 from base import BaseEngine
+from twophase import TwoPhaseEngine
 from etreeengine import ElementTreeEngine
 from etreeengine import PORTLET_ATTR
+from etreeengine import LINK_HTML_DOCUMENTS
 
 NAMESPACES = dict(cps=NS_URI, xhtml=NS_XHTML)
-
-LINK_HTML_DOCUMENTS = {'img' : 'src',
-                       'link'    : 'href',
-                       'object'  : 'data',
-                       'param' : 'value',
-                       }
 
 class LxmlEngine(ElementTreeEngine):
     """An engine based on lxml.html
@@ -51,11 +47,12 @@ class LxmlEngine(ElementTreeEngine):
 
     XML_HEADER = '<?xml version="1.0" encoding="%s"?>' % ENCODING
 
-    def __init__(self, html_file=None, theme_base_uri='', page_uri=''):
+    def __init__(self, html_file=None, theme_base_uri='', page_uri='',
+                 cps_base_url=''):
         self.tree = etree.parse(html_file)
         self.root = self.tree.getroot()
         BaseEngine.__init__(self, theme_base_uri=theme_base_uri,
-                            page_uri=page_uri)
+                            page_uri=page_uri, cps_base_url=cps_base_url)
 
 
     #
@@ -72,7 +69,6 @@ class LxmlEngine(ElementTreeEngine):
     def parseFragment(self, content, enclosing=None):
         # TODO GR: this works around the fact that entity support in
         # my ElementTree version doesn't work as advertised
-        content = content.replace('&nbsp;', ' ')
 
         parser = etree.XMLParser()
         parser.feed(self.XML_HEADER)
@@ -97,15 +93,18 @@ class LxmlEngine(ElementTreeEngine):
             return parsed[0]
         return parsed
 
-    def rewriteUris(self):
+    def rewriteUris(self, rewriter_func=None):
         """implementation: lxml.html has helpers for this. """
+        if rewriter_func is None:
+            rewriter_func=rewrite_uri
         for tag, attr in LINK_HTML_DOCUMENTS.items():
             for elt in self.root.iterfind('.//{%s}%s' % (NS_XHTML, tag)):
                 uri = elt.attrib[attr]
                 try:
-                    new_uri = rewrite_uri(uri=uri,
+                    new_uri = rewriter_func(uri=uri,
                         absolute_base=self.theme_base_uri,
-                        referer_uri=self.page_uri)
+                        referer_uri=self.page_uri,
+                        cps_base_url=self.cps_base_url)
                 except KeyError:
                     raise ValueError(
                         "Missing attribute %s on <%s> element" % (attr, tag))
@@ -137,4 +136,17 @@ class LxmlEngine(ElementTreeEngine):
 
         out = StringIO()
         self.tree.write(out)
-        return out.getvalue()
+        # XXX GR couldn't find a way to change the nsmap
+        # to prevent now useless declaration
+        return out.getvalue().replace(
+            'xmlns:cps="http://xmlns.racinet.org/cps"', '', 1)
+
+class TwoPhaseLxmlEngine(TwoPhaseEngine, LxmlEngine):
+    """Two phase version"""
+
+    def appendFragment(self, elt, fragment, is_element=False):
+        elt.append(etree.Element(self.computeInclusionMarkerTag(fragment)))
+
+    def insertFragment(self, index, elt, fragment, is_element=False):
+        elt.insert(index,
+                   etree.Element(self.computeInclusionMarkerTag(fragment)))

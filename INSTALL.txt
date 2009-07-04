@@ -3,6 +3,8 @@ CPSDesignerThemes INSTALL
 
 Dependencies
 ------------
+   At least one of these XML processing libraries is required :
+
    cElementTree 1.0.6 or plain Elementree 1.3
 
        Subversion checkouts are available here:
@@ -11,7 +13,26 @@ Dependencies
 
        Documentation: http://effbot.org/zone/elementtree-13-intro.htm
 
-   lxml is also needed to run the tests.
+   lxml >= 2.2.2. Details:
+       Tested versions of the lxml package so far
+           - on lxml 2.1.2 (MacOSX build by plone buildout recipe) -> fails
+	   - on lxml 2.2.2 (homemade build on Ubuntu 9.04) -> works
+       The discriminating issue between those versions is the following:
+          http://osdir.com/ml/python.lxml.devel/2006-06/msg00084.html
+
+       Run the unit tests to know if your version works, and don't
+       hesitate to report the results
+
+Testing dependencies
+--------------------
+   The tests currently try and load all possible engines. Therefore,
+   you'll need to have both (c)ElementTree and lxml to run them.
+   This could be lifted in the future.
+
+   Even if you deactivate the testing of lxml engines, lxml will still
+   be required, because it's been used by the testing infrastructure
+   itself (to check the output produced by the tested engine)
+
 
 Installing
 ----------
@@ -41,8 +62,6 @@ BUGS
   Tests and lxml engine
   ---------------------
   All engine tests are ran for all engines.
-  The lxml engine doesn't work yet, isn't hooked by default, and fails
-  on some tests.
 
   lxml is also needed to run the doctests, but this has nothing to do
   with the lxml engine for CPSDesginerThemes.
