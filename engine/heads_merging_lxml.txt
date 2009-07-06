@@ -1,0 +1,49 @@
+Merging logic for the <head> element: LXML specifics
+====================================================
+PREPARATIONS
+>>> import os
+>>> from lxml import usedoctest
+>>> from Products.CPSDesignerThemes.tests.test_engine import get_engine
+>>> from Products.CPSDesignerThemes.interfaces import IThemeEngine
+
+In the context of this test, we should have a predefined engine class
+(PageEngine). Let's demonstrate that:
+>>> IThemeEngine.implementedBy(PageEngine)
+True
+
+Let's define some string constants
+>>> LINK = '<link rel="Stylesheet" type="text/css" href="document.css" />'
+
+>>> cps_global, thm_body = PageEngine.parseHeadBody("""
+... <html xmlns="http://www.w3.org/1999/xhtml">
+...  <head>
+...    <link rel="stylesheet" type="text/css" href="http://ex/main.css"/>
+...    <script src="/functions.js"></script>
+...  </head>
+...  <body></body>
+... </html>""")
+
+The lxml engines let comments go through and will rewrite the URI in
+the MS IE conditional statement as well:
+>>> engine = get_engine(PageEngine, 'theme1', page='msie_head.html',
+...  	                cps_base_url='/cps_portal/')
+>>> engine.mergeHeads(head_content=LINK, cps_global=cps_global)
+>>> print engine.serialize() # TODO JS ordering as well
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+   <title>The title from the theme</title>
+   <link href="/cps_portal/portal_themes/default/icons/cps_favicon_4.png"
+         rel="icon" type="image/png" />
+   <link href="/thm_base/test.css" rel="Stylesheet" type="text/css" />
+   <!--[if IE 6]>
+     <link rel="stylesheet" type="text/css" href="/thm_base/msie_thm.css"
+           media="all"/>
+   <![endif]-->
+   <link rel="stylesheet" type="text/css" href="http://ex/main.css"/>
+   <link href="document.css" rel="Stylesheet" type="text/css" />
+   <script src="/thm_base/eye_candi.js" type="text/javascript"> </script>
+   <script src="/functions.js"></script>
+  </head>
+  <body>
+  </body>
+</html>

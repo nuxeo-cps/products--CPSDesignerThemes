@@ -93,16 +93,9 @@ class LxmlEngine(ElementTreeEngine):
             return parsed[0]
         return parsed
 
-    def rewriteUris(self, rewriter_func=None):
-        """implementation: lxml.html has helpers for this.
-
-        For now the only difference with ET is the use of iterfind.
-        findall() on lxml returns a list. Is that really a big matter for perf?
-        """
-        if rewriter_func is None:
-            rewriter_func=rewrite_uri
+    def _rewriteElementUris(self, from_elt, rewriter_func):
         for tag, attr in LINK_HTML_DOCUMENTS.items():
-            for elt in self.root.iterfind('.//{%s}%s' % (NS_XHTML, tag)):
+            for elt in from_elt.iterfind('.//{%s}%s' % (NS_XHTML, tag)):
                 uri = elt.attrib[attr]
                 try:
                     new_uri = rewriter_func(uri=uri,
@@ -114,11 +107,36 @@ class LxmlEngine(ElementTreeEngine):
                         "Missing attribute %s on <%s> element" % (attr, tag))
                 elt.attrib[attr] = new_uri
                 self.logger.debug("URI Rewrite %s -> %s" % (uri, new_uri))
-        for style_elt in self.root.iterfind('.//{%s}%s' % (NS_XHTML, 'style')):
+        for style_elt in from_elt.iterfind('.//{%s}%s' % (NS_XHTML, 'style')):
             if style_elt.text:
                 style_elt.text = CSS_LINKS_RE.sub(self.styleAtImportRewriteUri,
                                                   style_elt.text)
 
+    def rewriteUris(self, rewriter_func=None):
+        """implementation: lxml.html has helpers for this.
+
+        For now the only difference with ET is the use of iterfind.
+        findall() on lxml returns a list. Is that really a big matter for perf?
+        """
+        if rewriter_func is None:
+            rewriter_func=rewrite_uri
+        self._rewriteElementUris(self.root, rewriter_func)
+
+        for comment in self.root.iter(tag=etree.Comment):
+            if comment.text.startswith('[if'):
+                t = comment.text
+                # TODO: error handling
+                start_cond_index = t.find(']')+2
+                end_cond_index = t.find('<![endif]')
+                fragment = t[start_cond_index:end_cond_index]
+                elt = self.parseFragment(fragment, enclosing='msie-cond')
+                self._rewriteElementUris(elt, rewriter_func)
+                s = elt.text
+                for e in elt:
+                    s += etree.tostring(e).replace('xmlns="%s"' % NS_XHTML, '')
+                    if e.tail:
+                        s += e.tail
+                comment.text = t[:start_cond_index] + s + t[end_cond_index:]
 
 
     @classmethod
@@ -155,8 +173,7 @@ class LxmlEngine(ElementTreeEngine):
         self.tree.write(out)
         # XXX GR couldn't find a way to change the nsmap
         # to prevent now useless declaration
-        return out.getvalue().replace(
-            'xmlns:cps="http://xmlns.racinet.org/cps"', '', 1)
+        return out.getvalue().replace('xmlns:cps="%s"' % NS_URI, '', 1)
 
     @classmethod
     def makeSimpleElement(self, tag, content=None):

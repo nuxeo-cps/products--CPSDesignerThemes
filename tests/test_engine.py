@@ -164,4 +164,9 @@ def test_suite():
                                     package='Products.CPSDesignerThemes',
                                     optionflags=doctest.ELLIPSIS,
                                     globs=dict(PageEngine=PageEngine)))
+
+    suite.addTest(doctest.DocFileTest('engine/heads_merging_lxml.txt',
+                                      package='Products.CPSDesignerThemes',
+                                      optionflags=doctest.ELLIPSIS,
+                                      globs=dict(PageEngine=LxmlEngine)))
     return suite
