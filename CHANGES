@@ -1,12 +1,15 @@
 Requires
 ~~~~~~~~
--
+- Elementtree 1.3 or patched cElementTree 1.0.6 or lxml 2.2.2
 New features
 ~~~~~~~~~~~~
--
+- Engine choice through zcml directive
+- Engines: lxml engine, two-phase engines
+- CPSSkins export
+- cps:// URLs
 Bug fixes
 ~~~~~~~~~
--
+- 
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
-- 
+- engine doctests
