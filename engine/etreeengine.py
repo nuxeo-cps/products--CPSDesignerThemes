@@ -474,7 +474,7 @@ class ElementTreeEngine(BaseEngine):
         return out.getvalue()
 
     @classmethod
-    def makeSimpleElement(self, tag, content):
+    def makeSimpleElement(self, tag, content=None):
         """Useful to avoid code duplication and over-complicated inheritances.
         """
         element = ET.Element(tag)
