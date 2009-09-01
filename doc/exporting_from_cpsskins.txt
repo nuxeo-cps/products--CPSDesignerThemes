@@ -15,7 +15,7 @@ from which you plan to export the theme, BUT it musn't be active.
 Create an External Method at the root of the portal. 
    id : cpsskins_export
    module: CPSDesignerThemes.cpsskins_export
-   function: cpsskins_export
+   function: export
 
 Retrieving the export
 ---------------------
