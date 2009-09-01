@@ -123,6 +123,17 @@ class BaseEngine(object):
         head_content = '\n'.join((metal_slots.get(slot, '')
                                   for slot in METAL_HEAD_SLOTS))
 
+        body_content = metal_slots.get('body')
+        if body_content is not None:
+            # caller of main_template writes directly in <body>
+            # This would typically be a popup. Apply body directly.
+            return self.renderSimpleBody(body_content=body_content,
+                                         head_content=head_content,
+                                         head_element=head_element,
+                                         body_element=body_element,
+                                         context=context, request=None)
+
+
         return self.render(main_content=metal_slots.get('main', ''),
                            head_content=head_content,
                            head_element=head_element,
@@ -157,6 +168,17 @@ class BaseEngine(object):
         return ( (titleI18n(portlet),
                   portlet.render_cache(context_obj=context))
                 for portlet in portlets if portlet is not None)
+
+    def renderSimpleBody(self, body_content='', head_content='',
+                         body_element=None, head_element=None,
+                         context=None, request=None):
+        if body_element is not None:
+            self.mergeBodyElement(from_cps=body_element,
+                                  body_content=body_content)
+        self.mergeHeads(head_content=head_content,
+                        cps_global=head_element)
+
+        return self.serialize()
 
     def render(self, main_content='', head_content='',
                body_element=None, head_element=None,

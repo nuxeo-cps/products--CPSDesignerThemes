@@ -225,7 +225,7 @@ class ElementTreeEngine(BaseEngine):
             return parsed[0]
         return parsed
 
-    def mergeBodyElement(self, from_cps=None):
+    def mergeBodyElement(self, from_cps=None, body_content=None):
         """Merge the body element issued by CPS' ZPTs in the theme's
 
         This processes attributes only. Typically, these are onload, class, and
@@ -235,6 +235,13 @@ class ElementTreeEngine(BaseEngine):
         for k, v in from_cps.attrib.items():
             if k not in body.attrib:
                 body.attrib[k] = v
+        if body_content is not None:
+            # writing directly in body, meaning to override it !
+            # keeping the merged attributes, though
+            attrib = dict(body.attrib)
+            body.clear()
+            body.attrib.update(attrib)
+            self.appendFragment(body, body_content)
 
     @classmethod
     def _appendTextBefore(self, offset, target, text):
