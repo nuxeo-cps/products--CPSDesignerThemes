@@ -441,7 +441,7 @@ class ElementTreeEngine(BaseEngine):
             remove = ptl_elt.attrib.pop(REMOVE_ATTR, None)
             if not remove:
                 frame_parent.append(ptl_elt)
-            else:
+            else: # XXX couldn't this leverage insertFragment, too ?
                 if len(frame_parent):
                     # the frame parent already has children
                     last = frame_parent[-1]
@@ -453,7 +453,10 @@ class ElementTreeEngine(BaseEngine):
                 for elt in ptl_elt:
                     frame_parent.append(elt)
                 if ptl_elt.tail is not None:
-                    elt.tail += ptl_elt.tail
+                    if elt.tail is None:
+                        elt.tail = ptl_elt.tail
+                    else:
+                        elt.tail += ptl_elt.tail
 
     def protectEmptyElements(self, *tags):
         # maybe lxml can do this better
