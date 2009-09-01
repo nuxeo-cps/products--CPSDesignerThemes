@@ -166,7 +166,7 @@ class BaseEngine(object):
                return mcat(portlet.title_or_id())
 
         return ( (titleI18n(portlet),
-                  portlet.render_cache(context_obj=context))
+                  portlet.render_cache(context_obj=context).strip())
                 for portlet in portlets if portlet is not None)
 
     def renderSimpleBody(self, body_content='', head_content='',
@@ -203,6 +203,10 @@ class BaseEngine(object):
                                            context=context, request=request,
                                            i18n=self.isPortletTitleI18n(slot_elt
                                                                         ))
+            # dropping portlets with empty rendering
+            rendered = [(title, body) for title, body in rendered if body]
+            if not rendered:
+                self.removeElement(slot_elt)
             self.mergePortlets(frame_parent, frame, rendered)
 
         # isolated portlets (should appear mostly in CPSSkins exports)
@@ -297,6 +301,10 @@ class BaseEngine(object):
 
         portlets_rendered is a pair (title, body)
         frame's parent is passed because it's needed for frame repetition"""
+        raise NotImplementedError
+
+    def removeElement(self, elt):
+        """Remove an element from the tree."""
         raise NotImplementedError
 
     @classmethod

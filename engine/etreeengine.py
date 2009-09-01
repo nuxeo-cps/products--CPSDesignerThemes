@@ -105,6 +105,17 @@ class ElementTreeEngine(BaseEngine):
         BaseEngine.__init__(self, theme_base_uri=theme_base_uri,
                             page_uri=page_uri, **kw)
 
+    #
+    # Internal engine API implementation. For docstrings, see BaseEngine
+    #
+
+    def removeElement(self, elt):
+        # In plain ElementTree, one cannot access parent from element.
+        for parent in self.root.findall('.//*'):
+            if elt in parent:
+                parent.remove(elt)
+                break
+
     @classmethod
     def findByAttribute(self, elt, attr_name, value=None):
         """Shameless implementation of search by attribute.

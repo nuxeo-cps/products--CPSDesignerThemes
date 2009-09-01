@@ -61,6 +61,10 @@ class LxmlEngine(ElementTreeEngine):
     #
 
     @classmethod
+    def removeElement(self, elt):
+        elt.getparent().remove(elt)
+
+    @classmethod
     def findByAttribute(self, elt, attr_name, value=None):
         if value is None:
             # need an iterable, iterfind misses slot
