@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<object name="portlet_portal_status_message" meta_type="CPS Portlet"
+   portal_type="Custom Portlet">
+ <f id="render_method" v="generic_lib_portal_message"/>
+ <f id="slot" v="content_well"/>
+ <f id="slot_override" v="0"/>
+ <f id="visibility_range" v="0-0"/>
+</object>
