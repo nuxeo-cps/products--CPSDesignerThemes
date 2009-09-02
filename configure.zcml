@@ -5,6 +5,12 @@
 
   <!-- Engine class registration -->
   <theme:engine class=".engine.lxmlengine.TwoPhaseLxmlEngine"/>
+  <!--
+  You can configure to use another engine.
+  -->
+  <!--
+  <theme:engine class=".engine.lxmlengine.TwoPhaseElementTreeEngine"/>
+  -->
 
   <include file="browser.zcml"/>
 
