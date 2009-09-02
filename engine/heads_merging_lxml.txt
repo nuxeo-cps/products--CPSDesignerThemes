@@ -24,26 +24,65 @@ Let's define some string constants
 ... </html>""")
 
 The lxml engines let comments go through and will rewrite the URI in
-the MS IE conditional statement as well:
+the MS IE conditional statement as well. Notice moreover how the conditional
+statement got pushed at the end. This is needed by MS IE precedence rules for
+stylesheets (main use-case for conditional statements):
 >>> engine = get_engine(PageEngine, 'theme1', page='msie_head.html',
 ...  	                cps_base_url='/cps_portal/')
 >>> engine.mergeHeads(head_content=LINK, cps_global=cps_global)
->>> print engine.serialize() # TODO JS ordering as well
+>>> first = engine.serialize() 
+>>> print first
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
    <title>The title from the theme</title>
    <link href="/cps_portal/portal_themes/default/icons/cps_favicon_4.png"
          rel="icon" type="image/png" />
    <link href="/thm_base/test.css" rel="Stylesheet" type="text/css" />
-   <!--[if IE 6]>
-     <link rel="stylesheet" type="text/css" href="/thm_base/msie_thm.css"
-           media="all"/>
-   <![endif]-->
    <link rel="stylesheet" type="text/css" href="http://ex/main.css"/>
    <link href="document.css" rel="Stylesheet" type="text/css" />
    <script src="/thm_base/eye_candi.js" type="text/javascript"> </script>
    <script src="/functions.js"></script>
+   <!--[if IE 6]>
+     <link rel="stylesheet" type="text/css" href="/thm_base/msie_thm.css"
+           media="all"/>
+   <![endif]-->
   </head>
   <body>
   </body>
 </html>
+
+In case there are conditional statements in cps_global as well (systematically
+happens at this point, the latter are simply ignored (see #2019 for rationale):
+
+>>> cps_global, thm_body = PageEngine.parseHeadBody("""
+... <html xmlns="http://www.w3.org/1999/xhtml">
+...  <head>
+...    <link rel="stylesheet" type="text/css" href="http://ex/main.css"/>
+...    <script src="/functions.js"></script>
+...    <!--[if IE] <link href="msie_cps.css"> -->
+...  </head>
+...  <body></body>
+... </html>""")
+>>> engine = get_engine(PageEngine, 'theme1', page='msie_head.html',
+...  	                cps_base_url='/cps_portal/')
+>>> engine.mergeHeads(head_content=LINK, cps_global=cps_global)
+>>> print engine.serialize()
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+   <title>The title from the theme</title>
+   <link href="/cps_portal/portal_themes/default/icons/cps_favicon_4.png"
+         rel="icon" type="image/png" />
+   <link href="/thm_base/test.css" rel="Stylesheet" type="text/css" />
+   <link rel="stylesheet" type="text/css" href="http://ex/main.css"/>
+   <link href="document.css" rel="Stylesheet" type="text/css" />
+   <script src="/thm_base/eye_candi.js" type="text/javascript"> </script>
+   <script src="/functions.js"></script>
+   <!--[if IE 6]>
+     <link rel="stylesheet" type="text/css" href="/thm_base/msie_thm.css"
+           media="all"/>
+   <![endif]-->
+  </head>
+  <body>
+  </body>
+</html
+>

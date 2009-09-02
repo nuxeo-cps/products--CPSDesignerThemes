@@ -125,8 +125,8 @@ class LxmlEngine(ElementTreeEngine):
         if rewriter_func is None:
             rewriter_func=rewrite_uri
         self._rewriteElementUris(self.root, rewriter_func)
-
         for comment in self.root.iter(tag=etree.Comment):
+            
             if comment.text.startswith('[if'):
                 t = comment.text
                 # TODO: error handling
@@ -170,6 +170,16 @@ class LxmlEngine(ElementTreeEngine):
             if child.tag == '{%s}script' % NS_XHTML:
                 target.append(child) # will remove from source
 
+    @classmethod
+    def _cutMsieConditionals(self, elt):
+        """see etreeengine for API."""
+        res = etree.Element('msie-cond')
+        for comment in elt.iterchildren(tag=etree.Comment):
+            if comment.text.startswith('[if'):
+                res.append(comment)
+        if len(res):
+            return res
+
     def serialize(self):
         self.protectEmptyElements('script', 'div', 'textarea')
 
@@ -185,6 +195,15 @@ class LxmlEngine(ElementTreeEngine):
         if content:
             element.text = content
         return element
+
+    @classmethod
+    def dumpElement(self, elt):
+        tree = etree.ElementTree(elt)
+        out = StringIO()
+        tree.write(out)
+        # XXX GR couldn't find a way to change the nsmap
+        # to prevent now useless declaration
+        return out.getvalue().replace('xmlns:cps="%s"' % NS_URI, '', 1)
 
 class TwoPhaseLxmlEngine(TwoPhaseEngine, LxmlEngine):
     """Two phase version"""

@@ -302,6 +302,17 @@ class ElementTreeEngine(BaseEngine):
                 target.append(child)
                 del src[i]
 
+    @classmethod
+    def _cutMsieConditionals(self, elt, keep=False):
+        """Extract MSIE conditional statements from given element's toplevel.
+
+        Return the conditional statements, as a bunch of comments in an
+        enclosing <msie-cond> element."""
+        
+        # no support for comments parsing in ElementTree. Subclasses can do
+        # better
+        return 
+
     def mergeHeads(self, head_content='', cps_global=None):
         """Merge the contextual head_content with cps' global and the theme's.
 
@@ -316,18 +327,26 @@ class ElementTreeEngine(BaseEngine):
 
         in_theme = self.tree.find(HEAD)
         self._accumulateJavaScript(in_theme, js_acc)
+        msie_cond = self._cutMsieConditionals(in_theme)
 
         parsed = self.parseFragment(head_content, enclosing='head')
         self._accumulateJavaScript(parsed, js_acc)
+        if msie_cond is not None:
+            self._cutMsieConditionals(parsed)
 
         if cps_global is not None:
             self._accumulateJavaScript(cps_global, js_acc)
+            if msie_cond is not None:
+                self._cutMsieConditionals(cps_global)
             offset = self._mergeElement(len(in_theme), in_theme, cps_global)
 
         # the same ordering as what CPS header_lib_header does
         self._mergeElement(len(in_theme), in_theme, parsed)
 
         self._mergeElement(len(in_theme), in_theme, js_acc)
+        # Put theme MSIE conditionals at the end for precedence
+        if msie_cond is not None:
+            self._mergeElement(len(in_theme), in_theme, msie_cond)
 
     def renderMainContent(self, main_content):
         try:
