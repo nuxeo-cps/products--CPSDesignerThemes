@@ -2,7 +2,7 @@ EXPORTING FROM CPSSKINS
 =======================
 
 Important notice: in the current state of the CPSSkins exporter, you
-will still need to keep CPSSkins and its themes in your portal so that 
+will still need to keep CPSSkins and its themes in your portal so that
 the exported theme actually works. The reason becomes obvious if you
 read the section about URIs correction below.
 
@@ -13,7 +13,7 @@ You need to have the CPSDesignerThemes product in the Zope instance
 from which you plan to export the theme, BUT it musn't be active
 (cf. Disabling in INSTALL.txt to learn how to disable CPSDesignerThemes).
 
-Create an External Method at the root of the portal. 
+Create an External Method at the root of the portal.
    id : cpsskins_export
    module: CPSDesignerThemes.cpsskins_export
    function: export
@@ -71,7 +71,7 @@ the themes engine. Check that it got all of them, and correct the
 remaining ones, if any.
 
 The correction is done with the cps:// URL scheme. This is a
-CPSDesignerThemes specificity that 
+CPSDesignerThemes specificity that
 translates as the base portal URL at rendering time. You
 have to replace the base URL of your portal with cps://.
 
@@ -111,7 +111,7 @@ new slot) or after exporting (cps:slot syntax).
 In a more subtle way, it's part of CPSSkins' design to produce some
 dynamic CSS and JavaScript linked resources. These are called renderCSS and
 renderJS. Rewriting them with the cps:// URL scheme should prevent
-strange side effects. 
+strange side effects.
 
 
 
