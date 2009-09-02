@@ -1,52 +1,65 @@
+=========================
 CPSDesignerThemes INSTALL
 =========================
 
+:Author: Georges Racinet
+
+:Revision: $Id: howto-virtual_hosts.txt 52890 2008-06-27 12:58:37Z madarche $
+
+.. sectnum::    :depth: 4
+.. contents::   :depth: 4
+
 Dependencies
-------------
-   At least one of these XML processing libraries is required :
+============
 
-   cElementTree 1.0.6 or plain Elementree 1.3
+At least one of these XML processing libraries is required:
 
-       Subversion checkouts are available here:
-       http://svn.effbot.org/public/elementtree-1.3/
-       http://svn.effbot.org/public/tags/celementtree-1.0.6-20090110-preview
+- cElementTree 1.0.6 or plain Elementree 1.3
 
-       Documentation: http://effbot.org/zone/elementtree-13-intro.htm
+  Subversion checkouts are available here:
+  http://svn.effbot.org/public/elementtree-1.3/
+  http://svn.effbot.org/public/tags/celementtree-1.0.6-20090110-preview
 
-   lxml >= 2.2.2. Details:
-       Tested versions of the lxml package so far
-           - on lxml 2.1.2 (MacOSX build by plone buildout recipe) -> fails
-	   - on lxml 2.2.2 (homemade build on Ubuntu 9.04) -> works
-       The discriminating issue between those versions is the following:
-          http://osdir.com/ml/python.lxml.devel/2006-06/msg00084.html
+  Documentation: http://effbot.org/zone/elementtree-13-intro.htm
 
-       Run the unit tests to know if your version works, and don't
-       hesitate to report the results
+- lxml >= 2.2.2.
+
+  Details:
+  Tested versions of the lxml package so far
+  * on lxml 2.1.2 (MacOSX build by plone buildout recipe) -> fails
+  * on lxml 2.2.2 (homemade build on Ubuntu 9.04, Debian Etch) -> works
+  The discriminating issue between those versions is the following:
+  http://osdir.com/ml/python.lxml.devel/2006-06/msg00084.html
+
+Run the unit tests to know if your version works, and don't hesitate to report
+the results.
+
 
 Testing dependencies
---------------------
-   The tests currently try and load all possible engines. Therefore,
-   you'll need to have both (c)ElementTree and lxml to run them.
-   This could be lifted in the future.
+====================
 
-   Even if you deactivate the testing of lxml engines, lxml will still
-   be required, because it's been used by the testing infrastructure
-   itself (to check the output produced by the tested engine)
-
+The tests currently try and load all possible engines. Therefore, you'll need to
+have both (c)ElementTree and lxml to run them. This could be lifted in the
+future. Even if you deactivate the testing of lxml engines, lxml will still be
+required, because it's been used by the testing infrastructure itself (to check
+the output produced by the tested engine).
 
 Installing
-----------
-   Import the CPS Designer Themes default profile
+==========
+
+Import the CPS Designer Themes default profile
 
 Where are the themes ?
-----------------------
-  They are loaded from Products/CPSDesignerThemes/doc/sample_themes
-  To change that, go in ZMI to the .cps_themes object at the portal root
+======================
+
+They are loaded from Products/CPSDesignerThemes/doc/sample_themes
+To change that, go in ZMI to the .cps_themes object at the portal root
 
 Disabling
----------
-  In ZMI, go to the "Properties" tab of portal_skins.
-  Remove 'cps_designer_themes_compat' from the two lists of layers
+=========
+
+In ZMI, go to the "Properties" tab of portal_skins.
+Remove 'cps_designer_themes_compat' from the two lists of layers
 
 BUGS
 ====
@@ -67,3 +80,7 @@ BUGS
   with the lxml engine for CPSDesginerThemes.
 
 
+.. Local Variables:
+.. mode: rst
+.. End:
+.. vim: set filetype=rst:
