@@ -1,3 +1,14 @@
+========================
+CPSDesignerThemes README
+========================
+
+:Author: Georges Racinet
+
+:Revision: $Id: howto-virtual_hosts.txt 52890 2008-06-27 12:58:37Z madarche $
+
+.. sectnum::    :depth: 4
+.. contents::   :depth: 4
+
 
 See INSTALL.txt for installing and testing instructions
 
@@ -20,6 +31,7 @@ portal with corporate identity in a very short time.
 
 CPSDesignerThemes is provided under the GPL license by Georges Racinet
 Online resources at http://www.racinet.org/cps/designer-themes
+
 
 Basic concepts
 ==============
@@ -51,9 +63,14 @@ example: printer-friendly page)
 This concept is identical to the one from CPSSkins' Portal Box Groups
 and was actually directly taken from it.
 
-
 Stylesheets
 -----------
 
 CPS will add to the head section of the page the links to the
 stylesheets it specifically needs (e.g, document.css).
+
+
+.. Local Variables:
+.. mode: rst
+.. End:
+.. vim: set filetype=rst:
