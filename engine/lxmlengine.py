@@ -48,17 +48,13 @@ class LxmlEngine(ElementTreeEngine):
 
     XML_HEADER = '<?xml version="1.0" encoding="%s"?>' % ENCODING
 
-    def __init__(self, html_file=None, theme_base_uri='', page_uri='',
-                 cps_base_url=''):
-        self.tree = etree.parse(html_file)
-        self.root = self.tree.getroot()
-        BaseEngine.__init__(self, theme_base_uri=theme_base_uri,
-                            page_uri=page_uri, cps_base_url=cps_base_url)
-
-
     #
     # Internal engine API implementation. For docstrings, see BaseEngine
     #
+
+    def readTheme(self, html_file):
+        self.tree = etree.parse(html_file)
+        self.root = self.tree.getroot()
 
     @classmethod
     def removeElement(self, elt):
@@ -117,16 +113,12 @@ class LxmlEngine(ElementTreeEngine):
                                                   style_elt.text)
 
     def rewriteUris(self, rewriter_func=None):
-        """implementation: lxml.html has helpers for this.
-
-        For now the only difference with ET is the use of iterfind.
-        findall() on lxml returns a list. Is that really a big matter for perf?
+        """sadly, helpers from lxml.html can't be used.
         """
         if rewriter_func is None:
             rewriter_func=rewrite_uri
         self._rewriteElementUris(self.root, rewriter_func)
         for comment in self.root.iter(tag=etree.Comment):
-            
             if comment.text.startswith('[if'):
                 t = comment.text
                 # TODO: error handling
@@ -136,6 +128,8 @@ class LxmlEngine(ElementTreeEngine):
                 elt = self.parseFragment(fragment, enclosing='msie-cond')
                 self._rewriteElementUris(elt, rewriter_func)
                 s = elt.text
+                if s is None:
+                    s = ''
                 for e in elt:
                     s += etree.tostring(e).replace('xmlns="%s"' % NS_XHTML, '')
                     if e.tail:

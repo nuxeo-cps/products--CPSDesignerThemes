@@ -16,9 +16,9 @@
 # 02111-1307, USA.
 #
 # $Id$
-from etreeengine import TwoPhaseElementTreeEngine
+from lxmlengine import TwoPhaseLxmlEngine
 
-engine_class = TwoPhaseElementTreeEngine
+engine_class = TwoPhaseLxmlEngine
 
 def engineClassDirective(context, class_):
     global engine_class

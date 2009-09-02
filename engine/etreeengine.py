@@ -97,13 +97,10 @@ class ElementTreeEngine(BaseEngine):
 
     XML_HEADER = '<?xml version="1.0" encoding="%s"?>' % ENCODING
 
-    def __init__(self, html_file=None, theme_base_uri='', page_uri='', **kw):
-        self.logger.debug("Engine : %s", self.__class__)
+    def readTheme(self, html_file):
+        """Parse the theme and inits the 'tree' and 'root' attributes"""
         self.tree = ET.parse(html_file)
-
         self.root = self.tree.getroot()
-        BaseEngine.__init__(self, theme_base_uri=theme_base_uri,
-                            page_uri=page_uri, **kw)
 
     #
     # Internal engine API implementation. For docstrings, see BaseEngine
@@ -211,7 +208,9 @@ class ElementTreeEngine(BaseEngine):
         # entity declarations and voodoo to make it work
         if not C_ELEMENT_TREE:
             parser.entity = HTML_ENTITIES # avoid copying all over
-            parser.parser.UseForeignDTD() # unlock entity problems (pfeew)
+            # unlock entity problems (pfeew)
+            # important: relies on the provided patch for celementree
+            parser.parser.UseForeignDTD()
         else:
             parser.entity.update(HTML_ENTITIES)
 

@@ -78,12 +78,15 @@ class BaseEngine(object):
 
     XML_HEADER = '<?xml version="1.0" encoding="%s"?>' % ENCODING
 
-    def __init__(self, theme_base_uri='', page_uri='', cps_base_url=None):
+    def __init__(self, html_file=None, theme_base_uri='', page_uri='',
+                 cps_base_url=None):
         """Subclasses accept another argument: theme xml source.
 
         When we'll cache xml parsing and URI rewriting, this constructor will
         take another argument, namely the preprocessed XML tree from cache
         """
+        self.logger.debug("Engine : %s", self.__class__)
+        self.readTheme(html_file)
         self.theme_base_uri = theme_base_uri
         self.page_uri = page_uri
         self.cps_base_url = cps_base_url
@@ -225,6 +228,11 @@ class BaseEngine(object):
                         cps_global=head_element)
 
         return self.serialize()
+
+    def readTheme(self, html_file):
+        """Read the theme page from an open file.
+        Does no actual treatment, in particular no Uri rewriting."""
+        raise NotImplementedError
 
     def rewriteUris(self, rewriter_func=None):
         """Rewrite all URIs in the meaningful elements.
