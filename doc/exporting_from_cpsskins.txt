@@ -10,7 +10,8 @@ Preparations
 ------------
 
 You need to have the CPSDesignerThemes product in the Zope instance
-from which you plan to export the theme, BUT it musn't be active.
+from which you plan to export the theme, BUT it musn't be active
+(cf. Disabling in INSTALL.txt to learn how to disable CPSDesignerThemes).
 
 Create an External Method at the root of the portal. 
    id : cpsskins_export
