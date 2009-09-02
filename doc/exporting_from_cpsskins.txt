@@ -6,6 +6,8 @@ will still need to keep CPSSkins and its themes in your portal so that
 the exported theme actually works. The reason becomes obvious if you
 read the section about URIs correction below.
 
+Dependencies: CPSSkins >= 2.16.0
+
 Preparations
 ------------
 
