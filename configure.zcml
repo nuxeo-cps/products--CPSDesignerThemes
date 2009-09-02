@@ -9,7 +9,7 @@
   You can configure to use another engine.
   -->
   <!--
-  <theme:engine class=".engine.lxmlengine.TwoPhaseElementTreeEngine"/>
+  <theme:engine class=".engine.etreeengine.TwoPhaseElementTreeEngine"/>
   -->
 
   <include file="browser.zcml"/>
