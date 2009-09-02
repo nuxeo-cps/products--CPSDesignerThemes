@@ -84,5 +84,5 @@ happens at this point, the latter are simply ignored (see #2019 for rationale):
   </head>
   <body>
   </body>
-</html
->
+</html>
+

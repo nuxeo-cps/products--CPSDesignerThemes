@@ -122,13 +122,25 @@ class TestLxmlEngine(TestElementTreeEngine):
     EngineClass = LxmlEngine
 
     def test_entities(self):
-        """lxml has no support for entities in the absence of a DTD.
+        """DISABLING:
 
-        partially serialized content with the DTD could be a problem.
+        lxml has no support for entities in the absence of a DTD.
+        serialized fragments with the DTD could be a problem.
+
         Two-phase engines don't mind, and the most critical source of entities
         is the dynamical content.
+
+        TODO it seems that serializing a tree dumps the DTD,
+        but that serializing its root does not, so that it wouldn't be a
+        problem in theory. Now a strange thing happens with XMLParser API
+        parsing a whole (DTD + fragment) works and lets the entity through,
+        using feed() line by line does not. This is so erratic that I fear it
+        to be system-dependent.
         """
 
+    def test_entities_in_theme(self):
+        """Not supported by ElementTree based engines yet."""
+        engine = self.getEngine('theme1', 'entities.html')
 
 class TestTwoPhaseElementTreeEngine(TestElementTreeEngine):
 

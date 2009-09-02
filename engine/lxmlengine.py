@@ -53,7 +53,10 @@ class LxmlEngine(ElementTreeEngine):
     #
 
     def readTheme(self, html_file):
-        self.tree = etree.parse(html_file)
+        # resolve_entites=False lets entities go through without trying
+        # to read the DTD... unless there's no DTD !
+        parser = etree.XMLParser(resolve_entities=False)
+        self.tree = etree.parse(html_file, parser)
         self.root = self.tree.getroot()
 
     @classmethod
