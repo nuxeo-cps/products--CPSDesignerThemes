@@ -20,9 +20,13 @@ At least one of these XML processing libraries is required:
 
   Details:
   Tested versions of the lxml package so far
+
   * on lxml 2.2.2 (homemade build on Ubuntu 9.04, Debian Etch, Lenny) -> works
   * on lxml 2.1.2 (MacOSX build by Plone buildout recipe) -> fails
-  The discriminating issue between those versions is the following:
+
+  The discriminating issue between those versions looks like the
+  following lxml 1.0 bug:
+
   http://osdir.com/ml/python.lxml.devel/2006-06/msg00084.html
 
 - cElementTree >= 1.0.6 or plain Elementree >= 1.3
