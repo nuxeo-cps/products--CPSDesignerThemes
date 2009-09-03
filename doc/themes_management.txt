@@ -68,14 +68,14 @@ Example:
 
  To use ``cps3_4`` you have to:
 
-   - go to the ``.root_themes`` object and change the default theme
+   - go to the ``.cps_themes`` object and change the default theme
      to ``cps3_4``.
    - go to the Method Themes of ``portal_themes`` and change the
      theme for the ``index_html`` method to ``cps3_4`` (you'll get a
      warning that cps3_4 isn't a CPSSkins theme).
 
  Without the second step, the portal's homepage would still be the one
- from the ``default`` themes.
+ from the ``default`` theme.
 
 .. Local Variables:
 .. mode: rst
