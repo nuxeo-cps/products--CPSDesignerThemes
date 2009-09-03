@@ -29,6 +29,15 @@ At least one of these XML processing libraries is required:
 
   http://osdir.com/ml/python.lxml.devel/2006-06/msg00084.html
 
+  lxml 2.2.2 is easy to build on Debian Lenny::
+
+    $ wget http://codespeak.net/lxml/lxml-2.2.2.tgz
+    $ tar xvzf lxml-2.2.2.tgz
+    $ cd lxml-2.2.2
+    $ aptitude build-dep python-lxml
+    $ python2.4 setup.py build
+    $ sudo python2.4 setup.py install
+
 - cElementTree >= 1.0.6 or plain Elementree >= 1.3
 
   Subversion checkouts are available here:
