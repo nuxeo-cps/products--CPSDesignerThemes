@@ -13,8 +13,8 @@ Engines for CPSDesignerThemes
   functionalities that don't involve any actual XML or HTML processing
   are provided by the engine base class (engine.base.BaseEngine)
 
-  Why several engines
-  -------------------
+  Why several engines ?
+  ---------------------
 
   Because XML processing libraries have different properties that
   might suit differently a given installation. Also, some builds are
@@ -23,11 +23,24 @@ Engines for CPSDesignerThemes
   On a design note, this made room to make a reference
   implementation, while working on improvements.
 
+  Developers and integrators can also make their own engine, or
+  modify the existing ones by subclassing, e.g, to
+  circumvent bugs, In the latter case, they'd enjoy their improvements
+  right away, since they don't depend on CPSDesignerThemes
+  release cycle for this. That being said, contributions are
+  naturally very much welcomed.
+
   Overriding the default engine
   -----------------------------
 
   Check the "<theme:engine>" directive in CPSDesignerThemes'
   configure.zcml and override it in your product (in your overrides.zcml).
+
+  Why doing not doing this in ZMI ? For performance reasons (the
+  proper class gets imported at startup), and also because the themes
+  container management pages should stay very simple. Also, installing
+  the corresponding library and tweaking it is a system
+  administrator task.
 
   Available engines
   -----------------
@@ -37,7 +50,7 @@ Engines for CPSDesignerThemes
 
     - engine.etreeengine.ElementTreeEngine: based on the ElementTree package.
       Expects all dynamical content from CPS to be XML valid
-    - engine.lxmlengine.Lxmlengine.lxmlengine: based on the lxml package.
+    - engine.lxmlengine.Lxmlengine: based on the lxml package.
 
   There are two-phase variants. They use XML processing first, and
   then include dynamical content coming from CPS by a pure string

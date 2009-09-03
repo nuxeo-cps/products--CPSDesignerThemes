@@ -1,0 +1,83 @@
+=================
+THEMES MANAGEMENT
+=================
+
+:Author: Georges Racinet
+
+:Revision: $Id: INSTALL.txt 53827 2009-09-02 21:25:35Z gracinet $
+
+.. sectnum::    :depth: 4
+.. contents::   :depth: 4
+
+Storage
+=======
+
+A theme is pretty much a static website, the only difference being that
+html files are being written with special attributes to control
+inclusion of dynamical content.
+
+Themes are simply stored as directories on the Zope instance file
+system. These are in turn all placed in the same themes directory.
+The path to this themes directory can be configured in ZMI, on the
+``.cps_themes`` object at the root of portal.
+It is local to the Zope Instance, for security reasons,
+but symbolic links are followed.
+the system administrator can actually put the themes directory
+anywhere and make a link in the Zope instance.
+
+If you have a ZEO setup, then the themes should be deployed on
+all clients machines. The themes directory can be shared among
+instances on the same server. Symbolic links are supported.
+
+
+Naming conventions
+==================
+
+ - A theme name is the name of the corresponding directory on the file system.
+ - A page name corresponds to a file in the theme directory, with the
+   html extension.
+
+Example: the ``Front`` page of the ``cps3_4`` theme is located in
+``<THEMES_DIRECTORY>/cps3_4/Front.html``
+
+Negociation
+===========
+
+ Negociation is the action of choosing the proper theme and page for a
+ given request.
+
+ For the time being, CPSDesignerThemes leverages the CPSSkins
+ negociator. In particular, Method Themes and local themes are
+ supported. Check CPSSkins documentation for more details, keeping in
+ mind that the theme and page concepts and names can be taken in the
+ sense of CPSDesignerTHemes.
+
+ The default theme and page are defined on the ``.cps_themes`` object.
+
+Example:
+--------
+
+ The CPS 3.4 home page is assigned by CPSSkins to the ``Front`` page
+ of the ``default`` theme. This is done in ``portal_themes``, on
+ the "Method themes" tab.
+
+ CPSDesignerThemes comes with two themes:
+
+   - ``default``: ugly demonstration of capabilities, almost unusable.
+   - ``cps3_4``: CPS 3.4 classical theme, exported from CPSSkins.
+
+ To use ``cps3_4`` you have to:
+
+   - go to the ``.root_themes`` object and change the default theme
+     to ``cps3_4``.
+   - go to the Method Themes of ``portal_themes`` and change the
+     theme for the ``index_html`` method to ``cps3_4`` (you'll get a
+     warning that cps3_4 isn't a CPSSkins theme).
+
+ Without the second step, the portal's homepage would still be the one
+ from the ``default`` themes.
+
+.. Local Variables:
+.. mode: rst
+.. End:
+.. vim: set filetype=rst:

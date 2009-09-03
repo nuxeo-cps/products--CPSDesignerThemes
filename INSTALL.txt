@@ -31,8 +31,9 @@ At least one of these XML processing libraries is required:
 
   Documentation: http://effbot.org/zone/elementtree-13-intro.htm
 
-  To plug one of the ElementTree based engines, you have to edit
-  ```configure.zcml```. Note that the default lxml based one
+  To run on (c)ElementTree, you have to edit
+  ```configure.zcml```. See ```doc/engines.txt``` for details.
+  Note that the default lxml-based engine
   is currently the most efficient and robust available.
 
 Run the unit tests (see below) to know if your version works, and
@@ -56,8 +57,10 @@ Import the CPS Designer Themes default profile
 Where are the themes ?
 ======================
 
-They are loaded from Products/CPSDesignerThemes/doc/sample_themes
-To change that, go in ZMI to the .cps_themes object at the portal root
+The default setting is to load them from
+Products/CPSDesignerThemes/doc/sample_themes
+Check ```doc/themes_management.txt``` to learn in particular how to
+configure that.
 
 Disabling
 =========
