@@ -73,7 +73,7 @@ class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
         """Pure indirection to CPSSkins."""
         thmtool = getToolByName(self.context, 'portal_themes')
         theme, page = thmtool.getRequestedThemeAndPageName(
-            context_obj=self.context)
+            context_obj=self.context, no_defaults=True)
         logger.debug('CPSSkinsThemeNegociator: requesting (%s,%s)', theme, page)
         return theme, page
 
