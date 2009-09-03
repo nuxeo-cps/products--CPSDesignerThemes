@@ -56,8 +56,8 @@ Negociation
 
  The default theme and page are defined on the ``.cps_themes`` object.
 
-Example:
---------
+Example: using the CPS 3.4 exported theme
+-----------------------------------------
 
  The CPS 3.4 home page is assigned by CPSSkins to the ``Front`` page
  of the ``default`` theme. This is done in ``portal_themes``, on
@@ -78,6 +78,25 @@ Example:
 
  Without the second step, the portal's homepage would still be the one
  from the ``default`` theme.
+
+ Now that ``cps3_4`` is hooked, there is a remaining action to be done
+ to actually use it. Indeed, it relies on a few dynamical stylesheet
+ and images that are still loaded from the CPSSkins theme. Here's an extract
+ from the current ``index.html``:
+
+    <img src="cps://portal_themes/cps3_4/Default/header/cell_header_container/portal_box_logo/image/index_html"
+    width="180" height="90" alt="Logo" />
+
+ In short, you need to have a copy of the CPSSkins 3.4 default theme in
+ ``portal_themes``, with id ``cps3_4``.
+
+ This is typical of exported themes (see the documentation about the
+ export process). In the future, we'll try and clean up links that
+ should, like this one, become static.
+
+ In the meanwhile, on a CPSDefault bare installation, you'll have to
+ rename or copy ``portal_themes/default`` into ``portal_themes/cps3_4`` for the
+ exported theme to work.
 
 .. Local Variables:
 .. mode: rst
