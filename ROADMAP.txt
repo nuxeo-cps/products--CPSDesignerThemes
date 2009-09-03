@@ -1,105 +1,112 @@
+=========================
 CPSDesignerThemes Roadmap
 =========================
 
-    This is a draft. This roadmap rushes towards isofunctionality with
-    CPSSkins, so that the product can be used and tested as a
-    replacement ASAP. What happens after 0.4 is subject to discussion
-    and can be redefined
+:Author: Georges Racinet
 
-    Version 0.1
-    -----------
+:Revision: $Id$
+
+.. sectnum::    :depth: 4
+.. contents::   :depth: 4
+
+
+This is a draft. This roadmap rushes towards isofunctionality with
+CPSSkins, so that the product can be used and tested as a
+replacement ASAP. What happens after 0.4 is subject to discussion
+and can be redefined
+
+Early versions
+==============
+
+Version 0.1
+-----------
 
      - Compatibility mode for standard CPS pages, i.e., based on main_template
      - File system theme container (reads a configurable path,
-    relative to INSTANCE_HOME)
+       relative to INSTANCE_HOME)
      - No theme and page negociation (container's default/index.html)
      - (c)ElementTree engine
 
-    Version 0.2
-    -----------
+Version 0.2
+-----------
 
+     - Included in CPS-3-full bundle.
      - Documentation for CPSDesignerThemes developers
      - engine refactoring and lxml engine
      - CPSSkins themes conversion
      - Ships with exported version of CPS 3.4 default theme
-     - minimal negociation to render a bare CPS Default site (e.g.,
-       front page). Hardcoded tolerated.
+     - theme and page negociation
 
 
-    Version 0.3 (quality milestone)
-    -----------
+Version 0.3 (quality milestone)
+-------------------------------
 
      - Stabilisation of engine API and extensive unit testing.
-     - Effort towards leverage of Zope component architecture where
-    relevant, with future releases in mind
+     - Overall robustness.
+     - Effort towards leverage of Zope component architecture where relevant,
+       with future releases in mind
      - documentation for designers
      - Early adopters can start prototyping projects with the product
 
-    Version 0.4
-    -----------
+Version 0.4
+-----------
 
-     - Theme and page negociation, similar to CPSSkins'
+     - CPSDesignerThemes based portlet editor.
+     - No more dependencies on CPSSkins. Can run without the
+       ``portal_themes`` tool, but can also coexist.
 
-    Version 0.5 (quality milestone)
-    -------------------------------
+Version 0.5 (quality milestone)
+-------------------------------
 
      - Documentation for integrators, notably upgrade scenarios from CPSSkins
      - Suitable for pre-production by early adopters
      - Full iso-functionality with themes exported from CPSSkins.
-     - CPSSkins still necessary for the portlets editor
 
-    Version 0.5
-    -----------
+Version 0.6
+-----------
 
      - ZODB local themes with zip upload
-     - much care to test that reverse proxying down inside the portal
-     works
+     - much care to test that reverse proxying down inside the portal works
      - HTTP header negociation
 
-    Version 0.6
-    -----------
+From 0.6 on, as much point releases as necessary to reach
 
-     - Portlets editor can work with CPSDesignerThemes
-     - Inclusion in the CPS-3-full bundle (trunk)
-
-As much point releases as necessary to reach
-
-    Version 1.0 (production ready)
-    -------------------------------
+Version 1.0 (production ready)
+==============================
 
      - No feature
      - Documentation effort (online?)
      - Inclusion in the CPS-3-full bundle (3.4 branch)
 
-    Version 1.1 (CPSDefault integration for 3.5)
-    --------------------------------------------
-    These are actually CPSDefault features, but that of course means that
-    CPSDesignerThemes is ready for them
+Version 1.1 (CPSDefault integration for 3.5)
+--------------------------------------------
+These are actually CPSDefault features, but that of course means that
+CPSDesignerThemes is ready for them
 
      - Conversion from CPSSkins themes as an upgrade step
      - CPSDefault's base profile switches to CPSDesignerThemes for
-    next 3.5 release
+       next 3.5 release
      - Ships with an original CPS 3.5 theme
      - CPSDesignerThemes stays optional in the 3.4 branch
 
-     Version 1.2
-     -----------
-       Optimization round-up. This is postponed so late because early
+Version 1.2
+-----------
+     Optimization round-up. This is postponed so late because early
      tests suggest that an lxml based themes engine will run in epsilon time
      compared to the rest of CPS.
 
-    Version 2.0
-    -----------
+Version 2.0
+===========
      - Native hooking system (maybe something similar to <browser:page> ?)
      - Cleanup of as much Zope 2 idiomatics as possible in favor of
-    Zope 3 / Five style
+       Zope 3 / Five style
      - FTP access for ZODB local themes
      - UI improvements (loading by 3rd party URL, easy preview links...)
      - Online themes bank ?
 
 
 Open ideas /questions
----------------------
+======================
 
      - i18n support (for the themes themselves), could be done in a
        static way with index_fr.html convention, meaning that
@@ -109,3 +116,7 @@ Open ideas /questions
      - do we need a custom validator for the theme itself ? Is that even
        possible for additional namespace to declare new attributes on XHTML ?
 
+.. Local Variables:
+.. mode: rst
+.. End:
+.. vim: set filetype=rst:
