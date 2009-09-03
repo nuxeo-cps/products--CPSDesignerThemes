@@ -12,6 +12,8 @@ CPSDesignerThemes INSTALL
 Dependencies
 ============
 
+CPSSkins >= 2.16.1
+
 At least one of these XML processing libraries is required:
 
 - lxml >= 2.2.2 (default)
@@ -26,13 +28,15 @@ At least one of these XML processing libraries is required:
 - cElementTree >= 1.0.6 or plain Elementree >= 1.3
 
   Subversion checkouts are available here:
+
   http://svn.effbot.org/public/elementtree-1.3/
+
   http://svn.effbot.org/public/tags/celementtree-1.0.6-20090110-preview
 
   Documentation: http://effbot.org/zone/elementtree-13-intro.htm
 
   To run on (c)ElementTree, you have to edit
-  ```configure.zcml```. See ```doc/engines.txt``` for details.
+  ``configure.zcml``. See ``doc/engines.txt`` for details.
   Note that the default lxml-based engine
   is currently the most efficient and robust available.
 
@@ -59,14 +63,14 @@ Where are the themes ?
 
 The default setting is to load them from
 Products/CPSDesignerThemes/doc/sample_themes
-Check ```doc/themes_management.txt``` to learn in particular how to
-configure that.
+
+Check ``doc/themes_management.txt`` for configuration, and more.
 
 Disabling
 =========
 
 In ZMI, go to the "Properties" tab of portal_skins.
-Remove 'cps_designer_themes_compat' from the two lists of layers
+Remove ``cps_designer_themes_compat`` from the two lists of layers
 
 BUGS
 ====

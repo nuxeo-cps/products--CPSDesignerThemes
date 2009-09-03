@@ -52,6 +52,8 @@ Negociation
  mind that the theme and page concepts and names can be taken in the
  sense of CPSDesignerTHemes.
 
+ Warning: this requires CPSSkins >= 2.16.1
+
  The default theme and page are defined on the ``.cps_themes`` object.
 
 Example:
