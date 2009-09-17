@@ -29,12 +29,20 @@ At least one of these XML processing libraries is required:
 
   http://osdir.com/ml/python.lxml.devel/2006-06/msg00084.html
 
-  lxml 2.2.2 is easy to build on Debian Lenny::
+  lxml 2.2.2 is easy to install on Debian Lenny. There are at least two possible
+  ways to install lxml, A (the easiest) and B. 
+
+  A - Using easy_install ::
+
+    $ sudo aptitude install python-setuptools
+    $ sudo easy_install-2.4 lxml
+
+  B - Without using easy_install ::
 
     $ wget http://codespeak.net/lxml/lxml-2.2.2.tgz
     $ tar xvzf lxml-2.2.2.tgz
     $ cd lxml-2.2.2
-    $ aptitude build-dep python-lxml
+    $ sudo aptitude build-dep python-lxml
     $ python2.4 setup.py build
     $ sudo python2.4 setup.py install
 
