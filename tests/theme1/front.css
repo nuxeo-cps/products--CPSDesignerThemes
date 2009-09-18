@@ -5,3 +5,7 @@
 .major div {
   background: url(images/back.png);
 }
+
+.dynamical td {
+  background: url(cps://dyn.jpg);
+}

@@ -19,6 +19,7 @@
 
 import unittest
 from Testing.ZopeTestCase import ZopeTestCase
+import Acquisition
 from ZPublisher.HTTPResponse import HTTPResponse
 from Products.CPSDesignerThemes.themecontainer import FSThemeContainer
 
@@ -29,6 +30,11 @@ class LoggerResponse(HTTPResponse):
     def write(self, s):
         self.out_data += s
 
+class FakeUrlTool(Acquisition.Implicit):
+
+    def getBaseUrl(self):
+        return '/cps_base_url/'
+
 class TestFsContainer(ZopeTestCase):
 
     def afterSetUp(self):
@@ -36,6 +42,7 @@ class TestFsContainer(ZopeTestCase):
         cont.manage_changeProperties(
             relative_path='Products/CPSDesignerThemes/tests')
         self.folder._setObject(cont.getId(), cont)
+        self.folder.portal_url = FakeUrlTool()
         self.container = self.folder.container
         self.container_path = self.container.absolute_url_path()
         self.app.REQUEST.RESPONSE = LoggerResponse()
@@ -55,6 +62,9 @@ class TestFsContainer(ZopeTestCase):
         self.assertEquals(
             res[5].strip(),
             'background: url(%s/theme1/images/back.png);' % self.container_path)
+        self.assertEquals(
+            res[9].strip(),
+            'background: url(/cps_base_url/dyn.jpg);')
 
     def testCssUriRewriteDeep(self):
         sheet = self.container['theme1']['style']['top.css']

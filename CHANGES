@@ -6,7 +6,8 @@ New features
 -
 Bug fixes
 ~~~~~~~~~
--
+- #2028: cps:// URL scheme now works in stylesheets
+- INSTALL.txt doc now explains how to install lxml through easy_install.
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
-- INSTALL.txt doc now explains how to install lxml through easy_install.
+- 

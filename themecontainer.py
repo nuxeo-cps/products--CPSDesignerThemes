@@ -32,6 +32,7 @@ from engine import get_engine_class
 from interfaces import IThemeContainer
 
 from Products.CMFCore.utils import SimpleItemWithProperties
+from Products.CMFCore.utils import getToolByName
 from Products.CMFCore.FSImage import FSImage
 from Products.CPSUtil.PropertiesPostProcessor import PropertiesPostProcessor
 
@@ -91,11 +92,13 @@ class StyleSheet(File):
     def rewriteUrl(self, match_obj):
         return 'url(%s)' % rewrite_uri(self.theme_base_uri,
                                          self.relative_uri,
+                                         cps_base_url=self.cps_base_url,
                                          uri=match_obj.group(1))
 
-    def setUris(self, theme_base='/', relative='main.css'):
+    def setUris(self, theme_base='/', relative='main.css', cps_base_url=None):
         self.relative_uri = relative
         self.theme_base_uri = theme_base
+        self.cps_base_url = cps_base_url
 
     security.declarePublic('index_html')
     def index_html(self, REQUEST, RESPONSE):
@@ -115,10 +118,12 @@ class ResourceTraverser(Acquisition.Explicit):
 
     logger = logging.getLogger('Products.CPSDesignerThemes.themecontainer.ResourceTraverser')
 
-    def __init__(self, path, theme_base_uri='/', relative_uri='/'):
+    def __init__(self, path, theme_base_uri='/', relative_uri='/',
+                 cps_base_url=None):
         self.path = path
         self.theme_base_uri = theme_base_uri
         self.relative_uri=relative_uri
+        self.cps_base_url = cps_base_url
 
     @classmethod
     def isThemeContainer(self):
@@ -130,12 +135,15 @@ class ResourceTraverser(Acquisition.Explicit):
         if os.path.isdir(path):
             # The first traversal from container is the root of theme
             if self.isThemeContainer():
+                cps_base_url = getToolByName(self, 'portal_url').getBaseUrl()
                 return ResourceTraverser(
                     path,
+                    cps_base_url=cps_base_url,
                     theme_base_uri='/'.join((self.getBaseUri(), name)),
                     relative_uri='')
             # general case
             return ResourceTraverser(path, theme_base_uri=self.theme_base_uri,
+                                     cps_base_url=self.cps_base_url,
                                      relative_uri='/'.join((self.relative_uri,
                                                             name)))
         elif os.path.isfile(path):
@@ -150,6 +158,7 @@ class ResourceTraverser(Acquisition.Explicit):
                 f = open(path, 'r')
                 ss = StyleSheet(name, name, f)
                 ss.setUris(theme_base=self.theme_base_uri,
+                           cps_base_url=self.cps_base_url,
                            relative='/'.join((self.relative_uri, name)))
                 return ss
             else:
