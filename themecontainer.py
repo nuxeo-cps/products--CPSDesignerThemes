@@ -234,8 +234,8 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
             if os.path.exists(page_path):
                 break
         else:
-            return ValueError("Could not find suitables themes and page for"
-                              "the required %s and %s" % (theme, page))
+            raise ValueError("Could not find suitables themes and page for"
+                              " the required %s and %s" % (theme, page))
 
         PageEngine = get_engine_class()
         return PageEngine(html_file=page_path,
