@@ -6,6 +6,7 @@ New features
 -
 Bug fixes
 ~~~~~~~~~
+- #2031: wrong ordering of javascript inclusions
 - #2030: bad exception raising if theme page not found
 - #2028: cps:// URL scheme now works in stylesheets
 - INSTALL.txt doc now explains how to install lxml through easy_install.

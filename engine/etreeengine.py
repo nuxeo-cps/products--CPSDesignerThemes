@@ -313,31 +313,23 @@ class ElementTreeEngine(BaseEngine):
         return 
 
     def mergeHeads(self, head_content='', cps_global=None):
-        """Merge the contextual head_content with cps' global and the theme's.
-
-        For now, this is stupid concatenation.
-        TODO: this should:
-          - respect a natural ordering, and in particular put all
-            JS scripts towards the end,
-          - actually merge cps_global with the theme's head (we should first
-            define a policy about this).
-        """
+        """See base class for docstring."""
         js_acc = self.makeSimpleElement('js-acc')
 
         in_theme = self.tree.find(HEAD)
         self._accumulateJavaScript(in_theme, js_acc)
         msie_cond = self._cutMsieConditionals(in_theme)
 
-        parsed = self.parseFragment(head_content, enclosing='head')
-        self._accumulateJavaScript(parsed, js_acc)
-        if msie_cond is not None:
-            self._cutMsieConditionals(parsed)
-
         if cps_global is not None:
             self._accumulateJavaScript(cps_global, js_acc)
             if msie_cond is not None:
                 self._cutMsieConditionals(cps_global)
             offset = self._mergeElement(len(in_theme), in_theme, cps_global)
+
+        parsed = self.parseFragment(head_content, enclosing='head')
+        self._accumulateJavaScript(parsed, js_acc)
+        if msie_cond is not None:
+            self._cutMsieConditionals(parsed)
 
         # the same ordering as what CPS header_lib_header does
         self._mergeElement(len(in_theme), in_theme, parsed)

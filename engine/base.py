@@ -276,12 +276,13 @@ class BaseEngine(object):
         head_content would be what comes from the slot filling
         while cps_global would be what comes from the main_template
 
-        For now, this is stupid concatenation.
-        TODO: this should:
-          - respect a natural ordering, and in particular put all
-            JS scripts towards the end,
-          - actually merge cps_global with the theme's head (we should first
-            define a policy about this).
+        The base logic is that the theme's <head> elements go first,
+        then cps_global and finally head_content.
+        It is wishable (not mandatory) to put scripts inclusions at the end,
+        but inner ordering of them must be preserved.
+
+        There are special rules for MS IE conditional statements (if possible)
+        <title> element, etc.
         """
         raise NotImplementedError
 
