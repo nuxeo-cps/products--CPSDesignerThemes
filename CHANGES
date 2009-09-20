@@ -6,6 +6,7 @@ New features
 -
 Bug fixes
 ~~~~~~~~~
+- #2032: removal of main content element if main content is empty
 - #2031: wrong ordering of javascript inclusions
 - #2030: bad exception raising if theme page not found
 - #2028: cps:// URL scheme now works in stylesheets

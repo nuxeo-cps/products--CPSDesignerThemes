@@ -345,6 +345,10 @@ class ElementTreeEngine(BaseEngine):
         except StopIteration:
             return
 
+        if not main_content:
+            self.removeElement(main_elt)
+            return
+
         # cleaning up
         del main_elt.attrib[MAIN_CONTENT_ATTR]
         for child in main_elt:
