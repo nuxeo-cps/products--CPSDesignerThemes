@@ -32,12 +32,6 @@ from Products.CPSDesignerThemes.utils import rewrite_uri
 METAL_HEAD_SLOTS = ( # the passed slots that end up in the <head> element
     'base', 'head_slot', 'style_slot', 'javascript_head_slot')
 
-LINK_HTML_DOCUMENTS = {'img' : 'src',
-                       'link'    : 'href',
-                       'object'  : 'data',
-                       'param' : 'value',
-                       }
-
 class MainContentPortlet(object):
     """Simulates the Main Content Portlet for CPSSkins exported themes."""
 
@@ -313,7 +307,13 @@ class BaseEngine(object):
         raise NotImplementedError
 
     def removeElement(self, elt):
-        """Remove an element from the tree."""
+        """Remove an element from the tree.
+
+        subclasses should try and avoid using this method. The implementation
+        might indeed be expensive because of lack of context about the element.
+        In cases where a "parent" is known, there is usually
+        a natural and fast way of doing this.
+        """
         raise NotImplementedError
 
     @classmethod
