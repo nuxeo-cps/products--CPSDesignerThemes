@@ -19,6 +19,7 @@
 
 import os
 import logging
+import types
 
 from zope.interface import implements
 from zope.component import adapts
@@ -60,7 +61,10 @@ class RootContainerFinder:
         return containers[0]
 
 class FixedFSThemeEngine(RootContainerFinder, EngineAdapter):
+    """For unit tests only"""
+
     def getEngine(self):
+        """XXX this method is never called and would not work. Leftover ?"""
         theme, page = self.getRequestedThemeAndPageName()
         return self.lookupContainer().getPageEngine(
             'default', 'index', cps_base_url=self.cps_base_url, fallback=True)
@@ -69,7 +73,7 @@ class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
     """Full negociator that applies CPSSkins rules and uses a root container.
     """
 
-    def getRequestedThemeAndPageName(self):
+    def getCPSSkinsThemeAndPageName(self):
         """Pure indirection to CPSSkins."""
         thmtool = getToolByName(self.context, 'portal_themes')
         theme, page = thmtool.getRequestedThemeAndPageName(
@@ -79,7 +83,70 @@ class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
 
     def getEngine(self):
         """The fallback is up to the container."""
-        theme, page = self.getRequestedThemeAndPageName()
+        theme, page = self.getCPSSkinsThemeAndPageName()
         return self.lookupContainer().getPageEngine(
             theme, page, cps_base_url=self.cps_base_url, fallback=True)
+
+class CherryPickingCPSSkinsThemeNegociator(CPSSkinsThemeNegociator):
+    """CPSSKins negociation, overridden by a property on context object only.
+
+    TODO Initiate RST doc about negociators hooking and predefined negociators.
+
+    This negociator first reads the property '.cps_designer_theme' on the
+    context object *only*. No acquisition or algorithm to apply from an
+    ancestor like CPSSkins does.
+
+    The content of the property looks like this:
+       <published method>:<theme>+<page>
+    Example:
+       folder_view:special+front
+
+    If the property doesn't exist, it falls back on what CPSSkinsThemeNegociator
+    does.
+
+    Use cases : very simple situations where the fact that CPSSkins lookup is
+    based on "bottom most folder" goes in the way.
+
+       - applying a given theme page on a single document, different from
+       its parents' or its siblings:
+           'cpsdocument_view:special+unique' on that document only.
+           (CPSSkins negociation would apply on parent and siblings unless they
+           are themselves tuned)
+       - applying a given theme page on the folder view, but not on its children
+         folder_view:special+front on the folder only.
+         This is a local version of CPSSKins' "Method Themes"
+    """
+
+    def getRequestPublished(self):
+        # borrowed from CPSPortlets
+        published_obj = self.request.get('PUBLISHED')
+        if published_obj is None:
+            return
+        try:
+            if isinstance(published_obj, types.MethodType):
+                # z3 view?
+                if published_obj.im_func.func_name == 'view_html':
+                    # Convention for default view method name
+                    # XXX Could check request['URL'] too
+                    ob = request['PARENTS'][1]
+                    return ob.getTypeInfo().queryMethodID('view', '')
+            else:
+                return published_obj.getId()
+        except AttributeError:
+            pass
+
+    def getEngine(self):
+        prop = self.context.getProperty('.cps_designer_theme', None)
+        if prop:
+            published, themepage = prop.split(':')
+            published = published.strip()
+        if not prop or (published and published != self.getRequestPublished()):
+            theme, page = self.getCPSSkinsThemeAndPageName()
+        else:
+            theme, page = tuple(s.strip() for s in themepage.split('+'))
+        return self.lookupContainer().getPageEngine(
+            theme, page, cps_base_url=self.cps_base_url, fallback=True)
+
+
+
 
