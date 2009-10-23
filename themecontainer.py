@@ -129,8 +129,11 @@ class ResourceTraverser(Acquisition.Explicit):
     def isThemeContainer(self):
         return False
 
+    def getFSPath(self):
+        return self.path
+
     def __getitem__(self, name, default=_marker):
-        path = os.path.join(self.path, name)
+        path = os.path.join(self.getFSPath(), name)
         self.logger.debug("Traverser : resource path is %s", path)
         if os.path.isdir(path):
             # The first traversal from container is the root of theme
@@ -214,7 +217,12 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
     def _postProcessProperties(self):
         if '..' in self.relative_path:
             raise ValueError("'..' is forbidden in the path")
-        self.path = os.path.join(INSTANCE_HOME, self.relative_path)
+
+    def getFSPath(self):
+        """Override: this persistent class musn't store an absolute path.
+        See #2045
+        """
+        return os.path.join(INSTANCE_HOME, self.relative_path)
 
     def getBaseUri(self):
         return self.absolute_url_path()
@@ -229,7 +237,7 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
                         (self.default_theme, self.default_page))
 
         for page_path, final_page in (
-                (os.path.join(self.path, t, p + '.html'), p)
+                (os.path.join(self.getFSPath(), t, p + '.html'), p)
                  for t, p in alternatives):
             if os.path.exists(page_path):
                 break

@@ -13,6 +13,7 @@
   -->
 
   <include file="browser.zcml"/>
+  <include file="upgrade.zcml"/>
 
   <adapter
       provides=".interfaces.IThemeEngine"
