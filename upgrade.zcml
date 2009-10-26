@@ -1,0 +1,11 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:cps="http://namespaces.nuxeo.org/cps">
+
+  <cps:upgradeStep
+      title="Remove persistent absolute paths in root containers."
+      handler=".upgrades.upgrade_trac_ticket_2045"
+      source="3.5" destination="3.5.0"
+      />
+
+</configure>
