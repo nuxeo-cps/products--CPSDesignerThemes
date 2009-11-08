@@ -155,8 +155,13 @@ class LxmlEngine(ElementTreeEngine):
         frame_parent = frame.getparent()
         del frame.attrib[PORTLET_ATTR]
 
+        # Removal below of frame from the tree breaks some namespace info
+        # inside of it, hindering the merges occurring afterwards
+        # This is a bug in lxml, not occurring on lxml 2.2
+        if etree.LXML_VERSION < (2, 2):
+            frame = etree.fromstring(etree.tostring(frame))
         for elt in frames:
-            elt.getparent().remove(frame)
+            elt.getparent().remove(elt)
 
         return frame_parent, frame
 

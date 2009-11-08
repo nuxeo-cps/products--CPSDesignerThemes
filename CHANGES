@@ -1,11 +1,12 @@
 Requires
 ~~~~~~~~
--
+- lxml
 New features
 ~~~~~~~~~~~~
 -
 Bug fixes
 ~~~~~~~~~
+- #2035: work on lxml 2.1
 - #2045: Absolute path to themes container is persistent
 - #2034: provide "cherry picking" theme negociator
 - #2032: removal of main content element if main content is empty

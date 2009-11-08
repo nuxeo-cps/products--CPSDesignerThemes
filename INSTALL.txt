@@ -16,35 +16,15 @@ CPSSkins >= 2.16.1
 
 At least one of these XML processing libraries is required:
 
-- lxml >= 2.2.2 (default)
+- lxml >= 2.1 (default)
 
   Details:
-  Tested versions of the lxml package so far
+  There have been problems with some version of the lxml package in
+  the past. Currently versions known to work are:
 
-  * on lxml 2.2.2 (homemade build on Ubuntu 9.04, Debian Etch, Lenny) -> works
-  * on lxml 2.1.2 (MacOSX build by Plone buildout recipe) -> fails
-
-  The discriminating issue between those versions looks like the
-  following lxml 1.0 bug:
-
-  http://osdir.com/ml/python.lxml.devel/2006-06/msg00084.html
-
-  lxml 2.2.2 is easy to install on Debian Lenny. There are at least two possible
-  ways to install lxml, A (the easiest) and B. 
-
-  A - Using easy_install ::
-
-    $ sudo aptitude install python-setuptools
-    $ sudo easy_install-2.4 lxml
-
-  B - Without using easy_install ::
-
-    $ wget http://codespeak.net/lxml/lxml-2.2.2.tgz
-    $ tar xvzf lxml-2.2.2.tgz
-    $ cd lxml-2.2.2
-    $ sudo aptitude build-dep python-lxml
-    $ python2.4 setup.py build
-    $ sudo python2.4 setup.py install
+  * lxml 2.1.5 (package python-lxml in Ubuntu 9.04)
+  * lxml 2.1.2 (MacOSX build by Plone buildout recipe)
+  * lxml 2.1.1 (package python-lxml in Debian Lenny)
 
 - cElementTree >= 1.0.6 or plain Elementree >= 1.3
 
@@ -58,6 +38,7 @@ At least one of these XML processing libraries is required:
 
   To run on (c)ElementTree, you have to edit
   ``configure.zcml``. See ``doc/engines.txt`` for details.
+
   Note that the default lxml-based engine
   is currently the most efficient and robust available.
 
