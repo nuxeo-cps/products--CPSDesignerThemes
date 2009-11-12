@@ -19,6 +19,8 @@
 
 from TAL.TALInterpreter import TALInterpreter
 
+METAL_SLOT_RECORDER = 'metal:slot-recorder'
+
 class TALSlotRecordingInterpreter(TALInterpreter):
     """A variant on the TAL interpreter that's able to record slot contents.
 
@@ -49,8 +51,16 @@ class TALSlotRecordingInterpreter(TALInterpreter):
 
     def do_startTag(self, (name, attrList),
                         end=">", endlen=1, _len=len):
-        if name == 'metal:slot-recorder':
-            self.slot_record_level = self.level + 1
+        if name.startswith(METAL_SLOT_RECORDER):
+
+            # Level of record specified in the tag name or by value
+            level_s = name[len(METAL_SLOT_RECORDER):]
+            if level_s:
+                srl_offset = int(level_s)
+            else:
+                srl_offset = 1
+            self.slot_record_level = self.level + srl_offset
+
             self._current_slot = None
             if self._slots_recorded is None:
                 self._slots_recorded = {}

@@ -44,9 +44,18 @@ class EngineAdapter(object):
     def __init__(self, context, request):
         self.context = context
         self.request = request
+
+        # GR don't want to import a constant from CPSDefault here
+        self.void = void = getattr(request, '_cps_void_response', None)
+        if void is None:
+            logger.warn("Didn't found marker in request. Void responses "
+                        "(302, 304...) quick handling might be broken.")
+
         self.cps_base_url = getToolByName(context, 'portal_url').getBaseUrl()
 
     def renderCompat(self, **kw):
+        if self.void: # return asap for efficiency (see #2040)
+            return ''
         return self.getEngine().renderCompat(context=self.context,
                                              request=self.request, **kw)
 class RootContainerFinder:

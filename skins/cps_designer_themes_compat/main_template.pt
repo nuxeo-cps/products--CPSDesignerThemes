@@ -1,6 +1,13 @@
 <cpsdesigner-themes-compat>
-<metal:slot-recorder define-macro="master"
-  tal:define="showthirdcol showthirdcol|python:1;
+<!-- the number at the end of the tag name specifies the level in the tree
+     at which to record (defaults to 1)
+     Note that tal:block seems to count for 2 tags -->
+<metal:slot-recorder4 define-macro="master">
+<tal:block define="utool nocall:here/portal_url;
+			 void python:utool.getPortalObject().handleVoidResponses(here, request)"
+	   condition="not:void">
+<tal:block
+  define="showthirdcol showthirdcol|python:1;
               emptybody emptybody|request/emptybody|nothing;
               mtool here/portal_membership;
               utool nocall:here/portal_url;
@@ -42,5 +49,8 @@
   <metal:block define-slot="header" />
   <metal:block define-slot="main" />
   <metal:block define-slot="sub" tal:condition="not:emptybody"/>
-</metal:slot-recorder>
+</tal:block>
+</tal:block>
+</metal:slot-recorder4>
+
 </cpsdesigner-themes-compat>
