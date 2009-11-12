@@ -3,11 +3,11 @@
      at which to record (defaults to 1)
      Note that tal:block seems to count for 2 tags -->
 <metal:slot-recorder4 define-macro="master">
-<tal:block define="utool nocall:here/portal_url;
-			 void python:utool.getPortalObject().handleVoidResponses(here, request)"
-	   condition="not:void">
-<tal:block
-  define="showthirdcol showthirdcol|python:1;
+  <tal:block define="utool nocall:here/portal_url;
+	   	           void python:utool.getPortalObject().handleVoidResponses(here, request)"
+	             condition="not:void">
+    <tal:block
+      define="showthirdcol showthirdcol|python:1;
               emptybody emptybody|request/emptybody|nothing;
               mtool here/portal_membership;
               utool nocall:here/portal_url;
@@ -31,26 +31,26 @@
               dummy python: request.set('cpsskins_cmfactions', actions);
 ">
 
-  <metal:block use-macro="here/cpsskins_global_defines/macros/defines"/>
-  <head>
-      <metal:block use-macro="here/header_lib_header/macros/header|here/header_lib/macros/header"/>
-  </head>
+      <metal:block use-macro="here/cpsskins_global_defines/macros/defines"/>
+      <head>
+          <metal:block use-macro="here/header_lib_header/macros/header|here/header_lib/macros/header"/>
+      </head>
 
-  <body tal:attributes="onload here/getOnLoad|string:setFocus();
-			class cpsskins_bodyclass;
-			style cpsskins_bodystyle"/>
+      <body tal:attributes="onload here/getOnLoad|string:setFocus();
+        			class cpsskins_bodyclass;
+	        		style cpsskins_bodystyle"/>
 
-  <metal:block define-slot="doctype"/>
-  <metal:block define-slot="base"/>
-  <metal:block define-slot="head_slot"/>
-  <metal:block define-slot="style_slot"/>
-  <metal:block define-slot="javascript_head_slot"/>
-  <metal:block define-slot="body" tal:condition="emptybody"/>
-  <metal:block define-slot="header" />
-  <metal:block define-slot="main" />
-  <metal:block define-slot="sub" tal:condition="not:emptybody"/>
-</tal:block>
-</tal:block>
+      <metal:block define-slot="doctype"/>
+      <metal:block define-slot="base"/>
+      <metal:block define-slot="head_slot"/>
+      <metal:block define-slot="style_slot"/>
+      <metal:block define-slot="javascript_head_slot"/>
+      <metal:block define-slot="body" tal:condition="emptybody"/>
+      <metal:block define-slot="header" />
+      <metal:block define-slot="main" />
+      <metal:block define-slot="sub" tal:condition="not:emptybody"/>
+    </tal:block>
+  </tal:block>
 </metal:slot-recorder4>
 
 </cpsdesigner-themes-compat>
