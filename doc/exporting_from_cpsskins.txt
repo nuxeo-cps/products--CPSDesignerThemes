@@ -47,6 +47,29 @@ For the "Foo" page of the "bar" theme, the call would be:
 The name of the directory from which you launch these commands should
 be equal to the targeted name for the theme within CPSDesignerThemes.
 
+
+Adding missing CSS resources
+============================
+
+wget doesn't retrieve CSS resources such as:
+
+- images
+- other CSS declared with the @import CSS directive
+
+So for example the ``cpsskins_common-css2.css`` as declared in the following
+code doesn't get retrieved::
+
+  <style type="text/css" media="all">@import url(/cps/cpsskins_common-css2.css);</style>
+
+So in this part the task is to manually retrieve all those CSS resources and put
+them in your CPSDesignerThemes theme and, if needed, modify their path or
+declaration in the HTML page theme.
+
+So one would modify the code above in the following::
+
+  <link rel="Stylesheet" type="text/css" href="/cps/cpsskins_common-css2.css" />
+
+
 Correcting file names
 =====================
 
@@ -129,8 +152,8 @@ either before exporting (put a Portal Box Group Templet to define the
 new slot) or after exporting (cps:slot syntax).
 
 In a more subtle way, it's part of CPSSkins' design to produce some
-dynamic CSS and JavaScript linked resources. These are called renderCSS and
-renderJS. Rewriting them with the cps:// URL scheme should prevent
+dynamic CSS and JavaScript linked resources. These are called ``renderCSS`` and
+``renderJS``. Rewriting them with the cps:// URL scheme should prevent
 strange side effects.
 
 
