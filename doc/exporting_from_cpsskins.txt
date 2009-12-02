@@ -1,3 +1,4 @@
+=======================
 EXPORTING FROM CPSSKINS
 =======================
 
@@ -9,7 +10,7 @@ read the section about URIs correction below.
 Dependencies: CPSSkins >= 2.16.0
 
 Preparations
-------------
+============
 
 You need to have the CPSDesignerThemes product in the Zope instance
 from which you plan to export the theme, BUT it musn't be active
@@ -21,7 +22,7 @@ Create an External Method at the root of the portal.
    function: export
 
 Retrieving the export
----------------------
+=====================
 
 DO NOT use a browser to retrieve the export. You can test the external
 method with a browser if you like, but browsers tend to rewrite some
@@ -47,7 +48,7 @@ The name of the directory from which you launch these commands should
 be equal to the targeted name for the theme within CPSDesignerThemes.
 
 Correcting file names
----------------------
+=====================
 
 With the examples above, the html pages that make your theme have been
 named 'cpsskins_export', or cpsskins_export?page=Front in your theme
@@ -65,7 +66,7 @@ theme negociation, you should move them to the top of your theme
 hierarchy, but don't move the exported resources around.
 
 Checking and correcting URIs
-----------------------------
+============================
 
 The export process tries and rewrites URIs (for images, stylesheets)
 to remove the host part from them, since that would not make sense for
@@ -87,7 +88,7 @@ http://example.com/cps/foo/bar/image.png as
 
 
 Caveats: Dynamic vs static
---------------------------
+==========================
 
 This export process simply saved what the page CPSSkins theme elements
 (Templets) would have produced in a normal rendering of the same
@@ -114,6 +115,14 @@ In a more subtle way, it's part of CPSSkins' design to produce some
 dynamic CSS and JavaScript linked resources. These are called renderCSS and
 renderJS. Rewriting them with the cps:// URL scheme should prevent
 strange side effects.
+
+
+Theme setting up
+================
+
+Finally, after you have successfully exported and corrected your theme, you can
+set up your new CPSDesignerThemes theme. This procedure is explained in the
+`Theme Management` specific documentation cf. themes_management.txt file.
 
 
 .. Local Variables:
