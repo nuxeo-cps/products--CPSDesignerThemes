@@ -31,7 +31,8 @@ class ExportEngine(EngineClass):
             if elt.tag == meta_tag and elt.attrib.get('name') == 'engine':
                 break
         else:
-            raise ValueError("CPSSkin's generator not found")
+            raise ValueError("CPSSkin's meta tag \"engine\" not found "
+                             "in the generated web page")
 
         if 'CPSSkins' in elt.attrib['content']:
             del head[0:i]
