@@ -50,12 +50,11 @@ be equal to the targeted name for the theme within CPSDesignerThemes.
 Correcting file names
 =====================
 
-With the examples above, the html pages that make your theme have been
-named 'cpsskins_export', or cpsskins_export?page=Front in your theme
-directory. Rename them according to the conventions of the them
-container you plan to use.
-With the default settings, that would be 'index.html' and
-'Front.html', respectively.
+With the examples above, the html pages that make your theme have been named
+``cpsskins_export``, or ``cpsskins_export?page=Front`` in your theme
+directory. Rename them according to the conventions of the them container you
+plan to use. With the default settings, that would be ``index.html`` and
+``Front.html``, respectively.
 
 In situations where the exported portal isn't at the root of the host
 (for instance: http://localhost:8080/cps, or
@@ -64,6 +63,24 @@ you'll find the exported pages deeper in the hierarchy. Namely, in
 './cps' or './internal/portal'. For simplicity and compatibility of
 theme negociation, you should move them to the top of your theme
 hierarchy, but don't move the exported resources around.
+
+
+Correcting the namespaces
+=========================
+
+Add the following namespace to each generated HTML page:
+``xmlns:cps="http://xmlns.racinet.org/cps"``
+
+So if before you had::
+
+  <html xmlns="http://www.w3.org/1999/xhtml"  lang="en" xml:lang="en">
+
+then the modification should produce::
+
+  <html xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:cps="http://xmlns.racinet.org/cps"
+        lang="en" xml:lang="en">
+
 
 Checking and correcting URIs
 ============================
