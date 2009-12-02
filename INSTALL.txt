@@ -75,6 +75,11 @@ In ZMI, go to the `Properties` tab of portal_skins and remove
 the layer ``cps_designer_themes_compat`` from the skins `CPSSkins`
 and `CPSSkins-macroless`.
 
+The term ``compat`` in the name of the skin ``cps_designer_themes_compat``
+refers to the compatibility of using slots in the ZPTs, because future
+developments will not rely on skins.
+
+
 BUGS
 ====
 
