@@ -71,8 +71,9 @@ Check ``doc/themes_management.txt`` for configuration, and more.
 Disabling
 =========
 
-In ZMI, go to the "Properties" tab of portal_skins.
-Remove ``cps_designer_themes_compat`` from the two lists of layers
+In ZMI, go to the `Properties` tab of portal_skins and remove
+the layer ``cps_designer_themes_compat`` from the skins `CPSSkins`
+and `CPSSkins-macroless`.
 
 BUGS
 ====
