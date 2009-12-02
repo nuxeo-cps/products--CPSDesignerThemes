@@ -116,13 +116,7 @@ renderJS. Rewriting them with the cps:// URL scheme should prevent
 strange side effects.
 
 
-
-
-
-
-
-
-
-
-
-
+.. Local Variables:
+.. mode: rst
+.. End:
+.. vim: set filetype=rst:
