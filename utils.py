@@ -33,6 +33,10 @@ def rewrite_uri(absolute_base='', referer_uri='/index.html', uri='',
     >>> rewrite_uri(absolute_base='/cps/container/thm', uri='http://example.com/style.css')
     'http://example.com/style.css'
 
+    Same for anchor in current page
+    >>> rewrite_uri(absolute_base='/cps/container/thm', uri='#content')
+    '#content'
+
     Absolute uri, from a lower level
     >>> rewrite_uri(absolute_base='/cont/thm', referer_uri='/styles/main.css',
     ...             uri='/images/x.png')
@@ -60,7 +64,7 @@ def rewrite_uri(absolute_base='', referer_uri='/index.html', uri='',
     """
     # TODO refactor using standard lib
 
-    if uri.startswith('http://'):
+    if uri.startswith('http://') or uri.startswith('#'):
         return uri
     if uri.startswith('cps://'):
         if cps_base_url is None:

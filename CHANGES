@@ -15,6 +15,7 @@ Bug fixes
 - #2030: bad exception raising if theme page not found
 - #2028: cps:// URL scheme now works in stylesheets
 - INSTALL.txt doc now explains how to install lxml through easy_install.
+- #2063: don't rewrite anchors in current page
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 
