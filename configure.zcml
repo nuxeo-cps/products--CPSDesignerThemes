@@ -22,6 +22,15 @@
       factory=".negociator.CPSSkinsThemeNegociator"
       />
 
+  <!-- this one mostly useful for error responses
+       within themes, notably 404 -->
+  <adapter
+      provides=".interfaces.IThemeEngine"
+      for=".interfaces.IResourceTraverser
+	   zope.publisher.interfaces.http.IHTTPRequest"
+      factory=".negociator.CPSSkinsThemeNegociator"
+      />
+
   <!-- Five specifics -->
 
   <five:implements class=".themecontainer.FSThemeContainer"

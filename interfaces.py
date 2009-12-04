@@ -43,6 +43,10 @@ class IThemeContainer(Interface):
 
         if no page is specified, the whole theme is being invalidated."""
 
+class IResourceTraverser(Interface):
+
+    pass
+
 
 # ZCML directives
 

@@ -37,6 +37,7 @@ from Products.CMFCore.FSImage import FSImage
 from Products.CPSUtil.PropertiesPostProcessor import PropertiesPostProcessor
 
 from utils import rewrite_uri
+from interfaces import IResourceTraverser
 
 _marker = object()
 
@@ -117,6 +118,7 @@ class ResourceTraverser(Acquisition.Explicit):
     TODO at least use a more modern traversal style"""
 
     logger = logging.getLogger('Products.CPSDesignerThemes.themecontainer.ResourceTraverser')
+    implements(IResourceTraverser)
 
     def __init__(self, path, theme_base_uri='/', relative_uri='/',
                  cps_base_url=None):
