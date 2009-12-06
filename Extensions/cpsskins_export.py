@@ -17,10 +17,13 @@
 #
 # $Id$
 
+import logging
 from StringIO import StringIO
 from Products.CMFCore.utils import getToolByName
 from Products.CPSDesignerThemes.constants import NS_XHTML, NS_URI
 from Products.CPSDesignerThemes.engine import get_engine_class
+
+logger = logging.getLogger('Products.CPSDesignerThemes.Extensions.cpsskins_export')
 
 EngineClass = get_engine_class()
 
@@ -55,9 +58,48 @@ class ExportEngine(EngineClass):
         if 'CPSSkins' in elt.attrib['content']:
             del head[0:i]
 
+DESIGNER_LAYER = 'cps_designer_themes_compat'
+def disable_designer_themes(portal):
+    """ Disable and return a dict (skin name) -> (order among layers)
+    """
+
+    stool = portal.portal_skins
+    indices = {}
+    for skin, path in stool.getSkinPaths():
+        layers = [l.strip() for l in path.split(',')]
+        try:
+            indices[skin] = index = layers.index(DESIGNER_LAYER)
+        except ValueError:
+            continue
+        logger.debug("Before disabling, layers for skin '%s': %s", skin, layers)
+        del layers[index]
+        stool.addSkinSelection(skin, ','.join(layers))
+    if indices:
+        portal.clearCurrentSkin()
+        portal.setupCurrentSkin()
+    return indices
+
+def reenable_designer_themes(portal, indices):
+    stool = portal.portal_skins
+    for skin, index in indices.items():
+        path = stool.getSkinPath(skin)
+        layers = [l.strip() for l in path.split(',')]
+        layers.insert(index, DESIGNER_LAYER)
+        stool.addSkinSelection(skin, ','.join(layers))
+        logger.debug("After reenabling, layers for skin '%s': %s", skin, layers)
+    if indices:
+        portal.clearCurrentSkin()
+        portal.setupCurrentSkin()
+
 
 def export(self):
+    portal = getToolByName(self, 'portal_url').getPortalObject()
+
+    indices = disable_designer_themes(portal)
+    exporter = self.cpsskins_designer_export
     first_pass = self.cpsskins_designer_export()
+    reenable_designer_themes(portal, indices)
+
     first_pass = first_pass.replace('xmlns="%s"' % NS_XHTML, 'xmlns="%s" xmlns:cps="%s"' % (
         NS_XHTML, NS_URI))
     portal =  getToolByName(self, 'portal_url').getPortalObject()
@@ -74,4 +116,5 @@ def export(self):
 
     ## HEAD preparation
     engine.stripHeadElement()
+
     return engine.serialize()

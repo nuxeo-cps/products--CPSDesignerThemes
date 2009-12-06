@@ -8,8 +8,9 @@ Bug fixes
 ~~~~~~~~~
 - #2035: work on lxml 2.1
 - #2040: handling of void responses
-- #2045: Absolute path to themes container is persistent
 - #2048: Possible contexts too restricted
+- #2083: export from CPSSkins: don't make the user fiddle with skins
+- #2045: Absolute path to themes container is persistent
 - #2034: provide "cherry picking" theme negociator
 - #2032: removal of main content element if main content is empty
 - #2031: wrong ordering of javascript inclusions
