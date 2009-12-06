@@ -191,6 +191,13 @@ class LxmlEngine(ElementTreeEngine):
         # to prevent now useless declaration
         return out.getvalue().replace('xmlns:cps="%s"' % NS_URI, '', 1)
 
+    def serializeExport(self):
+        self.protectEmptyElements('script', 'div', 'textarea')
+
+        out = StringIO()
+        self.tree.write(out)
+        return out.getvalue()
+
     @classmethod
     def makeSimpleElement(self, tag, content=None):
         element = etree.Element(tag)

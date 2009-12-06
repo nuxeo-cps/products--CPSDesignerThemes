@@ -117,4 +117,4 @@ def export(self):
     ## HEAD preparation
     engine.stripHeadElement()
 
-    return engine.serialize()
+    return engine.serializeExport()

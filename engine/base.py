@@ -242,6 +242,12 @@ class BaseEngine(object):
         """Produce the final page to be sent over HTTP."""
         raise NotImplementedError
 
+    def serializeExport(self):
+        """Serialization for CPSSkins export.
+
+        Might have different requirements in some cases."""
+        return self.serialize()
+
     def extractSlotElements(self):
         """Return an iterable over pairs (slot name, slot xml element)
         Side effect: cleanup the slot element to make it xhtml compliant
