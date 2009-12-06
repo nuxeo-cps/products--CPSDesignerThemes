@@ -15,18 +15,10 @@
   <include file="browser.zcml"/>
   <include file="upgrade.zcml"/>
 
+  <!-- adapter looked up in code that wants to relay to CPSDesignerThemes -->
   <adapter
       provides=".interfaces.IThemeEngine"
-      for="OFS.interfaces.IObjectManager
-	   zope.publisher.interfaces.http.IHTTPRequest"
-      factory=".negociator.CPSSkinsThemeNegociator"
-      />
-
-  <!-- this one mostly useful for error responses
-       within themes, notably 404 -->
-  <adapter
-      provides=".interfaces.IThemeEngine"
-      for=".interfaces.IResourceTraverser
+      for="*
 	   zope.publisher.interfaces.http.IHTTPRequest"
       factory=".negociator.CPSSkinsThemeNegociator"
       />

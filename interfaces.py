@@ -1,4 +1,4 @@
-# (C) Copyright 2008 Georges Racinet
+# (C) Copyright 2009 Georges Racinet
 # Author: Georges Racinet <georges@racinet.fr>
 #
 # This program is free software; you can redistribute it and/or modify
