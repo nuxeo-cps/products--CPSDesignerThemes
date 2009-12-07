@@ -86,24 +86,6 @@ you'll find the exported pages deeper in the hierarchy. Namely, in
 theme negociation, you should move them to the top of your theme
 hierarchy, but don't move the exported resources around.
 
-
-Correcting the namespaces
-=========================
-
-Add the following namespace to each generated HTML page:
-``xmlns:cps="http://xmlns.racinet.org/cps"``
-
-So if before you had::
-
-  <html xmlns="http://www.w3.org/1999/xhtml"  lang="en" xml:lang="en">
-
-then the modification should produce::
-
-  <html xmlns="http://www.w3.org/1999/xhtml"
-        xmlns:cps="http://xmlns.racinet.org/cps"
-        lang="en" xml:lang="en">
-
-
 Checking and correcting URIs
 ============================
 
@@ -118,11 +100,13 @@ translates as the base portal URL at rendering time. You
 have to replace the base URL of your portal with cps://.
 
 In case your portal is at http://example.com, you have to rewrite all
-URIs such as http://example.com/foo/bar/image.png like this:
+URIs such as http://example.com/foo/bar/image.png like this::
+
    cps://foo/bar/image.png
 
 In case you portal is at http://example.com/cps, you have to rewrite
-http://example.com/cps/foo/bar/image.png as
+http://example.com/cps/foo/bar/image.png as::
+
    cps://foo/bar/image.png
 
 
