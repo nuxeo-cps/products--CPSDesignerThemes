@@ -116,5 +116,18 @@ def export(self):
 
     ## HEAD preparation
     engine.stripHeadElement()
+    xml = engine.serializeExport()
 
-    return engine.serializeExport()
+    # formatting
+    import popen2
+    stdout, stdin, stderr = popen2.popen3(
+            'tidy --wrap 79 --indent-attributes yes '
+            '--indent yes --indent-spaces 2 -asxml -xml')
+    stdin.write(xml)
+    stdin.close()
+    formatted = stdout.read()
+    stdout.close()
+    # GR this includes the possibility that tidy is not installed
+    logger.error("Tidy errors and warnings: %s", stderr.read())
+
+    return formatted or xml

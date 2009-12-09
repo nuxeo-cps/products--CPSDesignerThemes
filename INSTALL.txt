@@ -55,6 +55,12 @@ future. Even if you deactivate the testing of lxml engines, lxml will still be
 required, because it's been used by the testing infrastructure itself (to check
 the output produced by the tested engine).
 
+CPSSkins Export dependencies
+============================
+
+Recommended: ``tidy``. If tidy is present, the output of the export
+will be automatically formatted.
+
 Installing
 ==========
 

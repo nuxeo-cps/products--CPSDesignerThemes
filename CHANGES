@@ -1,6 +1,7 @@
 Requires
 ~~~~~~~~
 - lxml
+- tidy (recommended only for export)
 New features
 ~~~~~~~~~~~~
 -
@@ -11,6 +12,7 @@ Bug fixes
 - #2048: Possible contexts too restricted
 - #2083: export from CPSSkins: don't make the user fiddle with skins
 - #2086: export from CPSSkins: missing xmlns namespace with lxml engine
+- #2089: export from CPSSkins: formatting the output
 - #2045: Absolute path to themes container is persistent
 - #2034: provide "cherry picking" theme negociator
 - #2032: removal of main content element if main content is empty
