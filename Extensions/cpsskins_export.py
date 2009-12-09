@@ -100,9 +100,13 @@ def export(self):
     first_pass = self.cpsskins_designer_export()
     reenable_designer_themes(portal, indices)
 
-    first_pass = first_pass.replace('xmlns="%s"' % NS_XHTML, 'xmlns="%s" xmlns:cps="%s"' % (
+    first_pass = first_pass.replace('xmlns="%s"' % NS_XHTML,
+                                    'xmlns="%s" xmlns:cps="%s"' % (
         NS_XHTML, NS_URI))
     portal =  getToolByName(self, 'portal_url').getPortalObject()
+
+    # see #2076
+    first_pass = first_pass.decode(portal.default_charset).encode('utf-8')
     engine = ExportEngine(StringIO(first_pass),
                           cps_base_url=portal.absolute_url())
 
