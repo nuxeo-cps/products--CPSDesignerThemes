@@ -17,8 +17,18 @@
 #
 # $Id$
 
-from themecontainer import FSThemeContainer
+from zope.component import adapts
+from zope.interface import implements
 
+from themecontainer import FSThemeContainer
+from Products.GenericSetup.utils import XMLAdapterBase
+from Products.GenericSetup.utils import PropertyManagerHelpers
+from Products.GenericSetup.utils import exportObjects
+from Products.GenericSetup.utils import importObjects
+
+from Products.GenericSetup.interfaces import IBody
+from Products.GenericSetup.interfaces import ISetupEnviron
+from interfaces import IThemeContainer
 _marker = object()
 
 NAME = 'designer_themes'
@@ -27,16 +37,54 @@ ROOT_THEMES = '.cps_themes'
 
 def importRootThemesContainer(context):
     """Create the root themes container.
-
-    TODO: also import it (not important yet)
     """
-    site = context.getSite()
-    if ROOT_THEMES in site.objectIds():
-        return
-
     logger = context.getLogger(NAME)
     logger.info("Creating the root themes container")
-    thc = FSThemeContainer(ROOT_THEMES)
-    thc.manage_changeProperties(title='Root themes')
-    site._setObject(ROOT_THEMES, thc)
+
+    site = context.getSite()
+    thc = getattr(site, ROOT_THEMES, None)
+    if thc is None:
+        thc = FSThemeContainer(ROOT_THEMES)
+        thc.manage_changeProperties(title='Root themes')
+        site._setObject(ROOT_THEMES, thc)
+        thc = getattr(site, ROOT_THEMES)
+    importObjects(thc, '', context)
+
+
+def exportRootThemesContainer(context):
+    """Export the root themes container
+    """
+    site = context.getSite()
+    thc = getattr(site, ROOT_THEMES)
+    if thc is None:
+        logger = context.getLogger(NAME)
+        logger.info("Nothing to export.")
+        return
+    exportObjects(thc, '', context)
+
+class ThemeContainerXMLAdapter(XMLAdapterBase, PropertyManagerHelpers):
+    """XML importer and exporter for theme containers
+    """
+
+    adapts(IThemeContainer, ISetupEnviron)
+    implements(IBody)
+
+    _LOGGER_ID = NAME
+    name = NAME
+
+    def _exportNode(self):
+        """Export the object as a DOM node.
+        """
+        node = self._getObjectNode('object')
+        node.appendChild(self._extractProperties())
+        self._logger.info("Root themes container exported.")
+        return node
+
+    def _importNode(self, node):
+        """Import the object from the DOM node.
+        """
+        if self.environ.shouldPurge():
+            self._purgeProperties()
+        self._initProperties(node)
+        self._logger.info("Root theme container imported.")
 

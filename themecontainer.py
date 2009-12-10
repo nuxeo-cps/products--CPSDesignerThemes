@@ -209,6 +209,12 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
                                  'sample_themes')
     title = ''
 
+    manage_options = SimpleItemWithProperties.manage_options + (
+        {'label': 'Export',
+         'action': 'manage_genericSetupExport.html',
+         },
+        )
+
     def __init__(self, ob_id, **kw):
         self._setId(ob_id)
 
@@ -256,5 +262,6 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
     def invalidate(self, theme, page=None):
         """No cache yet."""
         pass
+
 
 InitializeClass(FSThemeContainer)

@@ -23,7 +23,18 @@
       factory=".negociator.CPSSkinsThemeNegociator"
       />
 
+  <!-- Generic Setup -->
+  <adapter
+      factory=".exportimport.ThemeContainerXMLAdapter"
+      provides="Products.GenericSetup.interfaces.IBody"
+      for=".interfaces.IThemeContainer
+           Products.GenericSetup.interfaces.ISetupEnviron"
+      />
+
   <!-- Five specifics -->
+
+  <!-- necessary for ZMI export -->
+  <five:traversable class=".themecontainer.FSThemeContainer"/>
 
   <five:implements class=".themecontainer.FSThemeContainer"
 		   interface=".interfaces.IThemeContainer" />
