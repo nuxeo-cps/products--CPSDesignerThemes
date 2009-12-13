@@ -134,9 +134,11 @@ class ResourceTraverser(Acquisition.Explicit):
     def getFSPath(self):
         return self.path
 
+    def __repr__(self):
+        return '<ResourceTraverser at %s>' % self.path
+
     def __getitem__(self, name, default=_marker):
         path = os.path.join(self.getFSPath(), name)
-        self.logger.debug("Traverser : resource path is %s", path)
         if os.path.isdir(path):
             # The first traversal from container is the root of theme
             if self.isThemeContainer():
@@ -152,6 +154,7 @@ class ResourceTraverser(Acquisition.Explicit):
                                      relative_uri='/'.join((self.relative_uri,
                                                             name)))
         elif os.path.isfile(path):
+            self.logger.debug("Traverser : resource path is %s", path)
             ext = name.rsplit('.', 1)[-1]
             # TODO other types
             if ext in IMG_EXTENSIONS:
@@ -214,6 +217,9 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
          'action': 'manage_genericSetupExport.html',
          },
         )
+
+    def __repr__(self):
+        return SimpleItemWithProperties.__repr__(self)
 
     def __init__(self, ob_id, **kw):
         self._setId(ob_id)
