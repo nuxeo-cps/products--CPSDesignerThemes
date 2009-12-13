@@ -47,30 +47,8 @@ The name of the directory from which you launch these commands should
 be equal to the targeted name for the theme within CPSDesignerThemes.
 
 
-Adding missing CSS resources
-============================
-
-wget doesn't retrieve CSS resources such as:
-
-- images
-- other CSS declared with the @import CSS directive
-
-So for example the ``cpsskins_common-css2.css`` as declared in the following
-code doesn't get retrieved::
-
-  <style type="text/css" media="all">@import url(/cps/cpsskins_common-css2.css);</style>
-
-So in this part the task is to manually retrieve all those CSS resources and put
-them in your CPSDesignerThemes theme and, if needed, modify their path or
-declaration in the HTML page theme.
-
-So one would modify the code above in the following::
-
-  <link rel="Stylesheet" type="text/css" href="/cps/cpsskins_common-css2.css" />
-
-
-Correcting file names
-=====================
+Correcting master html file names
+=================================
 
 With the examples above, the html pages that make your theme have been named
 ``cpsskins_export``, or ``cpsskins_export?page=Front`` in your theme
@@ -84,7 +62,46 @@ http://example.com/internal/portal), with the wget commands above,
 you'll find the exported pages deeper in the hierarchy. Namely, in
 './cps' or './internal/portal'. For simplicity and compatibility of
 theme negociation, you should move them to the top of your theme
-hierarchy, but don't move the exported resources around.
+hierarchy, but don't move the exported resources around (you can do
+that latter, once the theme works).
+
+Adding missing CSS resources
+============================
+
+wget doesn't retrieve resources declared in CSS styles and
+stylesheets, such as:
+
+- images
+- other stylesheets declared with the @import CSS directive
+
+So for example the ``cpsskins_common-css2.css`` as declared in the following
+code doesn't get retrieved::
+
+  <style type="text/css" media="all">@import url(/cps/cpsskins_common-css2.css);</style>
+
+It isn't a problem with this directive per se, simply that wget will
+ignore it.
+
+So in this part the task is to manually retrieve all those CSS resources and put
+them in your CPSDesignerThemes theme at the expected place. No need to
+modify the declaration.
+
+A tool to automate this
+-----------------------
+
+You may use the script ``export_load_style_elements.py`` that you'll find
+in ``CPSDesignerThemes/bin``.
+
+Place yourself at the root of your theme directory on the client
+machine, and provide the base url of the host you retrieved the export
+from as a unique argument.
+
+Whatever your virtual hosting conditions are, this url must be of the
+following type:
+ ``<scheme>://<hostname>[:<port>]``
+No trailing slash, NO PATH, even if the portal sits at
+``http://localhost:8080/cps`` or even ``http://example.com/foo/bar/mysite``.
+
 
 Checking and correcting URIs
 ============================
@@ -109,11 +126,18 @@ http://example.com/cps/foo/bar/image.png as::
 
    cps://foo/bar/image.png
 
+In that example, assuming this image is purely static, you also have
+the possibility to download it, put it somewhere in the theme and
+issue a relative URI.
+
 
 Caveats: Dynamic vs static
 ==========================
 
-This export process simply saved what the page CPSSkins theme elements
+The ``cps://`` URL scheme is also very useful to restore the dynamical
+behaviour of some resources.
+
+This export process has simply saved what the page CPSSkins theme elements
 (Templets) would have produced in a normal rendering of the same
 context. This makes them essentially static.
 
@@ -130,14 +154,16 @@ Templets (Breadcrumb templet...) are much more problematic.
 Most dynamical Templets have a counterpart Portlet, though. This
 duplication is due to the fact that CPSPortlets has been written some
 time after CPSSkins. You should replace very dynamic Templets (such as
-the Breadcrum templet) with the corresponding Portlets in a slot,
+the Breadcrumb templet) with the corresponding Portlets in a slot,
 either before exporting (put a Portal Box Group Templet to define the
 new slot) or after exporting (cps:slot syntax).
 
 In a more subtle way, it's part of CPSSkins' design to produce some
 dynamic CSS and JavaScript linked resources. These are called ``renderCSS`` and
-``renderJS``. Rewriting them with the cps:// URL scheme should prevent
-strange side effects.
+``renderJS``. Actually, only the latter is truly static.
+
+Rewriting ``renderJS`` calls with the cps:// URL scheme must be done to
+prevent strange side effects.
 
 
 Theme setting up
@@ -145,8 +171,12 @@ Theme setting up
 
 Finally, after you have successfully exported and corrected your theme, you can
 set up your new CPSDesignerThemes theme. This procedure is explained in the
-`Theme Management` specific documentation cf. themes_management.txt file.
+`Theme Management` specific documentation cf. themes_management.txt
+file.
 
+Needless to say, it's a good idea to know how to do this before
+hand, so that you can check incrementally what happens during the
+export procedure.
 
 .. Local Variables:
 .. mode: rst
