@@ -9,6 +9,17 @@ read the section about URIs correction below.
 
 Dependencies: CPSSkins >= 2.16.0
 
+Tutorial within subversion
+==========================
+
+This procedure has been applied to export the default CPS theme, with
+one Subversion checkin per step, to provide some kind of tutorial of
+the process.
+
+The checkins numbers are 54086 through 54090, available at
+http://svn.nuxeo.org/trac/pub/changeset/54086 and so on.
+
+
 Preparations
 ============
 
@@ -65,6 +76,13 @@ theme negociation, you should move them to the top of your theme
 hierarchy, but don't move the exported resources around (you can do
 that latter, once the theme works).
 
+Providing a proper extension to renderCSS
+=========================================
+
+You have to find the ``renderCSS`` and rename it to ``renderCSS.css``,
+and of course update the HTML files accordingly. Otherwise, this
+important stylesheet will be ignored by browsers.
+
 Adding missing CSS resources
 ============================
 
@@ -86,8 +104,8 @@ So in this part the task is to manually retrieve all those CSS resources and put
 them in your CPSDesignerThemes theme at the expected place. No need to
 modify the declaration.
 
-A tool to automate this
------------------------
+A tool for automatic retrieval
+------------------------------
 
 You may use the script ``export_load_style_elements.py`` that you'll find
 in ``CPSDesignerThemes/bin``.
