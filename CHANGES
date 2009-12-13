@@ -11,6 +11,7 @@ Bug fixes
 - #2040: handling of void responses
 - #2048: Possible contexts too restricted
 - #2083: export from CPSSkins: don't make the user fiddle with skins
+- #2027: export from CPSSkins: missing resources (provided a script)
 - #2086: export from CPSSkins: missing xmlns namespace with lxml engine
 - #2089: export from CPSSkins: formatting the output
 - #2076: export from CPSSkins: problems with non ascii-chars outside of portlets
