@@ -31,17 +31,5 @@ import compat # BBB for old page templates
 import negociator
 
 def initialize(registrar):
-    """Initialize Paris Montagne Contacts content and tools.
+    """Initialize CPSDesignerThemes content and tools.
     """
-
-    # optional ldap; to be triggered by external method only
-    profile_registry.registerProfile(
-        'default',
-        'CPS Designer Themes',
-        "CPS Designer Themes, default configuration",
-        'profiles/default',
-        'CPSDesignerThemes',
-        EXTENSION,
-        for_=ICPSSite)
-
-

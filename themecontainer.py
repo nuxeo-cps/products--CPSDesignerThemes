@@ -208,8 +208,7 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
 
     _propertiesBaseClass = SimpleItemWithProperties
 
-    relative_path = os.path.join('Products', 'CPSDesignerThemes', 'doc',
-                                 'sample_themes')
+    relative_path = os.path.join('Products', 'CPSDefault', 'themes')
     title = ''
 
     manage_options = SimpleItemWithProperties.manage_options + (

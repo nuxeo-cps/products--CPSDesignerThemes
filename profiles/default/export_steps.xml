@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<export-steps>
- <export-step id="root_themes"
-              handler="Products.CPSDesignerThemes.exportimport.exportRootThemesContainer"
-              title="Root themes container">
-   Export CPSDesigner root themes container configuration
- </export-step>
-</export-steps>

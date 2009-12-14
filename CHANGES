@@ -7,6 +7,7 @@ New features
 -
 Bug fixes
 ~~~~~~~~~
+- #2085: CPSDesignerThemes is now the default rendering system
 - #2035: work on lxml 2.1
 - #2040: handling of void responses
 - #2048: Possible contexts too restricted
