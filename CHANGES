@@ -1,31 +1,12 @@
 Requires
 ~~~~~~~~
-- lxml
-- tidy (recommended only for export)
+-
 New features
 ~~~~~~~~~~~~
 -
 Bug fixes
 ~~~~~~~~~
-- #2085: CPSDesignerThemes is now the default rendering system
-- #2035: work on lxml 2.1
-- #2040: handling of void responses
-- #2048: Possible contexts too restricted
-- #2083: export from CPSSkins: don't make the user fiddle with skins
-- #2027: export from CPSSkins: missing resources (provided a script)
-- #2086: export from CPSSkins: missing xmlns namespace with lxml engine
-- #2089: export from CPSSkins: formatting the output
-- #2076: export from CPSSkins: problems with non ascii-chars outside of portlets
-- #2045: Absolute path to themes container is persistent
-- #2024: Moved portal_status_message portlet to CPSDefault
-- #2034: provide "cherry picking" theme negociator
-- #2032: removal of main content element if main content is empty
-- #2031: wrong ordering of javascript inclusions
-- #2077: import/export for root designer themes
-- #2030: bad exception raising if theme page not found
-- #2028: cps:// URL scheme now works in stylesheets
-- INSTALL.txt doc now explains how to install lxml through easy_install.
-- #2063: don't rewrite anchors in current page
+-
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 
