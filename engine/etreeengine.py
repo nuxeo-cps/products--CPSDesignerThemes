@@ -32,8 +32,12 @@ try:
                 "issues with entities.")
 
 except ImportError:
-    import elementtree.ElementTree as ET
     C_ELEMENT_TREE = False
+    try:
+        import elementtree.ElementTree as ET
+        ELEMENT_TREE_PRESENT = True
+    except ImportError:
+        ELEMENT_TREE_PRESENT = False
 
 import htmlentitydefs
 

@@ -6,7 +6,7 @@ New features
 -
 Bug fixes
 ~~~~~~~~~
--
+- #2094: dependency on elementtree
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 

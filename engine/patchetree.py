@@ -49,11 +49,15 @@ to lift the problem with default_namespace and attributes.
 
 Suited for CPSDesignerThemes, don't use in other contexts."""
 
+ETREE_PRESENT = True
 
-from elementtree import ElementTree
-from elementtree.ElementTree import (QName, _namespace_map,
-                                     _raise_serialization_error,
-                                     )
+try:
+    from elementtree import ElementTree
+    from elementtree.ElementTree import (QName, _namespace_map,
+                                         _raise_serialization_error,
+                                         )
+except ImportError:
+    ETREE_PRESENT = False
 
 def _namespaces(elem, encoding, default_namespace=None):
     # identify namespaces used in this tree
@@ -118,4 +122,5 @@ def _namespaces(elem, encoding, default_namespace=None):
             add_qname(text.text)
     return qnames, namespaces
 
-ElementTree._namespaces = _namespaces
+if ETREE_PRESENT:
+    ElementTree._namespaces = _namespaces
