@@ -1,4 +1,24 @@
 ===========================================================
+Package: CPSDesignerThemes 0.3.1
+===========================================================
+First release built by: gracinet at: 2009-12-21T11:54:22
+SVN Tag: https://svn.nuxeo.org/pub/CPS3/products/CPSDesignerThemes/tags/0.3.1
+Build from: https://svn.nuxeo.org/pub/CPS3/products/CPSDesignerThemes/trunk@54171
+
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
+~~~~~~~~~
+- #2094: dependency on elementtree
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
 Package: CPSDesignerThemes 0.3.0
 ===========================================================
 First release built by: gracinet at: 2009-12-15T12:27:36
