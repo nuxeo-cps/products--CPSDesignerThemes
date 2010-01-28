@@ -30,6 +30,7 @@ from Products.CPSDesignerThemes.engine.lxmlengine import (
     LxmlEngine,
     TwoPhaseLxmlEngine)
 from Products.CPSDesignerThemes.constants import NS_XHTML
+from Products.CPSDesignerThemes.engine.exceptions import FragmentParseError
 
 THEMES_PATH = os.path.join(INSTANCE_HOME, 'Products', 'CPSDesignerThemes',
                            'tests')
@@ -96,6 +97,12 @@ class EngineTestCase(unittest.TestCase):
         img = self.findTag(engine, 'img')
         self.assertEquals(img.attrib['src'], '/thm_base/pretty.png')
 
+    def test_parseFragment_invalid(self):
+        # engine must not barf on invalid fragments but raise a proper exception
+        engine = self.getEngine('theme1', page='uris.html')
+        self.assertRaises(FragmentParseError, engine.parseFragment, '<div>')
+        self.assertRaises(FragmentParseError, engine.parseFragment, '<div>',
+                          enclosing='enclosing')
 
 class TestElementTreeEngine(EngineTestCase):
 

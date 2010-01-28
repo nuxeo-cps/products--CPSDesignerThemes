@@ -34,6 +34,7 @@ from etreeengine import ElementTreeEngine
 from etreeengine import PORTLET_ATTR
 from etreeengine import LINK_HTML_DOCUMENTS
 from etreeengine import CSS_LINKS_RE
+from exceptions import FragmentParseError
 
 NAMESPACES = dict(cps=NS_URI, xhtml=NS_XHTML)
 
@@ -82,14 +83,14 @@ class LxmlEngine(ElementTreeEngine):
             remove_enclosing = True
         else:
             remove_enclosing = False
-        parser.feed('<%s xmlns="%s">' % (enclosing, NS_XHTML))
-        parser.feed(content)
-        parser.feed("</%s>" % enclosing)
-
         try:
+            parser.feed('<%s xmlns="%s">' % (enclosing, NS_XHTML))
+            parser.feed(content)
+            parser.feed("</%s>" % enclosing)
             parsed = parser.close()
         except SyntaxError, e:
-            self.logger.error("Problematic xml snippet:\n", content)
+            self.logger.error("Problematic xml fragment:%s\n", content)
+            raise FragmentParseError()
 
         # avoid 'and/or' notation (gives a future warning because of bool eval)
         if remove_enclosing:
@@ -128,7 +129,10 @@ class LxmlEngine(ElementTreeEngine):
                 start_cond_index = t.find(']')+2
                 end_cond_index = t.find('<![endif]')
                 fragment = t[start_cond_index:end_cond_index]
-                elt = self.parseFragment(fragment, enclosing='msie-cond')
+                try:
+                    elt = self.parseFragment(fragment, enclosing='msie-cond')
+                except FragmentParseError:
+                    continue
                 self._rewriteElementUris(elt, rewriter_func)
                 s = elt.text
                 if s is None:

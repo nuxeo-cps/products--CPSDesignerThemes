@@ -49,6 +49,8 @@ from Products.CPSDesignerThemes.interfaces import IThemeEngine
 from Products.CPSDesignerThemes.constants import NS_URI, NS_XHTML, ENCODING
 from Products.CPSDesignerThemes.utils import rewrite_uri
 from base import BaseEngine
+from exceptions import FragmentParseError
+
 import patchetree
 from twophase import TwoPhaseEngine
 
@@ -145,7 +147,10 @@ class ElementTreeEngine(BaseEngine):
         else:
             enclosing = 'include-fragment'
 
-        parsed = self.parseFragment(fragment, enclosing=enclosing)
+        try:
+            parsed = self.parseFragment(fragment, enclosing=enclosing)
+        except FragmentParseError:
+            return
         elt.text = parsed.text
         for child in parsed:
             elt.append(child)
@@ -160,7 +165,10 @@ class ElementTreeEngine(BaseEngine):
             enclosing = 'include-fragment'
             raise NotImplementedError
 
-        elt.insert(index, self.parseFragment(fragment, enclosing=enclosing))
+        try:
+            elt.insert(index, self.parseFragment(fragment, enclosing=enclosing))
+        except FragmentParseError:
+            pass
 
     #
     # Internal engine API implementation. For docstrings, see BaseEngine
@@ -226,14 +234,14 @@ class ElementTreeEngine(BaseEngine):
             remove_enclosing = True
         else:
             remove_enclosing = False
-        parser.feed('<%s xmlns="%s">' % (enclosing, NS_XHTML))
-        parser.feed(content)
-        parser.feed("</%s>" % enclosing)
-
         try:
+            parser.feed('<%s xmlns="%s">' % (enclosing, NS_XHTML))
+            parser.feed(content)
+            parser.feed("</%s>" % enclosing)
             parsed = parser.close()
         except SyntaxError, e:
-            self.logger.error("Problematic xml snippet:\n", content)
+            self.logger.error("Problematic xml fragment:\n%s\n", content)
+            raise FragmentParseError()
 
         if remove_enclosing:
             return parsed[0]
