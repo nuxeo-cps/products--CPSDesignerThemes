@@ -1,0 +1,29 @@
+PREPARATIONS
+ >>> import os
+ >>> from lxml import usedoctest
+ >>> from Products.CPSDesignerThemes.tests.test_engine import get_engine
+ >>> from Products.CPSDesignerThemes.interfaces import IThemeEngine
+
+In the context of this test, we should have a predefined engine class
+(PageEngine). Let's demonstrate that::
+ >>> IThemeEngine.implementedBy(PageEngine)
+ True
+
+We'll keep the output of some basic portlets around to feed the
+examples. The first element of each pair is the portlet title, the
+second is the portlet output itself::
+ >>> PORTLET = ('Portlet Two', '<div id="portlet2">Hello, eggs</div>')
+
+
+Let's demonstrate how the engine looks for the 'cps:isolatedPortlet' attributes
+and merges the portlets in there::
+ >>> engine = get_engine(PageEngine, 'theme1', page='isolated_portlet.html')
+ >>> ptl_id, elt, parent = tuple(engine.extractIsolatedPortletElements())[0]
+ >>> engine.mergeIsolatedPortlet(elt, PORTLET, parent)
+ >>> print engine.dumpElement(parent)
+ <?xml version='1.0' encoding='iso-8859-15'?>
+ <body xmlns="http://www.w3.org/1999/xhtml">
+   <div class="frame">
+     <div id="portlet2">Hello, eggs</div>
+   </div>
+ </body>

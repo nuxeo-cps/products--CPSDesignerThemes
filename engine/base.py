@@ -206,13 +206,16 @@ class BaseEngine(object):
                 self.removeElement(slot_elt)
             self.mergePortlets(frame_parent, frame, rendered)
 
-        # isolated portlets (should appear mostly in CPSSkins exports)
-        for ptl_id, elt in self.extractIsolatedPortletElements():
+        # isolated portlets
+        for ptl_id, elt, parent in self.extractIsolatedPortletElements():
             portlet = ptool.getPortletById(ptl_id)
-            frame_parent, frame = self.extractSlotFrame(elt)
-            rendered = self.renderPortlets([portlet],
-                                           context=context, request=request)
-            self.mergePortlets(frame_parent, frame, rendered)
+            portlet_rendered = self.renderPortlets([portlet], context=context,
+                                                   request=request)
+            try:
+                self.mergeIsolatedPortlet(elt, portlet_rendered.next(), parent)
+            except StopIteration:
+                self.logger.warn("Could not find isolated portlet with id='%s'",
+                                 ptl_id)
 
         if body_element is not None:
             self.mergeBodyElement(from_cps=body_element)
@@ -255,8 +258,8 @@ class BaseEngine(object):
         raise NotImplementedError
 
     def extractIsolatedPortletsElements(self):
-        """Return an iterable over pairs (slot name, slot xml element)
-        Side effect: cleanup the slot element to make it xhtml compliant
+        """Return an iterable of triples (portlet id, xml element, parent)
+        Side effect: cleanup the element of the cps:isolatedPortlet attribute
         """
         raise NotImplementedError
 
@@ -310,6 +313,13 @@ class BaseEngine(object):
 
         portlets_rendered is a pair (title, body)
         frame's parent is passed because it's needed for frame repetition"""
+        raise NotImplementedError
+
+    @classmethod
+    def mergeIsolatedPortlet(self, element, portlet_rendered, parent):
+        """Merge an isolated portlet where appropriate.
+        Uses cps:remove attribute on the element to make the proper decision.
+        """
         raise NotImplementedError
 
     def removeElement(self, elt):

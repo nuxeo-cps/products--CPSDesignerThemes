@@ -120,7 +120,7 @@ class ElementTreeEngine(BaseEngine):
                 break
 
     @classmethod
-    def findByAttribute(self, elt, attr_name, value=None):
+    def findByAttribute(self, elt, attr_name, value=None, with_parent=False):
         """Shameless implementation of search by attribute.
 
         Workaround the fact that attribute xpath expressions are supported
@@ -129,10 +129,26 @@ class ElementTreeEngine(BaseEngine):
         presence = value is None
         all = elt.findall('.//*')
 
-        if presence:
-            return (e for e in all if attr_name in e.keys())
-        else:
-            return (e for e in all if e.get(attr_name) == value)
+        if not with_parent:
+            if presence:
+                return (e for e in all if attr_name in e.keys())
+            else:
+                return (e for e in all if e.get(attr_name) == value)
+
+        return self._findByAttributeWithParent(all, attr_name,
+                                               value=value, presence=presence)
+
+    @classmethod
+    def _findByAttributeWithParent(self, elts, attr_name,
+                                   value=None, presence=False):
+        # XXX unsatisfying complexity, not so easy to fix
+        for parent in elts:
+            for child in parent:
+                if presence:
+                    if attr_name in child.keys():
+                        yield (parent, child)
+                elif child.get(attr_name) == value:
+                    yield (parent, child)
 
     #
     # Inclusion methods for dynamical content (main content and portlets)
@@ -205,10 +221,10 @@ class ElementTreeEngine(BaseEngine):
                 for slot in self.findByAttribute(self.root, SLOT_ATTR))
 
     def extractIsolatedPortletElements(self):
-        return ((ptl.attrib.pop(ISOLATED_PORTLET_ATTR), ptl)
-                for ptl in self.findByAttribute(self.root,
-                                                ISOLATED_PORTLET_ATTR))
-
+        return ((ptl.attrib.pop(ISOLATED_PORTLET_ATTR), ptl, parent)
+                for parent, ptl in self.findByAttribute(self.root,
+                                                        ISOLATED_PORTLET_ATTR,
+                                                        with_parent=True))
     @classmethod
     def parseHeadBody(self, pt_output):
         parsed = self.parseFragment(pt_output, enclosing='default-document')
@@ -376,9 +392,9 @@ class ElementTreeEngine(BaseEngine):
     def extractSlotFrame(self, slot):
         """Find the frame part in the slot and remove it from the tree.
 
-        Sibling frames (elements bearing 'cps:frame' attribute) are tolerated
-        as a convenience for web designers wanting to check their output
-        with several portlets TODO: move this to general doc."""
+        Sibling frames (sibling elements bearing 'cps:frame' attribute)
+        are tolerated as a convenience for web designers wanting to check
+        their output with several portlets TODO: move this to general doc."""
 
         frame = None
         for child in slot:
@@ -388,8 +404,9 @@ class ElementTreeEngine(BaseEngine):
                     frame = child
                     frame_parent = slot
                 slot.remove(child)
+
         if frame is None:
-            # same below
+            # 
             # XXX awful style
             for elt in slot.findall('.//*'):
                 for child in elt:
@@ -494,6 +511,24 @@ class ElementTreeEngine(BaseEngine):
                         elt.tail = ptl_elt.tail
                     else:
                         elt.tail += ptl_elt.tail
+
+    def mergeIsolatedPortlet(self, elt, portlet_rendered, parent):
+        frame_parent, frame = self.extractSlotFrame(elt)
+        frame_remove = frame.get(REMOVE_ATTR) # now to avoid side-effects
+        self.mergePortlets(frame_parent, frame, (portlet_rendered,))
+        if elt.attrib.pop(REMOVE_ATTR, False):
+            # XXX make this a generic skipElement method
+            i = parent.getchildren().index(elt)
+            parent.remove(elt)
+            if i == 0:
+                parent.text = elt.text
+            else:
+                prev = parent[i-1]
+                s = prev.text or '' # could be None
+                s += elt.text
+                prev.text = s
+            for j, child in enumerate(elt.getchildren()):
+                parent.insert(i+j, child)
 
     def protectEmptyElements(self, *tags):
         # maybe lxml can do this better

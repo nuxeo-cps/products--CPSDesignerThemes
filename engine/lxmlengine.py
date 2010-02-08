@@ -65,12 +65,17 @@ class LxmlEngine(ElementTreeEngine):
         elt.getparent().remove(elt)
 
     @classmethod
-    def findByAttribute(self, elt, attr_name, value=None):
+    def findByAttribute(self, elt, attr_name, value=None, with_parent=False):
         if value is None:
             # need an iterable, iterfind misses slot
-            return (e for e in elt.findall('.//*[@%s]' % attr_name))
-        return (e for e in elt.iterfind('.//*[@%s]' % attr_name)
-                if e.get(attr_name) == value)
+            found = (e for e in elt.findall('.//*[@%s]' % attr_name))
+        else:
+            found = (e for e in elt.iterfind('.//*[@%s]' % attr_name)
+                   if e.get(attr_name) == value)
+
+        if not with_parent:
+            return found
+        return ( (e.getparent(), e) for e in found)
 
     @classmethod
     def parseFragment(self, content, enclosing=None):

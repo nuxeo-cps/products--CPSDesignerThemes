@@ -177,7 +177,9 @@ def test_suite():
                        LxmlEngine, TwoPhaseLxmlEngine):
         suite.addTest(unittest.makeSuite(engines2test_case()[PageEngine]))
         for test_file in ('engine/portlets_merging.txt',
-                          'engine/heads_merging.txt'):
+                          'engine/heads_merging.txt',
+                          'engine/isolated_portlet.txt',
+                          ):
             suite.addTest(
                 doctest.DocFileTest(test_file,
                                     package='Products.CPSDesignerThemes',
