@@ -216,6 +216,7 @@ class BaseEngine(object):
             except StopIteration:
                 self.logger.warn("Could not find isolated portlet with id='%s'",
                                  ptl_id)
+                parent.remove(elt)
 
         if body_element is not None:
             self.mergeBodyElement(from_cps=body_element)
