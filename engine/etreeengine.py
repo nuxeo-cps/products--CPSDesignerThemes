@@ -542,17 +542,15 @@ class ElementTreeEngine(BaseEngine):
         self.protectEmptyElements('script', 'div', 'textarea')
 
         out = StringIO()
-        # TODO UNICODE
         self.tree.write(out, default_namespace=NS_XHTML,
-                        encoding='iso-8859-15')
+                        encoding=ENCODING)
         return out.getvalue()
 
     @classmethod
     def dumpElement(self, elt):
         tree = ET.ElementTree(elt)
         out = StringIO()
-        # TODO UNICODE
-        tree.write(out, default_namespace=NS_XHTML, encoding='iso-8859-15')
+        tree.write(out, default_namespace=NS_XHTML, encoding=ENCODING)
         return out.getvalue()
 
     @classmethod
