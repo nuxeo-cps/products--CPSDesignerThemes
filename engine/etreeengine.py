@@ -232,6 +232,9 @@ class ElementTreeEngine(BaseEngine):
 
     @classmethod
     def parseFragment(self, content, enclosing=None):
+        if isinstance(content, unicode):
+            content = content.encode(ENCODING)
+
         parser = ET.XMLParser()
         # entity declarations and voodoo to make it work
         if not C_ELEMENT_TREE:
