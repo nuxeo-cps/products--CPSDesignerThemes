@@ -86,7 +86,7 @@ class EngineTestCase(unittest.TestCase):
             '<span>%s</span><div>%s</div>'
             '</p></div>' % (NS_XHTML, portlet[0], portlet[1]))
         if not hasattr(self.EngineClass, 'secondPhase'):
-            expected = expected.replace('&nbsp;', '\xa0')
+            expected = expected.replace('&nbsp;', u'\xa0'.encode('utf-8'))
         # skip declaration: not what is being tested
         rendered = re.sub(r'<\?xml.*\?>', '', rendered)
         self.assertEquals(rendered, expected)
