@@ -6,7 +6,8 @@ New features
 -
 Bug fixes
 ~~~~~~~~~
--
+- #2099: enforce cps:remove for isolated portlets
+- #2100: robustness wrt invalid fragments
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 
