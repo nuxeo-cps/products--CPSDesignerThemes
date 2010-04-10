@@ -17,6 +17,8 @@
 #
 # $Id$
 
+from urlparse import urlparse
+
 def rewrite_uri(absolute_base='', referer_uri='/index.html', uri='',
                 cps_base_url=None):
     """Shared URI rewriting logic.
@@ -62,15 +64,25 @@ def rewrite_uri(absolute_base='', referer_uri='/index.html', uri='',
     ... except ValueError: print 'ValueError'
     ValueError
     """
-    # TODO refactor using standard lib
 
-    if uri.startswith('http://') or uri.startswith('#'):
-        return uri
-    if uri.startswith('cps://'):
-        if cps_base_url is None:
+    parsed = urlparse(uri)
+
+    scheme = parsed[0]
+    if scheme:
+        if scheme != 'cps':
+            return uri
+        elif cps_base_url is None:
             raise ValueError("Need the CPS base URL to use the cps:// scheme")
         return cps_base_url + uri[6:]
-    if uri.startswith('/'):
+
+    if parsed[1]: # probably impossible (scheme is empty), but...
+        raise ValueError("Invalid URI : " + uri)
+
+    path = parsed[2]
+    if not path: # typically, pure fragment URI (#header)
+        return uri
+
+    if path.startswith('/'):
         local_base = ''
     else:
         local_base = referer_uri.rsplit('/', 1)[0] + '/'
