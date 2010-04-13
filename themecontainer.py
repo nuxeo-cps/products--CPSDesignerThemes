@@ -64,6 +64,7 @@ class OpenImage(Image):
     security.declarePublic('index_html')
     def index_html(self, REQUEST, RESPONSE):
         """Rewrap for caching headers"""
+        add_caching_headers(RESPONSE)
         res = Image.index_html(self, REQUEST, RESPONSE)
         add_caching_headers(RESPONSE)
         return res
@@ -78,9 +79,9 @@ class OpenFile(File):
     security.declarePublic('index_html')
     def index_html(self, REQUEST, RESPONSE):
         """Rewrap for caching headers"""
+        add_caching_headers(RESPONSE)
         res = File.index_html(self, REQUEST, RESPONSE)
-        RESPONSE.setHeader(
-            'Cache-Control', 'public, max-age=36000, must-revalidate')
+        add_caching_headers(RESPONSE)
         return res
 
 InitializeClass(OpenFile)
