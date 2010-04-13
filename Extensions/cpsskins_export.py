@@ -22,6 +22,7 @@ from StringIO import StringIO
 from Products.CMFCore.utils import getToolByName
 from Products.CPSDesignerThemes.constants import NS_XHTML, NS_URI
 from Products.CPSDesignerThemes.engine import get_engine_class
+from Products.CPSDesignerThemes.engine.twophase import TwoPhaseEngine
 
 logger = logging.getLogger('Products.CPSDesignerThemes.Extensions.cpsskins_export')
 
@@ -57,6 +58,17 @@ class ExportEngine(EngineClass):
 
         if 'CPSSkins' in elt.attrib['content']:
             del head[0:i]
+
+        # now put some default elements (etreeengine API only,
+        # avoid 2-phase pbms)
+        if isinstance(self, TwoPhaseEngine):
+            insertFragment = super(TwoPhaseEngine, self).insertFragment
+        else:
+            insertFragment = self.insertFragment
+
+        insertFragment(0, head, '<meta http-equiv="Content-Type" '
+                       'content="text/html; charset=UTF-8" />',
+                       is_element=True)
 
 DESIGNER_LAYER = 'cps_designer_themes_compat'
 def disable_designer_themes(portal):

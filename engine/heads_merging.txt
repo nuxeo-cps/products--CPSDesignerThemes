@@ -31,16 +31,18 @@ Let's define the needed fragments to demonstrate:
 ...    <script src="/functions.js"></script>
 ...  </head>
 ...  <body></body>
-... </html>""")
+... </html>""", 'ASCII')
 
 Now let's see how our sources get merged. See how the head_content
 part and cps_global parts go straight while URIs from the theme get rewritten:
 >>> engine = get_engine(PageEngine, 'theme1', page='simple_head.html',
 ...  	                cps_base_url='/cps_portal/')
+>>> engine.encoding = 'UTF-8'
 >>> engine.mergeHeads(head_content=head_content, cps_global=cps_global)
 >>> print engine.serialize() # TODO JS ordering as well
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
    <title>The title from the theme</title>
    <link href="/cps_portal/portal_themes/default/icons/cps_favicon_4.png"
          rel="icon" type="image/png" />

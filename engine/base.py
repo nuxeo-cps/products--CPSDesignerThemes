@@ -26,7 +26,7 @@ from zope.interface import implements
 from Products.CMFCore.utils import getToolByName
 
 from Products.CPSDesignerThemes.interfaces import IThemeEngine
-from Products.CPSDesignerThemes.constants import NS_URI, ENCODING
+from Products.CPSDesignerThemes.constants import NS_URI
 from Products.CPSDesignerThemes.utils import rewrite_uri
 
 METAL_HEAD_SLOTS = ( # the passed slots that end up in the <head> element
@@ -70,10 +70,8 @@ class BaseEngine(object):
     logger = logging.getLogger(
         'Products.CPSDesignerThemes.engine.BaseEngine')
 
-    XML_HEADER = '<?xml version="1.0" encoding="%s"?>' % ENCODING
-
     def __init__(self, html_file=None, theme_base_uri='', page_uri='',
-                 cps_base_url=None):
+                 cps_base_url=None, encoding=None):
         """Subclasses accept another argument: theme xml source.
 
         When we'll cache xml parsing and URI rewriting, this constructor will
@@ -84,6 +82,9 @@ class BaseEngine(object):
         self.theme_base_uri = theme_base_uri
         self.page_uri = page_uri
         self.cps_base_url = cps_base_url
+        # this is from this class point of view both input (portlets) and
+        # output (rendered htm) encoding
+        self.encoding = encoding
         self.rewriteUris()
 
     def renderCompat(self, metal_slots=None, pt_output='',
@@ -115,7 +116,8 @@ class BaseEngine(object):
         be called from there directly in the output, define the slots in the
         simplest manner near top level, and this method merges all of this."""
 
-        head_element, body_element = self.parseHeadBody(pt_output)
+        head_element, body_element = self.parseHeadBody(pt_output,
+                                                        self.encoding)
 
         head_content = '\n'.join((metal_slots.get(slot, '')
                                   for slot in METAL_HEAD_SLOTS))
@@ -138,7 +140,7 @@ class BaseEngine(object):
                            context=context, request=None)
 
     @classmethod
-    def parseHeadBody(self, pt_output):
+    def parseHeadBody(self, pt_output, encoding):
         """Return the head and body elements from an XML string fragment"""
         raise NotImplementedError
 

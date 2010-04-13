@@ -26,7 +26,8 @@ from lxml import html, etree
 from zope.interface import implements
 
 from Products.CPSDesignerThemes.interfaces import IThemeEngine
-from Products.CPSDesignerThemes.constants import NS_URI, NS_XHTML, ENCODING
+from Products.CPSDesignerThemes.constants import NS_URI, NS_XHTML
+from Products.CPSDesignerThemes.constants import XML_HEADER, XML_HEADER_NO_ENC
 from Products.CPSDesignerThemes.utils import rewrite_uri
 from base import BaseEngine
 from twophase import TwoPhaseEngine
@@ -47,7 +48,7 @@ class LxmlEngine(ElementTreeEngine):
     logger = logging.getLogger(
         'Products.CPSDesignerThemes.engine.LxmlEtreeEngine')
 
-    XML_HEADER = '<?xml version="1.0" encoding="%s"?>' % ENCODING
+    XML_HEADER = '<?xml version="1.0" encoding="%s"?>'
 
     #
     # Internal engine API implementation. For docstrings, see BaseEngine
@@ -78,9 +79,12 @@ class LxmlEngine(ElementTreeEngine):
         return ( (e.getparent(), e) for e in found)
 
     @classmethod
-    def parseFragment(self, content, enclosing=None):
+    def parseFragment(self, content, enclosing=None, encoding=None):
         parser = etree.XMLParser()
-        parser.feed(self.XML_HEADER)
+        if encoding is None:
+            parser.feed(XML_HEADER_NO_ENC)
+        else:
+            parser.feed(XML_HEADER % encoding)
 
         # We always need an enclosing tag to bear the xhtml namespace
         if enclosing is None:
@@ -135,7 +139,8 @@ class LxmlEngine(ElementTreeEngine):
                 end_cond_index = t.find('<![endif]')
                 fragment = t[start_cond_index:end_cond_index]
                 try:
-                    elt = self.parseFragment(fragment, enclosing='msie-cond')
+                    elt = self.parseFragment(fragment, enclosing='msie-cond',
+                                             encoding=self.encoding)
                 except FragmentParseError:
                     continue
                 self._rewriteElementUris(elt, rewriter_func)

@@ -46,7 +46,8 @@ from zope.interface import implements
 from Products.CMFCore.utils import getToolByName
 
 from Products.CPSDesignerThemes.interfaces import IThemeEngine
-from Products.CPSDesignerThemes.constants import NS_URI, NS_XHTML, ENCODING
+from Products.CPSDesignerThemes.constants import NS_URI, NS_XHTML
+from Products.CPSDesignerThemes.constants import XML_HEADER, XML_HEADER_NO_ENC
 from Products.CPSDesignerThemes.utils import rewrite_uri
 from base import BaseEngine
 from exceptions import FragmentParseError
@@ -59,6 +60,7 @@ def ns_prefix(name):
 
 HEAD = '{%s}head' % NS_XHTML
 BODY = '{%s}body' % NS_XHTML
+META = '{%s}meta' % NS_XHTML
 
 PORTLET_ATTR = ns_prefix('portlet')
 PORTLET_TITLE_I18N_ATTR = ns_prefix('translate-titles')
@@ -100,8 +102,6 @@ class ElementTreeEngine(BaseEngine):
     """
 
     implements(IThemeEngine)
-
-    XML_HEADER = '<?xml version="1.0" encoding="%s"?>' % ENCODING
 
     def readTheme(self, html_file):
         """Parse the theme and inits the 'tree' and 'root' attributes"""
@@ -164,7 +164,8 @@ class ElementTreeEngine(BaseEngine):
             enclosing = 'include-fragment'
 
         try:
-            parsed = self.parseFragment(fragment, enclosing=enclosing)
+            parsed = self.parseFragment(fragment, enclosing=enclosing,
+                                        encoding=self.encoding)
         except FragmentParseError:
             return
         elt.text = parsed.text
@@ -182,7 +183,8 @@ class ElementTreeEngine(BaseEngine):
             raise NotImplementedError
 
         try:
-            elt.insert(index, self.parseFragment(fragment, enclosing=enclosing))
+            elt.insert(index, self.parseFragment(fragment, enclosing=enclosing,
+                                                 encoding=self.encoding))
         except FragmentParseError:
             pass
 
@@ -226,12 +228,13 @@ class ElementTreeEngine(BaseEngine):
                                                         ISOLATED_PORTLET_ATTR,
                                                         with_parent=True))
     @classmethod
-    def parseHeadBody(self, pt_output):
-        parsed = self.parseFragment(pt_output, enclosing='default-document')
+    def parseHeadBody(self, pt_output, encoding):
+        parsed = self.parseFragment(pt_output, enclosing='default-document',
+                                    encoding=encoding)
         return (parsed.find('.//' + elt) for elt in (HEAD, BODY))
 
     @classmethod
-    def parseFragment(self, content, enclosing=None):
+    def parseFragment(self, content, enclosing=None, encoding=None):
         parser = ET.XMLParser()
         # entity declarations and voodoo to make it work
         if not C_ELEMENT_TREE:
@@ -242,7 +245,10 @@ class ElementTreeEngine(BaseEngine):
         else:
             parser.entity.update(HTML_ENTITIES)
 
-        parser.feed(self.XML_HEADER)
+        if encoding is None:
+            parser.feed(XML_HEADER_NO_ENC)
+        else:
+            parser.feed(XML_HEADER % encoding)
 
         # We always need an enclosing tag to bear the xhtml namespace
         if enclosing is None:
@@ -335,10 +341,33 @@ class ElementTreeEngine(BaseEngine):
 
         Return the conditional statements, as a bunch of comments in an
         enclosing <msie-cond> element."""
-        
+
         # no support for comments parsing in ElementTree. Subclasses can do
         # better
-        return 
+        return
+
+    def fixMetaElements(self, head):
+        encoding = self.encoding.upper()
+        ctype = None
+        for meta in head.findall(META):
+            attrib = meta.attrib
+            heq = attrib.get('http-equiv')
+            if heq is not None and heq.lower() == 'content-type':
+                if ctype is not None: # not the first one, drop it
+                    head.remove(meta)
+                else:
+                    ctype = meta
+
+        # content-type
+        if ctype is None:
+            ctype = self.parseFragment('<meta http-equiv="Content-Type" />')
+            head.insert(0, ctype)
+
+        ctype.attrib['content'] = 'text/html; charset=%s' % encoding
+
+        # engine
+        head.insert(0, self.parseFragment(
+            '<meta name="engine" content="CPSDesignerThemes" />'))
 
     def mergeHeads(self, head_content='', cps_global=None):
         """See base class for docstring."""
@@ -354,7 +383,8 @@ class ElementTreeEngine(BaseEngine):
                 self._cutMsieConditionals(cps_global)
             offset = self._mergeElement(len(in_theme), in_theme, cps_global)
 
-        parsed = self.parseFragment(head_content, enclosing='head')
+        parsed = self.parseFragment(head_content, enclosing='head',
+                                    encoding=self.encoding)
         self._accumulateJavaScript(parsed, js_acc)
         if msie_cond is not None:
             self._cutMsieConditionals(parsed)
@@ -366,6 +396,8 @@ class ElementTreeEngine(BaseEngine):
         # Put theme MSIE conditionals at the end for precedence
         if msie_cond is not None:
             self._mergeElement(len(in_theme), in_theme, msie_cond)
+
+        self.fixMetaElements(in_theme)
 
     def renderMainContent(self, main_content):
         try:
@@ -542,17 +574,14 @@ class ElementTreeEngine(BaseEngine):
         self.protectEmptyElements('script', 'div', 'textarea')
 
         out = StringIO()
-        # TODO UNICODE
         self.tree.write(out, default_namespace=NS_XHTML,
-                        encoding='iso-8859-15')
+                        encoding=self.encoding)
         return out.getvalue()
 
-    @classmethod
-    def dumpElement(self, elt):
+    def dumpElement(self, elt, encoding=None):
         tree = ET.ElementTree(elt)
         out = StringIO()
-        # TODO UNICODE
-        tree.write(out, default_namespace=NS_XHTML, encoding='iso-8859-15')
+        tree.write(out, default_namespace=NS_XHTML, encoding=self.encoding)
         return out.getvalue()
 
     @classmethod

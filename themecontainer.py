@@ -249,7 +249,8 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
             return page + '.html'
         return page
 
-    def getPageEngine(self, theme, page, cps_base_url=None, fallback=False):
+    def getPageEngine(self, theme, page, cps_base_url=None, fallback=False,
+                      encoding=None):
         if page is None:
             page = self.default_page
         if theme is None:
@@ -276,7 +277,8 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
         return PageEngine(html_file=page_path,
                           theme_base_uri=self.absolute_url_path() + '/' + theme,
                           page_uri='/' + page_rpath,
-                          cps_base_url=cps_base_url)
+                          cps_base_url=cps_base_url,
+                          encoding=encoding)
 
     def invalidate(self, theme, page=None):
         """No cache yet."""

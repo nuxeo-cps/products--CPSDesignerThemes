@@ -51,7 +51,14 @@ class EngineAdapter(object):
             logger.warn("Didn't found marker in request. Void responses "
                         "(302, 304...) quick handling might be broken.")
 
-        self.cps_base_url = getToolByName(context, 'portal_url').getBaseUrl()
+        # portal-related stuff
+        utool = getToolByName(context, 'portal_url')
+        self.cps_base_url = utool.getBaseUrl()
+        enc = utool.getPortalObject().default_charset
+        if enc == 'unicode':
+            # XXX maybe better to introspect zpublisher conf
+            enc = 'utf-8'
+        self.encoding = enc
 
     def renderCompat(self, **kw):
         if self.void: # return asap for efficiency (see #2040)
@@ -94,7 +101,7 @@ class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
         """The fallback is up to the container."""
         theme, page = self.getCPSSkinsThemeAndPageName()
         return self.lookupContainer().getPageEngine(
-            theme, page, cps_base_url=self.cps_base_url, fallback=True)
+            theme, page, cps_base_url=self.cps_base_url, fallback=True, )
 
 class CherryPickingCPSSkinsThemeNegociator(CPSSkinsThemeNegociator):
     """CPSSKins negociation, overridden by a property on context object only.
@@ -154,7 +161,8 @@ class CherryPickingCPSSkinsThemeNegociator(CPSSkinsThemeNegociator):
         else:
             theme, page = tuple(s.strip() for s in themepage.split('+'))
         return self.lookupContainer().getPageEngine(
-            theme, page, cps_base_url=self.cps_base_url, fallback=True)
+            theme, page, cps_base_url=self.cps_base_url, fallback=True,
+            encoding=self.encoding)
 
 
 

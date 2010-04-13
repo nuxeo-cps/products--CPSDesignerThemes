@@ -42,7 +42,7 @@ WT_REGEXP = re.compile(r'[\n ]*')
 def get_engine(EngineClass, theme, page='index.html', cps_base_url=None):
     f = open(os.path.join(THEMES_PATH, theme, page), 'r')
     return EngineClass(html_file=f,
-                       theme_base_uri='/thm_base',
+                       theme_base_uri='/thm_base', encoding='iso-8859-15',
                        page_uri='/'+page, cps_base_url=cps_base_url)
 
 class EngineTestCase(unittest.TestCase):
@@ -122,6 +122,13 @@ class TestElementTreeEngine(EngineTestCase):
     @classmethod
     def getAttribs(self, element):
         return element.attrib
+
+    def test_fixMetaElements(self):
+        engine = self.getEngine('theme1', 'simple_slot.html')
+
+        # don't break on other meta than http-equiv
+        head = engine.parseFragment('<head> <meta generator="Me"/></head>')
+        engine.fixMetaElements(head)
 
 
 class TestLxmlEngine(TestElementTreeEngine):

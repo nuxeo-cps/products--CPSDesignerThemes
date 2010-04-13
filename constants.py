@@ -1,3 +1,6 @@
 NS_URI = "http://xmlns.racinet.org/cps"
 NS_XHTML = "http://www.w3.org/1999/xhtml"
-ENCODING = 'iso-8859-15' # sigh
+
+XML_HEADER = '<?xml version="1.0" encoding="%s"?>'
+XML_HEADER_NO_ENC = '<?xml version="1.0"?>'
+
