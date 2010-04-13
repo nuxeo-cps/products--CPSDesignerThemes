@@ -240,6 +240,14 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
     def getBaseUri(self):
         return self.absolute_url_path()
 
+    def computePageFileName(self, page):
+        """Compute local FS name from page Name"""
+
+        f = page.rfind('.')
+        if f == -1:
+            return page + '.html'
+        return page
+
     def getPageEngine(self, theme, page, cps_base_url=None, fallback=False):
         if page is None:
             page = self.default_page
@@ -249,11 +257,16 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
                         (theme, self.default_page),
                         (self.default_theme, self.default_page))
 
-        for page_path, final_page in (
-                (os.path.join(self.getFSPath(), t, p + '.html'), p)
-                 for t, p in alternatives):
+        for t, p in alternatives:
+            page_rpath = self.computePageFileName(p)
+            page_path = os.path.join(self.getFSPath(), t, page_rpath)
+
             if os.path.exists(page_path):
                 break
+            else:
+                logger.debug(
+                    "Tried theme '%s', page '%s', but didn't find  %s",
+                    theme, p, page_path)
         else:
             raise ValueError("Could not find suitables themes and page for"
                               " the required %s and %s" % (theme, page))
@@ -261,7 +274,7 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
         PageEngine = get_engine_class()
         return PageEngine(html_file=page_path,
                           theme_base_uri=self.absolute_url_path() + '/' + theme,
-                          page_uri='/%s.html' % final_page,
+                          page_uri='/' + page_rpath,
                           cps_base_url=cps_base_url)
 
     def invalidate(self, theme, page=None):

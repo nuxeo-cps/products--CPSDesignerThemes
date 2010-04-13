@@ -78,6 +78,23 @@ class TestFsContainer(ZopeTestCase):
             res[5].strip(),
             'background: url(%s/theme1/images/back.png);' % self.container_path)
 
+    def testGetPageEngine(self):
+        # See #2137
+        e1 = self.container.getPageEngine('theme1', 'two_slots')
+        e2 = self.container.getPageEngine('theme1', 'two_slots.html')
+
+        self.assertEquals(e1.page_uri, e2.page_uri)
+        self.assertEquals(e1.serialize(), e2.serialize())
+
+        # other exts
+        e = self.container.getPageEngine('theme1', 'fs-extension.xhtml')
+        self.assertEquals(e.page_uri, '/fs-extension.xhtml')
+        self.assertEquals(e.serialize().strip(), '<html>xhtml extension</html>')
+
+        e = self.container.getPageEngine('theme1', 'fs-extension.cpsthm')
+        self.assertEquals(e.page_uri, '/fs-extension.cpsthm')
+        self.assertEquals(e.serialize().strip(),
+                          '<html>cpsthm extension</html>')
 
 def test_suite():
     return unittest.TestSuite((

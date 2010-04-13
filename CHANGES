@@ -7,6 +7,7 @@ New features
 Bug fixes
 ~~~~~~~~~
 - #2135: Fully specified URI rewriting is too specific
+- #2137: Accept any extension for theme pages
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 
