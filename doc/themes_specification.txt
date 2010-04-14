@@ -66,7 +66,7 @@ usual namespace, at toplevel in the root element.
 Example::
 
   <?xml version="1.0"?>
-  <document xmlns="http://www.racinet.org/cps">
+  <document xmlns="http://xmlns.racinet.org/cps">
     <options uri-absolute-path-rewrite="false"/>
   </document>
 

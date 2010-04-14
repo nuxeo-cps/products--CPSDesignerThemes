@@ -78,6 +78,21 @@ class TestFsContainer(ZopeTestCase):
             res[5].strip(),
             'background: url(%s/theme1/images/back.png);' % self.container_path)
 
+    def testStyleSheetOptions(self):
+        # see tests/theme2/stylesheet_options.xml
+        sheet = self.container['theme2']['style']['top.css']
+        request = self.app.REQUEST
+        res = sheet.index_html(request, request.RESPONSE).split('\n')
+
+        # absolute path URI didn't get rewritten
+        self.assertEquals(res[5].strip(),
+                          'background: url(/images/back.png);')
+
+        # relative path URIs have been treated as usual
+        self.assertEquals(
+            res[1].strip(),
+            'background: url(%s/theme2/style/bg.gif);' % self.container_path)
+
     def testGetPageEngine(self):
         # See #2137
         e1 = self.container.getPageEngine('theme1', 'two_slots')

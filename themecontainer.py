@@ -137,7 +137,7 @@ class ResourceTraverser(Acquisition.Explicit):
         self.theme_base_uri = theme_base_uri
         self.relative_uri=relative_uri
         self.cps_base_url = cps_base_url
-        self.stylesheet_options = None
+        self.stylesheet_options = stylesheet_options
 
     @classmethod
     def isThemeContainer(self):
