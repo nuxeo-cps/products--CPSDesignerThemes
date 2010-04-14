@@ -20,7 +20,7 @@
 from urlparse import urlparse
 
 def rewrite_uri(absolute_base='', referer_uri='/index.html', uri='',
-                cps_base_url=None):
+                cps_base_url=None, absolute_rewrite=True):
     """Shared URI rewriting logic.
 
 
@@ -43,6 +43,11 @@ def rewrite_uri(absolute_base='', referer_uri='/index.html', uri='',
     >>> rewrite_uri(absolute_base='/cont/thm', referer_uri='/styles/main.css',
     ...             uri='/images/x.png')
     '/cont/thm/images/x.png'
+
+    Absolute path uri, with no-rewrite option
+    >>> rewrite_uri(absolute_base='/cont/thm', referer_uri='/styles/main.css',
+    ...             uri='/images/x.png', absolute_rewrite=False)
+    '/images/x.png'
 
     Relative uri, from a deeper resource
     >>> rewrite_uri(absolute_base='/cont/thm', referer_uri='/graph/main.css',
@@ -83,7 +88,10 @@ def rewrite_uri(absolute_base='', referer_uri='/index.html', uri='',
         return uri
 
     if path.startswith('/'):
-        local_base = ''
+        if absolute_rewrite:
+            local_base = ''
+        else:
+            return uri
     else:
         local_base = referer_uri.rsplit('/', 1)[0] + '/'
 

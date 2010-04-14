@@ -1,0 +1,211 @@
+====================
+THEME SPECIFICATIONS
+====================
+
+:Author: Georges Racinet
+
+.. sectnum::    :depth: 4
+.. contents::   :depth: 4
+
+Introduction
+============
+
+A theme is a file hierarchy holding theme pages (enhanced xhtml) and
+other resources (stylesheets, images, video content, etc.).
+They are organized in the same way as a static website. The goal of this
+design is to make it possible to convert any existing website into a CPS theme.
+
+Sample themes can be found in ``CPSDesignerThemes/doc/sample_themes``
+and, starting with CPS 3.5, in ``CPSDefault/themes``.
+
+Namespace
+---------
+The theme pages format is XHTML 1.0 strict, enhanced with the
+following dedicated namespace: http://xmlns.racinet.org/cps
+
+A full DTD and xml declaration looks like this::
+
+ <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+           "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+   <html xmlns="http://www.w3.org/1999/xhtml" lang="en"
+	 xmlns:cps="http://xmlns.racinet.org/cps"
+         xml:lang="en">
+
+In the sequel, we'll use the ``cps:`` prefix for this
+namespace.
+
+Remark: the DOCTYPE is actually the one for the produced html
+content. There is currently no DTD for theme pages themselves, and
+therefore no validator.
+
+Global options
+==============
+
+Page options
+------------
+Options are specified as attributes of the ``cps:options`` element.
+This element must be placed at toplevel, before the ``head`` element.
+Their scope is the page where they are specified.
+
+Available options:
+
+ - uri-absolute-path-rewrite: boolean (defaults to true).
+
+Attribute values for boolean options must be
+either "false" or "true". Case does not matter, nor leading
+or trailing whitespaces.
+
+Stylesheet options
+------------------
+Options for stylesheets are read from the ``stylesheet_options.xml``
+file, that must be at root of the theme hierarchy. The options
+element follows the same logic as in a theme page: it must be in the
+usual namespace, at toplevel in the root element.
+
+Example::
+
+  <?xml version="1.0"?>
+  <document xmlns="http://www.racinet.org/cps">
+    <options uri-absolute-path-rewrite="false"/>
+  </document>
+
+The root element can be any, and as you see, it's shorter to place the
+whole file under the cps namespace.
+
+
+Rendering logic
+===============
+
+To be written...
+
+For now, see the introductory article explaining the whole principle:
+http://www.racinet.fr/index.php?post/2009/06/10/A-new-themes-engine-for-CPS
+
+See also the various tickets for the "CPSDesignerThemes" component in
+CPS' trac.
+
+URI rewriting
+=============
+All URIs used to link static resources from theme pages and
+stylesheets are being rewritten at rendering time so that the
+resources can be served from the themes container, with no confusion with
+actual CPS content.
+
+You can see that in effect by simply looking at the HTML source of any
+page produced by CPS.
+
+General case
+------------
+
+ - An absolute URI, like 'http://www.example.com/logo.png' does not
+   get rewritten.
+ - A partial URI with absolute path (e.g, '/logo.png') is rewritten as
+   <absolute path of the theme>/<path>
+ - A partial relative URI (no leading slash) is rewritten as the
+   absolute path URI one gets applying the usual rules for relative
+   URIs *from the absolute URI of the theme page*.
+ - Partial relative URIs with two leading slashes are not supported.
+
+Examples with the current root filesystem container:
+ - for page ``front`` of `default`` theme,
+   with the CPS object being at root of the virtual
+   host, the URI ``images/logo.png`` becomes
+   ``.cps_themes/default/logo.png``, because the page absolute path
+   URI is ``/.cps_themes/default/front.html``
+ - for page ``pages/front`` and same as above, the result would be
+   ``/.cps_themes/default/pages/images/logo.png``, whereas
+   ``/images/logo.png`` would be rewritten as
+   ``/.cps_themes/default/images/logo.png``
+
+pointing to the CPS portal : the cps URI scheme
+-----------------------------------------------
+
+In some cases, it's useful to escape the themes container and point to
+resources that are CPS content. This is especially useful for some
+themes that got exported from CPSSkins (see the "Exporting from
+CPSSkins" section)
+
+For this, there is a special class of URIs, built with the ``cps``
+scheme. The syntax is: ``cps://<relative path within cps portal>``.
+
+For instance, if you have an Image document in
+``sections/gallery/pict``, the link to the actual image content URI
+from this document looks like this: ``downloadFile/photo/img1.png``.
+If you want to use it from the theme, use the following URI:
+``cps://sections/gallery/pict/downloadFile/photo/img1.png``
+
+The rule is simply that ``cps://`` is replaced by the ``current``
+absolute URI path of the portal in the current virtualhost.
+
+A given CPS portal may be accessed through different virtualhost
+and different protocols (http or https, for instance), that's why this
+``cps://`` is to be preferred to a full absolute URI. Another use-case
+is relocalibility without any change of the theme,
+from dev instance to preproduction to production.
+
+In case of virtual hosting pointing deeper in the cps site
+(e.g, to ``sections/sites/mysite` in the publication farm use-case for
+CPS),  ``cps://`` actually will point to the root of the virtual host,
+which doesn't inder tools such as ``portal_themes`` that will be
+catched anyway by acquisition.
+
+Leading slash problem
+---------------------
+The ``uri-absolute-path-rewrite`` option is meant to overcome the leading
+slash problem. The remainders of this section is directly extracted
+from ticket #2135 in CPS' trac, where this was first discussed.
+
+Some installations use static resources (images, video content) that
+are linked from the theme but are typically served at the reverse
+proxy level (at the ''edge side''). It's common practice in that case
+to use absolute path URIs to go outside of CPS.
+
+Practical example:
+
+  - The banner is some piece of flash content, say ``flash_banner.swf``
+  - It's been linked from the theme page as ``/media/flash_banner.swf``
+  - At the edge, URLs starting with ``/media`` are served directly
+    instead of being transformed into a reverse proxy request to
+    CPS.
+
+A sample Apache conf for this example would be::
+
+  ServerName mysite.net
+  DocumentRoot /var/www/mysite.net
+
+  ProxyPass /media !
+  <Directory /var/www/mysitite.net/media>
+   Order allow,deny
+   Allow from all
+  </Directory>
+
+  # Standard proxy stuff
+  ProxyPass / http://localhost:8080/VirtualHostBase/http/%{HTTP_HOST}:80/cps/VirtualHostRoot/
+  ProxyPassReverse / http://localhost:8080/
+
+On the other hand, The URI rewriting logic of CPSDesignerThemes is meant so that
+everything comes from CPS (the ''server side''). Absolute URIs such as
+``/media/flash_banner.swf`` get rewritten to the root of the theme
+(currently, that would be ``/.cps_themes/<themename>/media/flash_banner.swf``)
+
+This behaviour is important in the contract for CPSDesignerThemes :
+any existing web site seen from a browser perspective should be usable
+as a theme. Therefore, absolute URIs must correspond to the root of
+the theme. This will allow transitions from other CMSes or homogeneity
+from them, etc.
+
+To accomodate both use-cases, we need an option. The cleanest way of
+specifying it is to introduce a new element in our XML
+namespace. Proposal:
+
+default behaviour is to rewrite absolute path URIs
+we introduce a new element ``options`` in the CPSDesignerThemes
+namespace. To let absolute path URIs go through, put::
+
+  <cps:options uri-absolute-path-rewrite="False"/>.
+
+.. Local Variables:
+.. mode: rst
+.. End:
+.. vim: set filetype=rst:

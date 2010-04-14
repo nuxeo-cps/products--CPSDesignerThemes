@@ -48,6 +48,7 @@ from Products.CMFCore.utils import getToolByName
 from Products.CPSDesignerThemes.interfaces import IThemeEngine
 from Products.CPSDesignerThemes.constants import NS_URI, NS_XHTML
 from Products.CPSDesignerThemes.constants import XML_HEADER, XML_HEADER_NO_ENC
+from Products.CPSDesignerThemes.constants import BOOLEAN_OPTIONS
 from Products.CPSDesignerThemes.utils import rewrite_uri
 from base import BaseEngine
 from exceptions import FragmentParseError
@@ -61,6 +62,8 @@ def ns_prefix(name):
 HEAD = '{%s}head' % NS_XHTML
 BODY = '{%s}body' % NS_XHTML
 META = '{%s}meta' % NS_XHTML
+
+OPTIONS = ns_prefix('options')
 
 PORTLET_ATTR = ns_prefix('portlet')
 PORTLET_TITLE_I18N_ATTR = ns_prefix('translate-titles')
@@ -111,6 +114,36 @@ class ElementTreeEngine(BaseEngine):
     #
     # Internal engine API implementation. For docstrings, see BaseEngine
     #
+
+    def parseOptions(self):
+        return self._parseOptions(self.root)
+
+    @classmethod
+    def _parseOptions(self, root):
+        for elt in root.getchildren():
+            if elt.tag == OPTIONS:
+                break
+            if elt.tag == HEAD:
+                return {}
+        else:
+            return {}
+
+        options = dict(elt.attrib)
+        for k in options:
+            if k in BOOLEAN_OPTIONS:
+                v = options[k].strip().upper()
+                if v == 'TRUE':
+                    options[k] = True
+                elif v == 'FALSE':
+                    options[k] = False
+                else:
+                    raise ValueError("Invalid option : '%s'" % options[k])
+        return options
+
+    @classmethod
+    def parseOptionsFile(self, xml_file):
+        tree = ET.parse(xml_file)
+        return self._parseOptions(tree.getRoot())
 
     def removeElement(self, elt):
         # In plain ElementTree, one cannot access parent from element.
@@ -193,14 +226,17 @@ class ElementTreeEngine(BaseEngine):
     #
 
     def styleAtImportRewriteUri(self, match_obj):
+        abs_rewrite = self.uri_absolute_path_rewrite
         return 'url(%s)' % rewrite_uri(uri=match_obj.group(1),
                                        absolute_base=self.theme_base_uri,
                                        referer_uri=self.page_uri,
-                                       cps_base_url=self.cps_base_url)
+                                       cps_base_url=self.cps_base_url,
+                                       absolute_rewrite=abs_rewrite)
 
     def rewriteUris(self, rewriter_func=None):
         if rewriter_func is None:
             rewriter_func=rewrite_uri
+        abs_rewrite = self.uri_absolute_path_rewrite
         for tag, attr in LINK_HTML_DOCUMENTS.items():
             for elt in self.root.findall('.//{%s}%s' % (NS_XHTML, tag)):
                 uri = elt.attrib[attr]
@@ -208,7 +244,8 @@ class ElementTreeEngine(BaseEngine):
                     new_uri = rewriter_func(uri=uri,
                                             absolute_base=self.theme_base_uri,
                                             referer_uri=self.page_uri,
-                                            cps_base_url=self.cps_base_url)
+                                            cps_base_url=self.cps_base_url,
+                                            absolute_rewrite=abs_rewrite)
                 except KeyError:
                     raise ValueError(
                         "Missing attribute %s on <%s> element" % (attr, tag))

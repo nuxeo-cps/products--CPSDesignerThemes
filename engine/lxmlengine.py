@@ -107,6 +107,7 @@ class LxmlEngine(ElementTreeEngine):
         return parsed
 
     def _rewriteElementUris(self, from_elt, rewriter_func):
+        abs_rewrite = self.uri_absolute_path_rewrite
         for tag, attr in LINK_HTML_DOCUMENTS.items():
             for elt in from_elt.iterfind('.//{%s}%s' % (NS_XHTML, tag)):
                 uri = elt.attrib[attr]
@@ -114,7 +115,8 @@ class LxmlEngine(ElementTreeEngine):
                     new_uri = rewriter_func(uri=uri,
                         absolute_base=self.theme_base_uri,
                         referer_uri=self.page_uri,
-                        cps_base_url=self.cps_base_url)
+                        cps_base_url=self.cps_base_url,
+                        absolute_rewrite=abs_rewrite)
                 except KeyError:
                     raise ValueError(
                         "Missing attribute %s on <%s> element" % (attr, tag))

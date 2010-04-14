@@ -1,0 +1,66 @@
+===============
+OPTIONS PARSING
+===============
+
+The user-level documentation lies at 
+CPSDesignerThemes/doc/themes_specification.txt
+
+
+Preparations
+============
+>>> import os
+>>> from lxml import usedoctest
+>>> from Products.CPSDesignerThemes.tests.test_engine import get_engine
+>>> from Products.CPSDesignerThemes.interfaces import IThemeEngine
+
+In the context of this test, we should have a predefined engine class
+(PageEngine). Let's demonstrate that:
+>>> IThemeEngine.implementedBy(PageEngine)
+True
+
+
+Valid options element
+=====================
+Let's demonstrate first with an existing option::
+
+ >>> engine = get_engine(PageEngine, 'theme1', page='options_valid.html',
+ ...  	                cps_base_url='/cps_portal/')
+ >>> engine.parseOptions()
+ {'uri-absolute-path-rewrite': True}
+
+Actually the options parser does not whether the option is actually
+leveraged or not::
+
+ >>> engine = get_engine(PageEngine, 'theme1', page='options_valid2.html',
+ ...  	                cps_base_url='/cps_portal/')
+ >>> engine.parseOptions()
+ {'some-other-option': 'holy grail'}
+
+Invalid options element
+=======================
+Note that most of these examples will lead to invalid XHTML, because
+of an uninterpreted options element in our namespace going through.
+
+An option element happening after <head> is ignored::
+
+ >>> engine = get_engine(PageEngine, 'theme1', page='options_invalid.html',
+ ...  	                cps_base_url='/cps_portal/')
+ >>> engine.parseOptions()
+ {}
+
+In case there is a correct options element and one after head, the
+second is ignored, but the first is recognized::
+
+ >>> engine = get_engine(PageEngine, 'theme1', page='options_invalid2.html',
+ ...  	                cps_base_url='/cps_portal/')
+ >>> engine.parseOptions()
+ {'uri-absolute-path-rewrite': True}
+
+.. Local Variables:
+.. mode: rst
+.. End:
+.. vim: set filetype=rst:
+
+
+
+

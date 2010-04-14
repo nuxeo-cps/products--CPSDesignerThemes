@@ -85,6 +85,9 @@ class BaseEngine(object):
         # this is from this class point of view both input (portlets) and
         # output (rendered htm) encoding
         self.encoding = encoding
+        self.options = options = self.parseOptions()
+        self.uri_absolute_path_rewrite = options.get(
+            'uri-absolute-path-rewrite', True)
         self.rewriteUris()
 
     def renderCompat(self, metal_slots=None, pt_output='',
@@ -232,6 +235,20 @@ class BaseEngine(object):
     def readTheme(self, html_file):
         """Read the theme page from an open file.
         Does no actual treatment, in particular no Uri rewriting."""
+        raise NotImplementedError
+
+    def parseOptions(self):
+        """Parse the options element.
+        See doc/themes_specifications.txt for detail"""
+        raise NotImplementedError
+
+    @classmethod
+    def parseOptionsFile(self, xml_file):
+        """Parse a separate xml_file holding options.
+        This must stay a classmethod, in order to be called directly with no
+        need to instantiate a whole engine. Use case : options for URI
+        rewriting within stylesheets
+        """
         raise NotImplementedError
 
     def rewriteUris(self, rewriter_func=None):

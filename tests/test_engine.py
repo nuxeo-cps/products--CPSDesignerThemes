@@ -186,6 +186,7 @@ def test_suite():
         for test_file in ('engine/portlets_merging.txt',
                           'engine/heads_merging.txt',
                           'engine/isolated_portlet.txt',
+                          'engine/options.txt',
                           ):
             suite.addTest(
                 doctest.DocFileTest(test_file,
