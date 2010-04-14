@@ -42,6 +42,7 @@ part and cps_global parts go straight while URIs from the theme get rewritten:
 >>> print engine.serialize() # TODO JS ordering as well
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+   <meta content="CPSDesignerThemes" name="engine" />
    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
    <title>The title from the theme</title>
    <link href="/cps_portal/portal_themes/default/icons/cps_favicon_4.png"
