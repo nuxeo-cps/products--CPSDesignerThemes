@@ -60,6 +60,18 @@ class EngineAdapter(object):
             enc = 'utf-8'
         self.encoding = enc
 
+    def getThemeAndPageName(self):
+        """Return the theme and page that should be rendered.
+        To be implemented by subclasses."""
+        raise NotImplementedError
+
+    def getEngine(self):
+        """The fallback is up to the container."""
+        theme, page = self.getThemeAndPageName()
+        return self.lookupContainer().getPageEngine(
+            theme, page, cps_base_url=self.cps_base_url, fallback=True,
+            encoding=self.encoding)
+
     def renderCompat(self, **kw):
         if self.void: # return asap for efficiency (see #2040)
             return ''
@@ -97,14 +109,7 @@ class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
         logger.debug('CPSSkinsThemeNegociator: requesting (%s,%s)', theme, page)
         return theme, page
 
-    def getEngine(self):
-        """The fallback is up to the container."""
-        theme, page = self.getCPSSkinsThemeAndPageName()
-        # TODO too much technical params to pass thru. Makes negociator
-        # maintaining hazardous
-        return self.lookupContainer().getPageEngine(
-            theme, page, cps_base_url=self.cps_base_url, fallback=True,
-            encoding=self.encoding)
+    getThemeAndPageName = getCPSSkinsThemeAndPageName
 
 class CherryPickingCPSSkinsThemeNegociator(CPSSkinsThemeNegociator):
     """CPSSKins negociation, overridden by a property on context object only.
@@ -154,7 +159,7 @@ class CherryPickingCPSSkinsThemeNegociator(CPSSkinsThemeNegociator):
         except AttributeError:
             pass
 
-    def getEngine(self):
+    def getThemeAndPageName(self):
         prop = self.context.getProperty('.cps_designer_theme', None)
         if prop:
             published, themepage = prop.split(':')
@@ -163,9 +168,7 @@ class CherryPickingCPSSkinsThemeNegociator(CPSSkinsThemeNegociator):
             theme, page = self.getCPSSkinsThemeAndPageName()
         else:
             theme, page = tuple(s.strip() for s in themepage.split('+'))
-        return self.lookupContainer().getPageEngine(
-            theme, page, cps_base_url=self.cps_base_url, fallback=True,
-            encoding=self.encoding)
+        return theme, page
 
 
 
