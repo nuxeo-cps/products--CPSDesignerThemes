@@ -100,8 +100,11 @@ class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
     def getEngine(self):
         """The fallback is up to the container."""
         theme, page = self.getCPSSkinsThemeAndPageName()
+        # TODO too much technical params to pass thru. Makes negociator
+        # maintaining hazardous
         return self.lookupContainer().getPageEngine(
-            theme, page, cps_base_url=self.cps_base_url, fallback=True, )
+            theme, page, cps_base_url=self.cps_base_url, fallback=True,
+            encoding=self.encoding)
 
 class CherryPickingCPSSkinsThemeNegociator(CPSSkinsThemeNegociator):
     """CPSSKins negociation, overridden by a property on context object only.
