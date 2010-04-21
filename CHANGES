@@ -4,6 +4,7 @@ Requires
 New features
 ~~~~~~~~~~~~
 - #2138: provide option to control rewriting of absolute path URIs
+- Charset independency (UTF-8, ISO-8859, ...)
 Bug fixes
 ~~~~~~~~~
 - #2139: automatically specify correct charset in <meta> tags
