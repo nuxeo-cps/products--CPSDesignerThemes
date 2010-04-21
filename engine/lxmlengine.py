@@ -86,6 +86,10 @@ class LxmlEngine(ElementTreeEngine):
         else:
             parser.feed(XML_HEADER % encoding)
 
+        # TODO will be decoded inside lxml probably. Avoid that ?
+        if isinstance(content, unicode):
+            content = content.encode(encoding)
+
         # We always need an enclosing tag to bear the xhtml namespace
         if enclosing is None:
             enclosing = 'default-document'

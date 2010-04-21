@@ -118,7 +118,8 @@ def export(self):
     portal =  getToolByName(self, 'portal_url').getPortalObject()
 
     # see #2076
-    first_pass = first_pass.decode(portal.default_charset).encode('utf-8')
+    if portal.default_charset != 'unicode':
+        first_pass = first_pass.decode(portal.default_charset).encode('utf-8')
     engine = ExportEngine(StringIO(first_pass),
                           cps_base_url=portal.absolute_url())
 
