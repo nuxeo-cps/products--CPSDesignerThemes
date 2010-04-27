@@ -78,3 +78,6 @@ class TwoPhaseEngine(object):
 
     def serialize(self):
         return self.secondPhase(super(TwoPhaseEngine, self).serialize())
+
+    def serializeExport(self):
+        return self.secondPhase(super(TwoPhaseEngine, self).serializeExport())

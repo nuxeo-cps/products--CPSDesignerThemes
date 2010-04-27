@@ -21,7 +21,7 @@ Let's define some string constants
 ...    <script src="/functions.js"></script>
 ...  </head>
 ...  <body></body>
-... </html>""")
+... </html>""", encoding='ASCII')
 
 The lxml engines let comments go through and will rewrite the URI in
 the MS IE conditional statement as well. Notice moreover how the conditional
@@ -29,11 +29,14 @@ statement got pushed at the end. This is needed by MS IE precedence rules for
 stylesheets (main use-case for conditional statements):
 >>> engine = get_engine(PageEngine, 'theme1', page='msie_head.html',
 ...  	                cps_base_url='/cps_portal/')
+>>> engine.encoding = 'utf-8'
 >>> engine.mergeHeads(head_content=LINK, cps_global=cps_global)
->>> first = engine.serialize() 
+>>> first = engine.serialize()
 >>> print first
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+   <meta content="CPSDesignerThemes" name="engine" />
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
    <title>The title from the theme</title>
    <link href="/cps_portal/portal_themes/default/icons/cps_favicon_4.png"
          rel="icon" type="image/png" />
@@ -62,13 +65,16 @@ happens at this point, the latter are simply ignored (see #2019 for rationale):
 ...    <!--[if IE] <link href="msie_cps.css"> -->
 ...  </head>
 ...  <body></body>
-... </html>""")
+... </html>""", encoding='ASCII')
 >>> engine = get_engine(PageEngine, 'theme1', page='msie_head.html',
 ...  	                cps_base_url='/cps_portal/')
+>>> engine.encoding = 'UTF-8'
 >>> engine.mergeHeads(head_content=LINK, cps_global=cps_global)
 >>> print engine.serialize()
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+   <meta content="CPSDesignerThemes" name="engine" />
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
    <title>The title from the theme</title>
    <link href="/cps_portal/portal_themes/default/icons/cps_favicon_4.png"
          rel="icon" type="image/png" />

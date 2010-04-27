@@ -42,7 +42,7 @@ WT_REGEXP = re.compile(r'[\n ]*')
 def get_engine(EngineClass, theme, page='index.html', cps_base_url=None):
     f = open(os.path.join(THEMES_PATH, theme, page), 'r')
     return EngineClass(html_file=f,
-                       theme_base_uri='/thm_base',
+                       theme_base_uri='/thm_base', encoding='iso-8859-15',
                        page_uri='/'+page, cps_base_url=cps_base_url)
 
 class EngineTestCase(unittest.TestCase):
@@ -86,7 +86,7 @@ class EngineTestCase(unittest.TestCase):
             '<span>%s</span><div>%s</div>'
             '</p></div>' % (NS_XHTML, portlet[0], portlet[1]))
         if not hasattr(self.EngineClass, 'secondPhase'):
-            expected = expected.replace('&nbsp;', u'\xa0'.encode('utf-8'))
+            expected = expected.replace('&nbsp;', '\xa0')
         # skip declaration: not what is being tested
         rendered = re.sub(r'<\?xml.*\?>', '', rendered)
         self.assertEquals(rendered, expected)
@@ -122,6 +122,13 @@ class TestElementTreeEngine(EngineTestCase):
     @classmethod
     def getAttribs(self, element):
         return element.attrib
+
+    def test_fixMetaElements(self):
+        engine = self.getEngine('theme1', 'simple_slot.html')
+
+        # don't break on other meta than http-equiv
+        head = engine.parseFragment('<head> <meta generator="Me"/></head>')
+        engine.fixMetaElements(head)
 
 
 class TestLxmlEngine(TestElementTreeEngine):
@@ -179,6 +186,7 @@ def test_suite():
         for test_file in ('engine/portlets_merging.txt',
                           'engine/heads_merging.txt',
                           'engine/isolated_portlet.txt',
+                          'engine/options.txt',
                           ):
             suite.addTest(
                 doctest.DocFileTest(test_file,

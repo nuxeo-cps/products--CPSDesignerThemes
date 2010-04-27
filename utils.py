@@ -17,8 +17,10 @@
 #
 # $Id$
 
+from urlparse import urlparse
+
 def rewrite_uri(absolute_base='', referer_uri='/index.html', uri='',
-                cps_base_url=None):
+                cps_base_url=None, absolute_rewrite=True):
     """Shared URI rewriting logic.
 
 
@@ -42,6 +44,11 @@ def rewrite_uri(absolute_base='', referer_uri='/index.html', uri='',
     ...             uri='/images/x.png')
     '/cont/thm/images/x.png'
 
+    Absolute path uri, with no-rewrite option
+    >>> rewrite_uri(absolute_base='/cont/thm', referer_uri='/styles/main.css',
+    ...             uri='/images/x.png', absolute_rewrite=False)
+    '/images/x.png'
+
     Relative uri, from a deeper resource
     >>> rewrite_uri(absolute_base='/cont/thm', referer_uri='/graph/main.css',
     ...             uri='x.png')
@@ -62,16 +69,29 @@ def rewrite_uri(absolute_base='', referer_uri='/index.html', uri='',
     ... except ValueError: print 'ValueError'
     ValueError
     """
-    # TODO refactor using standard lib
 
-    if uri.startswith('http://') or uri.startswith('#'):
-        return uri
-    if uri.startswith('cps://'):
-        if cps_base_url is None:
+    parsed = urlparse(uri)
+
+    scheme = parsed[0]
+    if scheme:
+        if scheme != 'cps':
+            return uri
+        elif cps_base_url is None:
             raise ValueError("Need the CPS base URL to use the cps:// scheme")
         return cps_base_url + uri[6:]
-    if uri.startswith('/'):
-        local_base = ''
+
+    if parsed[1]: # probably impossible (scheme is empty), but...
+        raise ValueError("Invalid URI : " + uri)
+
+    path = parsed[2]
+    if not path: # typically, pure fragment URI (#header)
+        return uri
+
+    if path.startswith('/'):
+        if absolute_rewrite:
+            local_base = ''
+        else:
+            return uri
     else:
         local_base = referer_uri.rsplit('/', 1)[0] + '/'
 

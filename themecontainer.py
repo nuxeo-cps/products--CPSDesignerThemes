@@ -36,12 +36,15 @@ from Products.CMFCore.utils import getToolByName
 from Products.CMFCore.FSImage import FSImage
 from Products.CPSUtil.PropertiesPostProcessor import PropertiesPostProcessor
 
+from engine import get_engine_class
 from utils import rewrite_uri
 from interfaces import IResourceTraverser
 
 _marker = object()
 
 IMG_EXTENSIONS = ('gif', 'jpg', 'jpeg', 'png', 'bmp')
+
+EngineClass = get_engine_class()
 
 def add_caching_headers(response):
     """Does the same thing as DTML directives in, e.g, default.css
@@ -64,6 +67,7 @@ class OpenImage(Image):
     security.declarePublic('index_html')
     def index_html(self, REQUEST, RESPONSE):
         """Rewrap for caching headers"""
+        add_caching_headers(RESPONSE)
         res = Image.index_html(self, REQUEST, RESPONSE)
         add_caching_headers(RESPONSE)
         return res
@@ -78,9 +82,9 @@ class OpenFile(File):
     security.declarePublic('index_html')
     def index_html(self, REQUEST, RESPONSE):
         """Rewrap for caching headers"""
+        add_caching_headers(RESPONSE)
         res = File.index_html(self, REQUEST, RESPONSE)
-        RESPONSE.setHeader(
-            'Cache-Control', 'public, max-age=36000, must-revalidate')
+        add_caching_headers(RESPONSE)
         return res
 
 InitializeClass(OpenFile)
@@ -94,12 +98,19 @@ class StyleSheet(File):
         return 'url(%s)' % rewrite_uri(self.theme_base_uri,
                                          self.relative_uri,
                                          cps_base_url=self.cps_base_url,
+                                         absolute_rewrite=self.absolute_rewrite,
                                          uri=match_obj.group(1))
 
     def setUris(self, theme_base='/', relative='main.css', cps_base_url=None):
         self.relative_uri = relative
         self.theme_base_uri = theme_base
         self.cps_base_url = cps_base_url
+
+    def setOptions(self, options):
+        self.options = options
+        if options is None:
+            options = {}
+        self.absolute_rewrite = options.get('uri-absolute-path-rewrite', True)
 
     security.declarePublic('index_html')
     def index_html(self, REQUEST, RESPONSE):
@@ -121,11 +132,12 @@ class ResourceTraverser(Acquisition.Explicit):
     implements(IResourceTraverser)
 
     def __init__(self, path, theme_base_uri='/', relative_uri='/',
-                 cps_base_url=None):
+                 cps_base_url=None, stylesheet_options=None):
         self.path = path
         self.theme_base_uri = theme_base_uri
         self.relative_uri=relative_uri
         self.cps_base_url = cps_base_url
+        self.stylesheet_options = stylesheet_options
 
     @classmethod
     def isThemeContainer(self):
@@ -137,20 +149,31 @@ class ResourceTraverser(Acquisition.Explicit):
     def __repr__(self):
         return '<ResourceTraverser at %s>' % self.path
 
+    @classmethod
+    def parseOptions(self, xml_file):
+        """Parse a options element from xml_file."""
+        return EngineClass.parseOptionsFile(xml_file)
+
     def __getitem__(self, name, default=_marker):
         path = os.path.join(self.getFSPath(), name)
         if os.path.isdir(path):
             # The first traversal from container is the root of theme
             if self.isThemeContainer():
                 cps_base_url = getToolByName(self, 'portal_url').getBaseUrl()
+                ss_opt = os.path.join(path, 'stylesheet_options.xml')
+                if os.path.isfile(ss_opt):
+                    stylesheet_options=self.parseOptions(ss_opt)
+                else:
+                    stylesheet_options=None
                 return ResourceTraverser(
                     path,
                     cps_base_url=cps_base_url,
                     theme_base_uri='/'.join((self.getBaseUri(), name)),
-                    relative_uri='')
+                    relative_uri='', stylesheet_options=stylesheet_options)
             # general case
             return ResourceTraverser(path, theme_base_uri=self.theme_base_uri,
                                      cps_base_url=self.cps_base_url,
+                                     stylesheet_options=self.stylesheet_options,
                                      relative_uri='/'.join((self.relative_uri,
                                                             name)))
         elif os.path.isfile(path):
@@ -165,6 +188,7 @@ class ResourceTraverser(Acquisition.Explicit):
             elif ext == 'css':
                 f = open(path, 'r')
                 ss = StyleSheet(name, name, f)
+                ss.setOptions(self.stylesheet_options)
                 ss.setUris(theme_base=self.theme_base_uri,
                            cps_base_url=self.cps_base_url,
                            relative='/'.join((self.relative_uri, name)))
@@ -240,7 +264,16 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
     def getBaseUri(self):
         return self.absolute_url_path()
 
-    def getPageEngine(self, theme, page, cps_base_url=None, fallback=False):
+    def computePageFileName(self, page):
+        """Compute local FS name from page Name"""
+
+        f = page.rfind('.')
+        if f == -1:
+            return page + '.html'
+        return page
+
+    def getPageEngine(self, theme, page, cps_base_url=None, fallback=False,
+                      encoding=None):
         if page is None:
             page = self.default_page
         if theme is None:
@@ -249,11 +282,16 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
                         (theme, self.default_page),
                         (self.default_theme, self.default_page))
 
-        for page_path, final_page in (
-                (os.path.join(self.getFSPath(), t, p + '.html'), p)
-                 for t, p in alternatives):
+        for t, p in alternatives:
+            page_rpath = self.computePageFileName(p)
+            page_path = os.path.join(self.getFSPath(), t, page_rpath)
+
             if os.path.exists(page_path):
                 break
+            else:
+                logger.debug(
+                    "Tried theme '%s', page '%s', but didn't find  %s",
+                    theme, p, page_path)
         else:
             raise ValueError("Could not find suitables themes and page for"
                               " the required %s and %s" % (theme, page))
@@ -261,8 +299,9 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
         PageEngine = get_engine_class()
         return PageEngine(html_file=page_path,
                           theme_base_uri=self.absolute_url_path() + '/' + theme,
-                          page_uri='/%s.html' % final_page,
-                          cps_base_url=cps_base_url)
+                          page_uri='/' + page_rpath,
+                          cps_base_url=cps_base_url,
+                          encoding=encoding)
 
     def invalidate(self, theme, page=None):
         """No cache yet."""
