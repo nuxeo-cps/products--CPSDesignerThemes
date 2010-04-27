@@ -42,6 +42,7 @@ class TestFixedFSThemeEngine(ZopeTestCase.ZopeTestCase):
 
     def afterSetUp(self):
         self.folder.portal_url = FakeUrlTool().__of__(self.folder)
+        self.folder.default_charset = 'latin-1'
         self.folder._setObject('container', FSThemeContainer('container'))
 
     def testLookupContainer(self):
@@ -49,6 +50,10 @@ class TestFixedFSThemeEngine(ZopeTestCase.ZopeTestCase):
         container = negociator.lookupContainer()
         self.assertTrue(IThemeContainer.providedBy(container))
         self.assertEquals(container.getId(), 'container')
+
+    def testCharset(self):
+        negociator = FixedFSThemeEngine(self.folder, self.app.REQUEST)
+        self.assertEquals(negociator.encoding, 'latin-1')
 
 
 def test_suite():
