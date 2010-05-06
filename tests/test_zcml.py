@@ -32,7 +32,7 @@ class TestZcml(unittest.TestCase):
         zcml.load_string("""
           <theme:engine
             class="Products.CPSDesignerThemes.engine.lxmlengine.LxmlEngine"
-            xmlns:theme="http://xmlns.racinet.org/zcml/designer-themes"/>""")
+            xmlns:theme="http://cps-cms.org/ns/zcml/designer-themes"/>""")
         self.assertEquals(engine.get_engine_class(), LxmlEngine)
 
 def test_suite():

@@ -135,9 +135,11 @@ class BaseEngine(object):
                                          body_element=body_element,
                                          context=context, request=None)
 
+        main_content = ''
+        for slot in ('header', 'main', 'sub'):
+            main_content += metal_slots.get(slot, '')
 
-        return self.render(main_content=metal_slots.get('main', ''),
-                           head_content=head_content,
+        return self.render(main_content=main_content,
                            head_element=head_element,
                            body_element=body_element,
                            context=context, request=None)

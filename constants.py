@@ -1,4 +1,4 @@
-NS_URI = "http://xmlns.racinet.org/cps"
+NS_URI = "http://cps-cms.org/ns/theme"
 NS_XHTML = "http://www.w3.org/1999/xhtml"
 
 XML_HEADER = '<?xml version="1.0" encoding="%s"?>'

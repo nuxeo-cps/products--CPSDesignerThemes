@@ -289,7 +289,7 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
             if os.path.exists(page_path):
                 break
             else:
-                logger.debug(
+                self.logger.debug(
                     "Tried theme '%s', page '%s', but didn't find  %s",
                     theme, p, page_path)
         else:
