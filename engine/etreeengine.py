@@ -128,6 +128,7 @@ class ElementTreeEngine(BaseEngine):
         else:
             return {}
 
+        root.remove(elt)
         options = dict(elt.attrib)
         for k in options:
             if k in BOOLEAN_OPTIONS:
@@ -138,6 +139,7 @@ class ElementTreeEngine(BaseEngine):
                     options[k] = False
                 else:
                     raise ValueError("Invalid option : '%s'" % options[k])
+
         return options
 
     @classmethod
