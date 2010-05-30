@@ -112,6 +112,13 @@ class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
     """Negociator with same rules as CPSSkins with a root container.
     """
 
+    def getThemeByMethod(self, published):
+        """Latest remnant of CPSSkins for easy func testing
+        TODO change that
+        """
+        tmtool = getToolByName(self.context, 'portal_themes')
+        return tmtool.getThemeByMethod(published)
+
     def getThemeAndPageName(self, **kw):
         """Gets the name of the requested theme and page by checking a series
            of URL parameters, variables, folder attributes, cookies, ...
@@ -148,16 +155,9 @@ class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
             return self._extractThemeAndPageName(theme, None)
 
         # method themes (theme + page)
-        published = REQUEST.get('PUBLISHED')
-        if published is not None:
-            try:
-                published = published.getId()
-            except AttributeError:
-                pass
-            else:
-                theme = self.getThemeByMethod(published)  # TODO ADAPT
-                if theme is not None:
-                    return self._extractThemeAndPageName(theme, None)
+        theme = self.getThemeByMethod(self.getRequestPublished())
+        if theme is not None:
+            return self._extractThemeAndPageName(theme, None)
 
         # local theme + page
         theme = self.getLocalThemeName(**kw)
