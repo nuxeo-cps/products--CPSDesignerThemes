@@ -112,20 +112,12 @@ class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
     """Negociator with same rules as CPSSkins with a root container.
     """
 
-    def getThemeByMethod(self, published):
-        """Latest remnant of CPSSkins for easy func testing
-        TODO change that
-        """
-        tmtool = getToolByName(self.context, 'portal_themes')
-        return tmtool.getThemeByMethod(published)
-
     def getThemeAndPageName(self, **kw):
         """Gets the name of the requested theme and page by checking a series
            of URL parameters, variables, folder attributes, cookies, ...
 
            If no_defaults is True, don't lookup the default theme, return
            None, None for further treatment instead (used by CPSDesignerThemes)
-           TODO: cleaner to extract this in a common module in CPSUtil
         """
 
         REQUEST = self.request
@@ -154,13 +146,8 @@ class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
         if theme is not None:
             return self._extractThemeAndPageName(theme, None)
 
-        # method themes (theme + page)
-        theme = self.getThemeByMethod(self.getRequestPublished())
-        if theme is not None:
-            return self._extractThemeAndPageName(theme, None)
-
-        # local theme + page
-        theme = self.getLocalThemeName(**kw)
+        # local and method themes (theme + page)
+        theme = self.getLocalThemeName()
         if theme is not None:
             return self._extractThemeAndPageName(theme, None)
 
@@ -240,16 +227,19 @@ class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
 
            - 'n-m:theme'
 
+           - 'method:n-m:theme'
+
            where:
            - 'theme' is the theme id
            - (n, m) is a couple with n <= m that describes the interval
-             inside which the theme will be used.
+             inside which the theme will be used, m=0 being an exception.
              (0, 0) means the current folder and all subfolders
              (1, 0) means all subfolders below the current folder
              (1, 1) means the subfolders of level 1
              (0, 1) means the folder and the subfolders of level 1
              (n, n) means the subfolders of level n
              ...
+           - method is the id of the method called by zope publisher
 
            Examples:
            * with a folder property called '.cpsdesigner_theme' or (BBB)
@@ -268,6 +258,9 @@ class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
              - string without interval:
 
                theme1
+
+             - fully specified with method:
+               folder_view:0-0:theme1
 
            * with a script called '.cpsdesigner_theme.py' or (BBB)
            '.cpsskins_theme.py' placed in a folder:
@@ -351,14 +344,19 @@ class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
 
         themes = []
         for l in theme_obj:
-            if ':' not in l:
-                themes.append(((0,0), l))
+            split = l.split(':')
+            if len(split) == 1:
+                themes.append(('', (0,0), l))
                 continue
-            nm, theme = l.split(':')
+            if len(split) == 2:
+                nm, theme = split
+                meth = ''
+            else:
+                meth, nm, theme = split
             if '-' not in nm:
                 continue
             n, m = nm.split('-')
-            themes.append(((int(n), int(m)), theme))
+            themes.append((meth, (int(n), int(m)), theme))
         return themes
 
     def getLocalTheme(self, folder=None, level=None):
@@ -374,7 +372,10 @@ class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
             return None
 
         level = int(level)
-        for (n, m), theme in themes:
+        published = self.getRequestPublished()
+        for meth, (n, m), theme in themes:
+            if meth and meth != published:
+                continue
             if n > 0 and n > level:
                 continue
             if m > 0 and m < level:
