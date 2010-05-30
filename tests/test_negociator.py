@@ -188,6 +188,45 @@ class TestCPSSkinsNegociator(ZopeTestCase.ZopeTestCase):
         theme = self.getRequestedThemeAndPageName(context_obj=subfolder)
         self.assertEquals(theme, ('theme', None))
 
+    def test_local_theme_method_1(self):
+        folder = self.getLocalThemeFolder()
+        subfolder = self.makeSubFolder(folder, 'subfolder')
+
+        class FakeMethod:
+            def __init__(self, mid):
+                self.mid = mid
+            def getId(self):
+                return self.mid
+
+        value = ('folder_view:0-0:other+front', '1-1:theme',
+                 'other_view:1-0:other+bar', '0-0:other',)
+        folder.manage_addProperty(CPSSKINS_LOCAL_THEME_ID, value, 'lines')
+
+        self.REQUEST['PUBLISHED'] = FakeMethod('foo')
+        theme = self.getRequestedThemeAndPageName(context_obj=folder)
+        self.assertEquals(theme, ('other', None))
+
+        theme = self.getRequestedThemeAndPageName(context_obj=subfolder)
+        self.assertEquals(theme, ('theme', None))
+
+        self.REQUEST['PUBLISHED'] = FakeMethod('folder_view')
+        theme = self.getRequestedThemeAndPageName(context_obj=folder)
+        self.assertEquals(theme, ('other', 'front'))
+
+        self.REQUEST['PUBLISHED'] = FakeMethod('folder_view')
+        theme = self.getRequestedThemeAndPageName(context_obj=folder)
+        self.assertEquals(theme, ('other', 'front'))
+
+        # one level deeper
+        ssubfolder = self.makeSubFolder(subfolder, 'ssubfolder')
+        self.REQUEST['PUBLISHED'] = FakeMethod('other_view')
+        theme = self.getRequestedThemeAndPageName(context_obj=ssubfolder)
+        self.assertEquals(theme, ('other', 'bar'))
+
+        self.REQUEST['PUBLISHED'] = FakeMethod('foo')
+        theme = self.getRequestedThemeAndPageName(context_obj=ssubfolder)
+        self.assertEquals(theme, ('other', None))
+
     def test_local_theme_5(self):
         folder = self.getLocalThemeFolder()
         subfolder = self.makeSubFolder(folder, 'subfolder')
