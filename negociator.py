@@ -389,8 +389,6 @@ class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
 class CherryPickingCPSSkinsThemeNegociator(CPSSkinsThemeNegociator):
     """CPSSKins negociation, overridden by a property on context object only.
 
-    TODO Initiate RST doc about negociators hooking and predefined negociators.
-
     This negociated is DEPRECATED. Most of its features can now be handled
     by the (standard) CPSSkins Theme Negociator.
 
