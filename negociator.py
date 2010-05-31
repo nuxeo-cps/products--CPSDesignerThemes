@@ -20,6 +20,7 @@
 import os
 import logging
 import types
+import warnings
 
 from zope.interface import implements
 from zope.component import adapts
@@ -390,6 +391,25 @@ class CherryPickingCPSSkinsThemeNegociator(CPSSkinsThemeNegociator):
 
     TODO Initiate RST doc about negociators hooking and predefined negociators.
 
+    This negociated is DEPRECATED. Most of its features can now be handled
+    by the (standard) CPSSkins Theme Negociator.
+
+      - local method themes are now part of the syntax. For instance, to apply
+      the 'fview' page of 'special' theme to 'folder_view' method to all folders
+      below current level, use:
+           folder_view:0-0:special+fview
+      - applying a rule to the folder on which it is defined only can be done
+      if one knows the precedence rules. To perform the same binding but only
+      on the folder bearing the definition, while keeping the default page of
+      special theme below, use:
+           1-0:special
+           folder_view:0-1:special+fview
+
+    The case of applying a rule to a *document* is not covered by
+    CPSSkinsThemeNegociator yet, but will be implemented upon request.
+
+    ORIGINAL DOCSTRING BEFORE DEPRECATION:
+
     This negociator first reads the property '.cps_designer_theme' on the
     context object *only*. No acquisition or algorithm to apply from an
     ancestor like CPSSkins does.
@@ -413,15 +433,21 @@ class CherryPickingCPSSkinsThemeNegociator(CPSSkinsThemeNegociator):
        - applying a given theme page on the folder view, but not on its children
          folder_view:special+front on the folder only.
          This is a local version of CPSSKins' "Method Themes"
+
     """
 
     def getThemeAndPageName(self):
+        warnings.warn("The Cherry Picking themes negociator is deprecated  "
+                      "and will be removed in CPS 3.5.2. "
+                      "You can now achieve the same results with "
+                      "CPSSkinsThemeNegociator in order")
+
         prop = self.context.getProperty('.cps_designer_theme', None)
         if prop:
             published, themepage = prop.split(':')
             published = published.strip()
         if not prop or (published and published != self.getRequestPublished()):
-            theme, page = CPSSkinsNegociator.getThemeAndPageName(self)
+            theme, page = CPSSkinsThemeNegociator.getThemeAndPageName(self)
         else:
             theme, page = tuple(s.strip() for s in themepage.split('+'))
         return theme, page
