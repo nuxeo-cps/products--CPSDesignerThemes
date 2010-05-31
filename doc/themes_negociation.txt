@@ -32,6 +32,11 @@ inside the area specified in the root container object
 
 TODO EXPAND CPSSkins part from CPSSkins doc.
 
+Note: for local bindings, the official property or script name
+ for this negociator is ``.cps_themes_bindings`` instead of CPSSkins'
+ ``.cpsskins_theme``. However the latter is recognized if and only if the former
+ is not present.
+
 Besides reimplementing the logic described in CPSSkins documentation,
 this negociator adds the possibility to specify local method
 themes. These bind the method used for publication (e.g, ``index_html``,
