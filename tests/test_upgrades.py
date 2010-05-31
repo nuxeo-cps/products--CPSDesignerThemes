@@ -130,8 +130,15 @@ class TestCPSSkinsUpgrades(ZopeTestCase.ZopeTestCase):
     def test_method_themes_existing_spec_prog(self):
         # Existing CPSDesigner themes spec
         setattr(self.portal, CPSDESIGNER_LOCAL_THEME_ID, ('0-0:default',))
+        self.assertFalse(upgrades.check_method_themes(self.portal))
         self.assertRaises(RuntimeError,
                           upgrades.upgrade_method_themes, self.portal)
+
+    def test_method_themes_no_tool(self):
+        self.portal.manage_delObjects(['portal_themes',])
+        self.assertFalse(upgrades.check_method_themes(self.portal))
+        upgrades.upgrade_method_themes(self.portal)
+        self.assertNone(getattr(self.portal, CPSSKINS_LOCAL_THEME_ID, None))
 
 def test_suite():
     suite = unittest.TestSuite()

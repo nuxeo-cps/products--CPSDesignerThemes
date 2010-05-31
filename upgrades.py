@@ -38,6 +38,17 @@ def upgrade_trac_ticket_2045(portal):
             logger.info("No persistent absolute path to clean out "
                         "in root containe '%s'", container.getId())
 
+def check_method_themes(portal):
+    logger = logging.getLogger(LOGGER_BASE + '#check_method_themes')
+    thmtool = getattr(portal, 'portal_themes', None)
+    if thmtool is None:
+        logger.info("No CPSSkins themes tool")
+        return False
+    if getattr(aq_base(portal), CPSDESIGNER_LOCAL_THEME_ID, None) is not None:
+        logger.info("Found existing attribute or property %s", CPSDESIGNER_LOCAL_THEME_ID)
+        return False
+    return True
+
 def upgrade_method_themes(portal):
     logger = logging.getLogger(LOGGER_BASE + '#upgrade_method_themes')
     thmtool = getattr(portal, 'portal_themes', None)

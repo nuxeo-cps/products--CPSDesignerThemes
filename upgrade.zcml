@@ -11,6 +11,7 @@
   <cps:upgradeStep
       title="Upgrade method themes to CPSDesignerThemes style."
       handler=".upgrades.upgrade_method_themes"
+      checker=".upgrades.check_method_themes"
       source="3.5.0" destination="3.5.1"
       />
 
