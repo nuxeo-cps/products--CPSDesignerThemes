@@ -20,6 +20,8 @@
 """CPS Designer themes related upgrades steps."""
 
 import logging
+from Acquisition import aq_base
+from negociator import CPSDESIGNER_LOCAL_THEME_ID, CPSSKINS_LOCAL_THEME_ID
 
 LOGGER_BASE = 'Products.CPSDesignerThemes.upgrades'
 
@@ -35,3 +37,57 @@ def upgrade_trac_ticket_2045(portal):
         except AttributeError:
             logger.info("No persistent absolute path to clean out "
                         "in root containe '%s'", container.getId())
+
+def upgrade_method_themes(portal):
+    logger = logging.getLogger(LOGGER_BASE + '#upgrade_method_themes')
+    thmtool = getattr(portal, 'portal_themes', None)
+    if thmtool is None:
+        logger.info("No CPSSkins tool. Nothing to do.""")
+        return
+
+    # Reading existing themes specifications on portal
+    thms = getattr(aq_base(portal), CPSDESIGNER_LOCAL_THEME_ID, None)
+    if thms is not None:
+        # should be very rare, no need to automate further
+        raise RuntimeError("%s property or attribute found on portal. "
+                           "You should remove it, keeping the values, "
+                           "run the upgrade step again "
+                           "and merge previous values afterwards.")
+
+    script_based = False
+    thms = portal.getProperty(CPSSKINS_LOCAL_THEME_ID, None)
+    if thms is not None:
+        logger.info("Found existing CPSSkins themes specification prop.")
+        portal.manage_delProperties((CPSSKINS_LOCAL_THEME_ID,))
+    else:
+        # retry in case there is an attr that is no prop
+        thms = getattr(aq_base(portal), CPSSKINS_LOCAL_THEME_ID, None)
+        if thms is not None:
+            if (not isinstance(thms, basestring) and not isinstance(thms, tuple)
+                and not isinstance(thms, list)):
+                script_based = True
+                script = thms
+                thms = None
+            else: # would be rollbacked if not in else statement, but well
+                logger.info("Found existing themes specification attribute.")
+                delattr(portal, CPSSKINS_LOCAL_THEME_ID)
+
+    if thms is None:
+        thms = []
+    if isinstance(thms, basestring):
+        thms = [thms]
+    thms = list(thms)
+
+    # Now translating Method Themes in a specification
+    for meth, thm in getattr(thmtool, 'method_themes', {}).items():
+        v = '%s:0-0:%s' % (meth, thm)
+        logger.info("New themes spec in property: %s", v)
+        thms.insert(0, v)
+
+    if script_based:
+        raise RuntimeError(
+                ("Unapplicable existing CPSSkins theme specification %s" +
+                 "Upgrade manually (check INFO log)") % script)
+
+    if thms:
+        portal.manage_addProperty(CPSDESIGNER_LOCAL_THEME_ID, thms, 'lines')
