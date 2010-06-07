@@ -48,12 +48,15 @@ class FakeUrlTool(Implicit):
         content_phy = content.getPhysicalPath()
         return content_phy[len(portal_phy):]
 
-class TestFixedFSThemeEngine(ZopeTestCase.ZopeTestCase):
+class BaseNegociatorTest(ZopeTestCase.ZopeTestCase)
 
     def afterSetUp(self):
+        self.app.REQUEST.set('_cps_void_response', False)
         self.folder.portal_url = FakeUrlTool().__of__(self.folder)
         self.folder.default_charset = 'latin-1'
         self.folder._setObject('container', FSThemeContainer('container'))
+
+class TestFixedFSThemeEngine(BaseNegociatorTest):
 
     def testLookupContainer(self):
         negociator = FixedFSThemeEngine(self.folder, self.app.REQUEST)
@@ -69,14 +72,17 @@ class TestFixedFSThemeEngine(ZopeTestCase.ZopeTestCase):
         negociator = FixedFSThemeEngine(self.folder, self.app.REQUEST)
         self.assertEquals(negociator.encoding, 'utf-8')
 
+    def testVoidResponse(self):
+        request = self.app.REQUEST
+        request._cps_void_response = True
+        negociator = FixedFSThemeEngine(self.folder, request)
+        self.assertEquals(negociator.renderCompat(), '')
+
 class TestCPSSkinsNegociator(ZopeTestCase.ZopeTestCase):
     """Adaptation from CPSSkins tests."""
 
     def afterSetUp(self):
-        self.folder.portal_url = FakeUrlTool().__of__(self.folder)
-        self.portal = self.folder
-        self.folder.default_charset = 'latin-1'
-        self.folder._setObject('container', FSThemeContainer('container'))
+        BaseNegociatorTest.afterSetUp(self)
 
         self.REQUEST = self.portal.REQUEST
         self.REQUEST.SESSION = {}

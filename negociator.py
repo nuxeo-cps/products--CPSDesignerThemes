@@ -42,6 +42,8 @@ from interfaces import IThemeEngine
 
 logger = logging.getLogger('CPSDesignerThemes.negociator')
 
+_default = object()
+
 class EngineAdapter(object):
     """Some boiler plate logic."""
 
@@ -53,10 +55,12 @@ class EngineAdapter(object):
         self.request = request
 
         # GR don't want to import a constant from CPSDefault here
-        self.void = void = getattr(request, '_cps_void_response', None)
-        if void is None:
+        self.void = void = getattr(request, '_cps_void_response', _default)
+        if void is _default:
+            import pdb; pdb.set_trace()
             logger.warn("Didn't find marker in request. Void responses "
                         "(302, 304...) quick handling might be broken.")
+            void = False
 
         # portal-related stuff
         utool = getToolByName(context, 'portal_url')
