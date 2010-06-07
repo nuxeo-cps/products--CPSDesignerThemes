@@ -55,7 +55,7 @@ class EngineAdapter(object):
         # GR don't want to import a constant from CPSDefault here
         self.void = void = getattr(request, '_cps_void_response', None)
         if void is None:
-            logger.warn("Didn't found marker in request. Void responses "
+            logger.warn("Didn't find marker in request. Void responses "
                         "(302, 304...) quick handling might be broken.")
 
         # portal-related stuff
