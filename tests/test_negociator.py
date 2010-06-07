@@ -48,7 +48,7 @@ class FakeUrlTool(Implicit):
         content_phy = content.getPhysicalPath()
         return content_phy[len(portal_phy):]
 
-class BaseNegociatorTest(ZopeTestCase.ZopeTestCase)
+class BaseNegociatorTest(ZopeTestCase.ZopeTestCase):
 
     def afterSetUp(self):
         self.app.REQUEST.set('_cps_void_response', False)
@@ -78,12 +78,13 @@ class TestFixedFSThemeEngine(BaseNegociatorTest):
         negociator = FixedFSThemeEngine(self.folder, request)
         self.assertEquals(negociator.renderCompat(), '')
 
-class TestCPSSkinsNegociator(ZopeTestCase.ZopeTestCase):
+class TestCPSSkinsNegociator(BaseNegociatorTest):
     """Adaptation from CPSSkins tests."""
 
     def afterSetUp(self):
         BaseNegociatorTest.afterSetUp(self)
 
+        self.portal = self.folder
         self.REQUEST = self.portal.REQUEST
         self.REQUEST.SESSION = {}
         self.REQUEST.cookies = {}
