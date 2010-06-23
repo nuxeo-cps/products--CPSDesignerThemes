@@ -164,7 +164,7 @@
 </metal:block>
 
 <metal:block define-macro="navigate"
-tal:define="sections python: [ 'wysiwyg', 'portlet_slots', 'site_structure', 'portlet_browser', 'unused_portlets']">
+tal:define="sections python: [ 'portlet_slots', 'site_structure', 'portlet_browser', 'unused_portlets']">
   <div class="mainFormTab">
     &nbsp;
     <tal:block repeat="section sections">

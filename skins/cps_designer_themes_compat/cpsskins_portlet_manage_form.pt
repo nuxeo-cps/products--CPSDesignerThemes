@@ -16,7 +16,7 @@
                   global theme_container python: tmtool.getThemeContainer(theme=current_theme);
                   theme_container_url python: base_url + utool.getRelativeUrl(theme_container);
                   view_mode tmtool/getViewMode;
-                  panel view_mode/portlets_panel|string:wysiwyg;
+                  panel view_mode/portlets_panel|string:portlet_slots;
                   wysiwyg python: panel == 'wysiwyg';
                   selected_portlet view_mode/selected_portlet|nothing;
                   override view_mode/portlets_override|python:1;
