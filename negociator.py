@@ -57,7 +57,6 @@ class EngineAdapter(object):
         # GR don't want to import a constant from CPSDefault here
         self.void = void = getattr(request, '_cps_void_response', _default)
         if void is _default:
-            import pdb; pdb.set_trace()
             logger.warn("Didn't find marker in request. Void responses "
                         "(302, 304...) quick handling might be broken.")
             void = False
