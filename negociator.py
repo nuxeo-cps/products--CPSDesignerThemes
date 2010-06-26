@@ -24,25 +24,37 @@ import warnings
 
 from zope.interface import implements
 from zope.component import adapts
+from zope.component import getMultiAdapter
 from Acquisition import aq_base, aq_parent, aq_inner
-
+from AccessControl import ModuleSecurityInfo
+from Products.CMFCore.utils import getToolByName
 from themecontainer import FSThemeContainer
 
 from OFS.interfaces import IObjectManager
 from zope.publisher.interfaces.http import IHTTPRequest
+from interfaces import IThemeEngine
 
-from Products.CMFCore.utils import getToolByName
+security = ModuleSecurityInfo('Products.CPSDesignerThemes.negociator')
+
+logger = logging.getLogger('CPSDesignerThemes.negociator')
+
+_default = object()
 
 CPSSKINS_THEME_COOKIE_ID = 'cpsskins_theme'
 CPSDESIGNER_THEME_COOKIE_ID = 'cpsdesigner_theme'
 CPSSKINS_LOCAL_THEME_ID = '.cpsskins_theme'
 CPSDESIGNER_LOCAL_THEME_ID = '.cps_themes_bindings'
 
-from interfaces import IThemeEngine
+security.declarePublic('adapt')
+def adapt(context, request):
+    """Bootstrap the adapter request.
 
-logger = logging.getLogger('CPSDesignerThemes.negociator')
+    Main interest is to use from restricted code, including TALES expressions
+    from non Zope3 style UI parts.
 
-_default = object()
+    XXX maybe restore some flexibility by using an optionally named adapter.
+    """
+    return getMultiAdapter((context, request), IThemeEngine)
 
 class EngineAdapter(object):
     """Some boiler plate logic."""
