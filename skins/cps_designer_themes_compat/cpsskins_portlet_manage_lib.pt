@@ -224,7 +224,7 @@ tal:define="sections python: [ 'portlet_slots', 'site_structure', 'portlet_brows
 <metal:block define-macro="empty_slot">
   <div style="margin:4px"
    tal:condition="python:len(portlets) == 0"
-   tal:attributes="dest_slot group;
+   tal:attributes="dest_slot slot;
                    class python: folder_editable and 'portletBoxDest' or None;
                    dest_ypos python: 0;
                    insert_url folder_url">
@@ -314,14 +314,12 @@ tal:define="sections python: [ 'portlet_slots', 'site_structure', 'portlet_brows
 </metal:block>
 
 <metal:block define-macro="portlet_slot">
-  <td>
-    <div class="templetBox"
-	 tal:content="slot" />
+  <td tal:define="slot_title slot; slot_icon nothing">
     <div class="boxGroupBoundingBox">
       <div tal:content="slot" class="boxGroupBoxSlotTitle" />
       <tal:block define="portlets python:ptltool.getPortlets(context=here, slot=slot, visibility_check=0, override=override, guard_check=0)">
 	<metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/box_slot" />
-	<!--metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/empty_slot" /-->
+	<metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/empty_slot"/>
       </tal:block>
     </div>
 </td>
