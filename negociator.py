@@ -88,7 +88,7 @@ class EngineAdapter(object):
             enc = 'utf-8'
         self.encoding = enc
 
-    def getThemeAndPageName(self):
+    def getThemeAndPageName(self, editing=False):
         """Return the theme and page that should be rendered.
         Both can be None, meaning that some downstream (container) defaults
         may still apply.
@@ -102,13 +102,7 @@ class EngineAdapter(object):
         if engine is not None:
             return engine
 
-        if not editing:
-            theme, page = self.getThemeAndPageName()
-        else:
-            tmtool = getToolByName(self.context, 'portal_themes')
-            view_mode = tmtool.getViewMode()
-            theme = view_mode.get('theme')
-            page = view_mode.get('page')
+        theme, page = self.getThemeAndPageName(editing=editing)
 
         logger.debug("Requested theme: %r page: %r", theme, page)
         engine = self.engine = self.lookupContainer().getPageEngine(
@@ -188,7 +182,8 @@ class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
 
         if int(kw.get('editing', 0)) == 1:
             # session variable (used in edition mode)
-            view_mode = self.getViewMode()
+            cpsskins = getToolByName(self.context, 'portal_themes')
+            view_mode = cpsskins.getViewMode()
             theme = view_mode.get('theme')
             page = view_mode.get('page')
             if (theme is not None) or (page is not None):
