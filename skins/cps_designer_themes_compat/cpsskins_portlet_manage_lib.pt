@@ -176,19 +176,6 @@ tal:define="sections python: [ 'portlet_slots', 'site_structure', 'portlet_brows
     </tal:block>
     &nbsp;
     <a class="exit"
-       tal:attributes="href string:${base_url}cpsskins_themes_reconfig_form;
-                       accesskey tmtool/getAccessKey"
-       tal:condition="python: checkPerm('Manage Themes', tmtool)"
-       tal:define="title string:_Theme editor_" i18n:translate=""
-       tal:content="python:mcat and mcat(title) or title" />
-    <a class="exit"
-       tal:define="title string:_ZMI_;
-       ptltool_url python: base_url + utool.getRelativeUrl(ptltool);"
-       tal:condition="python:checkPerm('Manage portal', tmtool)"
-       tal:attributes="href string:${ptltool_url}/manage_main"
-       i18n:translate=""
-       tal:content="python:mcat and mcat(title) or title" />
-    <a class="exit"
        tal:attributes="href string:${here_url}/;
                        accesskey ptltool/getAccessKey"
        tal:define="title string:_Exit_" i18n:translate=""
