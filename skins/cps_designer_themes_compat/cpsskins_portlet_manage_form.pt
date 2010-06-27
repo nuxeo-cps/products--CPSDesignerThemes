@@ -2,20 +2,14 @@
 <html tal:define="global boxedit python:1;
                   utool nocall:here/portal_url;
                   tmtool here/portal_themes;
+		  tmtool_url tmtool/absolute_url;
                   mcat python: tmtool.getTranslationService();
                   cpsskins_mcat python: tmtool.getTranslationService(cat='cpsskins');
                   mtool here/portal_membership;
                   ptltool nocall:here/portal_cpsportlets;
-                  tmtool here/portal_themes;
                   context_url python:here.getContextUrl(utool=utool);
                   base_url python: here.cpsskins_getBaseUrl();
-                  tmtool_url python: base_url + utool.getRelativeUrl(tmtool);
-                  current_view python: tmtool.getEffectiveThemeAndPageName(editing=1);
-                  global current_theme python: current_view[0];
-                  global current_page python: current_view[1];
-                  global theme_container python: tmtool.getThemeContainer(theme=current_theme);
-		  global theme_engine python: modules['Products.CPSDesignerThemes.negociator'].adapt(here, request);
-                  theme_container_url python: base_url + utool.getRelativeUrl(theme_container);
+
                   view_mode tmtool/getViewMode;
                   panel view_mode/portlets_panel|string:portlet_slots;
                   wysiwyg python: panel == 'wysiwyg';

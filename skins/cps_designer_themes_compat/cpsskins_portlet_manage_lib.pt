@@ -16,7 +16,7 @@
    tal:attributes="portlet_rurl portlet_rurl;
                    src_rurl portlet_folder_rurl;
                    src_ypos python: ypos and ypos or 0;
-                   src_slot group;
+                   src_slot slot;
                    editable editable;
                    class python: editable and 'boxGroupBoxSlot portletBoxDrag' or 'boxGroupBoxSlot'">
     <div
@@ -24,7 +24,7 @@
       tal:attributes="style box_style;
                       class python: folder_editable and 'portletBoxDest' or None;
                       insert_url folder_url;
-                      dest_slot group;
+                      dest_slot slot;
                       dest_ypos python: ypos and ypos or 0">
       <div tal:attributes="class slot_class">
       <div class="title boxGroupBoxTitle"
@@ -44,7 +44,7 @@
                        title portlet_title;
                        editable editable;
                        src_ypos python: ypos and ypos or 0;
-                       src_slot group">
+                       src_slot slot">
         <div class="body">
           <img src="" width="16" height="16" alt=""
           tal:condition="nocall:portlet_icon"
@@ -235,7 +235,7 @@ tal:define="sections python: [ 'portlet_slots', 'site_structure', 'portlet_brows
                      folder_url folder_url;
                      folder_editable folder_editable;
                      icon slot_icon;
-                     src_slot group">
+                     src_slot slot">
       <div i18n:attributes="title"
        tal:define="title string:_You can drop a Portlet into this area_"
        tal:attributes="title title"
@@ -303,51 +303,28 @@ tal:define="sections python: [ 'portlet_slots', 'site_structure', 'portlet_brows
 </metal:block>
 
 <metal:block define-macro="main_canvas">
-  <tal:block repeat="block python: page_container.getPageBlocks()">
-    <metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/box_slots" />
-  </tal:block>
-</metal:block>
-
-<metal:block define-macro="box_slots">
   <table cellpadding="0" cellspacing="3" width="100%">
-    <tr valign="top"
-     tal:define="objects python: block.getObjects(); 
-                 maxcols block/maxcols|nothing">
-      <tal:block condition="maxcols"
-       repeat="x_pos python: range(int(maxcols))">
-        <tal:block define="objects_in_xpos python: objects.get(x_pos, None);
-                           contents_in_xpos python: objects_in_xpos['contents'];
-                           cellsize python: objects_in_xpos['cellsizer'];
-                           cellwidth cellsize/cellwidth|nothing"
-                   condition="contents_in_xpos">
-          <td tal:attributes="width cellwidth">
-            <tal:block repeat="content contents_in_xpos">
-              <div class="templetBox"
-               tal:content="content/title_or_id"
-               tal:condition="content/aq_explicit/isPortalBox|nothing" />
-              <tal:block condition="content/aq_explicit/isPortalBoxGroup|nothing"
-               define="group content/box_group|nothing">
-                <div class="boxGroupBoundingBox"
-                 tal:define="slot_icon python: base_url + content.getIcon(1);
-                             slot_title content/title_or_id">
-                  <div tal:content="group" class="boxGroupBoxSlotTitle" />
-                  <tal:block define="portlets python:ptltool.getPortlets(context=here, slot=group, visibility_check=0, override=override, guard_check=0)">
-                    <metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/box_slot" />
-                    <metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/empty_slot" />
-                  </tal:block>
-                </div>
-              </tal:block>
-              <tal:block condition="content/aq_explicit/isCellBlock|nothing">
-                <tal:block define="block content">
-                  <metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/box_slots" />
-                </tal:block>
-              </tal:block>
-            </tal:block>
-          </td>
-        </tal:block>
+    <tr tal:repeat="slotelt theme_engine/extractSlotElements">
+      <tal:block define="slot python:slotelt[0]">
+	<metal:block
+	    use-macro="here/cpsskins_portlet_manage_lib/macros/portlet_slot" />
       </tal:block>
     </tr>
   </table>
+</metal:block>
+
+<metal:block define-macro="portlet_slot">
+  <td>
+    <div class="templetBox"
+	 tal:content="slot" />
+    <div class="boxGroupBoundingBox">
+      <div tal:content="slot" class="boxGroupBoxSlotTitle" />
+      <tal:block define="portlets python:ptltool.getPortlets(context=here, slot=slot, visibility_check=0, override=override, guard_check=0)">
+	<metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/box_slot" />
+	<!--metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/empty_slot" /-->
+      </tal:block>
+    </div>
+</td>
 </metal:block>
 
 <metal:block define-macro="unused_portlets_panel">

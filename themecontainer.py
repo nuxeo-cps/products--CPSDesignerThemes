@@ -301,7 +301,10 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
                           theme_base_uri=self.absolute_url_path() + '/' + theme,
                           page_uri='/' + page_rpath,
                           cps_base_url=cps_base_url,
-                          encoding=encoding)
+                          encoding=encoding,
+                          theme_name=t,
+                          page_name=p,
+                          )
 
     def invalidate(self, theme, page=None):
         """No cache yet."""

@@ -25,8 +25,10 @@ import warnings
 from zope.interface import implements
 from zope.component import adapts
 from zope.component import getMultiAdapter
+from Globals import InitializeClass
 from Acquisition import aq_base, aq_parent, aq_inner
 from AccessControl import ModuleSecurityInfo
+from AccessControl import ClassSecurityInfo
 from Products.CMFCore.utils import getToolByName
 from themecontainer import FSThemeContainer
 
@@ -62,16 +64,19 @@ class EngineAdapter(object):
     adapts(IObjectManager, IHTTPRequest)
     implements(IThemeEngine)
 
-    def __init__(self, context, request):
-        self.context = context
-        self.request = request
+    security = ClassSecurityInfo()
 
+    def __init__(self, context, request):
         # GR don't want to import a constant from CPSDefault here
         self.void = void = getattr(request, '_cps_void_response', _default)
         if void is _default:
             logger.warn("Didn't find marker in request. Void responses "
                         "(302, 304...) quick handling might be broken.")
             void = False
+
+        self.context = context
+        self.request = request
+        self.engine = None
 
         # portal-related stuff
         utool = getToolByName(context, 'portal_url')
@@ -93,17 +98,34 @@ class EngineAdapter(object):
 
     def getEngine(self):
         """The fallback is up to the container."""
+        engine = self.engine
+        if engine is not None:
+            return engine
         theme, page = self.getThemeAndPageName()
         logger.debug("Requested theme: %r page: %r", theme, page)
-        return self.lookupContainer().getPageEngine(
+        engine = self.engine = self.lookupContainer().getPageEngine(
             theme, page, cps_base_url=self.cps_base_url, fallback=True,
             encoding=self.encoding)
+        return engine
 
     def renderCompat(self, **kw):
         if self.void: # return asap for efficiency (see #2040)
             return ''
         return self.getEngine().renderCompat(context=self.context,
                                              request=self.request, **kw)
+
+    security.declarePublic('effectiveThemeAndPageNames')
+    def effectiveThemeAndPageNames(self):
+        """Return the effective theme and page names"""
+        engine = self.getEngine()
+        return (engine.theme_name, engine.page_name)
+
+    security.declarePublic('extractSlotElements')
+    def extractSlotElements(self):
+        return self.getEngine().extractSlotElements()
+
+InitializeClass(EngineAdapter)
+
 class RootContainerFinder:
     """This class uses the first container found at root."""
 
@@ -417,7 +439,7 @@ class CherryPickingCPSSkinsThemeNegociator(CPSSkinsThemeNegociator):
       special theme below, use:
            1-0:special
            folder_view:0-1:special+fview
-
+v
     The case of applying a rule to a *document* is not covered by
     CPSSkinsThemeNegociator yet, but will be implemented upon request.
 

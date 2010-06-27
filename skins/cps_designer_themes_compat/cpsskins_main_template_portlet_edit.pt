@@ -1,0 +1,72 @@
+<metal:block define-macro="head" 
+  tal:define="base_url python: request.get('cpsskins_base_url', '');
+	      global theme_engine python: modules['Products.CPSDesignerThemes.negociator'].adapt(here, request);
+	      current_view theme_engine/effectiveThemeAndPageNames;
+	      global current_theme python: current_view[0];
+	      global current_page python: current_view[1];
+
+              global theme_container python: tmtool.getThemeContainer(theme=current_theme);
+              global page_container python: theme_container.getPageContainer(current_page);
+              theme_url python: base_url + utool.getRelativeUrl(theme_container);">
+<meta name="generator" content="CPSSkins 2.3" />
+<tal:block content="structure theme_container/renderIcon" />
+<!-- CSS1 -->
+<link rel="Stylesheet" type="text/css"
+ tal:attributes="href string:${base_url}cpsskins_common.css" />
+<link rel="Stylesheet" type="text/css"
+ tal:attributes="href string:${theme_url}/renderCSS" />
+<!-- CSS2 -->
+<style type="text/css" media="all"
+ tal:content="string:@import url(${base_url}cpsskins_common-css2.css);" />
+<!-- JavaScript -->
+<script type="text/javascript" tal:attributes="src string:${here_url}/cpsskins_renderJS?theme=$current_theme"></script>
+</metal:block>
+<metal:block define-macro="main">
+  <tal:block define="pageblock_style python: page_container.getCSSLayoutStyle();
+                     dummy python: request.set('cpsskins_mcat', mcat)"
+   tal:repeat="pageblock python: page_container.getPageBlocks(filter=0)">
+    <table cellpadding="0" cellspacing="0" summary=""
+    tal:define="maxcols python: pageblock['maxcols']"
+    tal:attributes="style python: pageblock.getCSSLayoutStyle(pageblock_style);
+                    class python: pageblock.getCSSClass();
+                    summary python: pageblock['title']">
+       <tr>
+        <tal:block define="objects python: pageblock.getObjects(context_obj=context_obj)"
+                   repeat="x_pos python: range(int(maxcols))">
+          <tal:block 
+           define="objects_in_xpos python: objects.get(x_pos, None)"
+           condition="objects_in_xpos">
+            <td valign="top"
+             tal:define="contents_in_xpos python: objects_in_xpos['contents'];
+                         cellsize python: objects_in_xpos['cellsizer'];
+                         cellstyle python: objects_in_xpos['cellstyler']"
+             tal:attributes="class python: cellstyle and cellstyle.getCSSClass(level=2) or None;
+                             style python: cellsize and cellsize.getCSSLayoutStyle() or None">
+              <tal:block repeat="content contents_in_xpos">
+                <div tal:define="margin_style python: content.getCSSMarginStyle();
+                                 isRenderable not:content/isMainContent|nothing;
+                                 rendered python: isRenderable and content.render_cache(shield=shield, context_obj=context_obj, enable_esi=enable_esi, boxedit=boxedit, override=override, visibility_check=1, guard_check=0)"
+                     tal:condition="python: rendered or not isRenderable"
+                     tal:attributes="style margin_style"
+                     tal:omit-tag="not:margin_style">
+                  <div tal:attributes="class python: content.getCSSClass(level=2);
+                                       style python: content.getCSSLayoutStyle();
+                                       title content/title_or_id">
+                    <tal:block condition="rendered"
+                     content="structure rendered" />
+                    <tal:block condition="not:isRenderable">
+                      <tal:block condition="content/isMainContent|nothing">
+                        <metal:block define-slot="maincontent" />
+                        <br style="clear:both" />
+                      </tal:block>
+                    </tal:block>
+                  </div>
+                </div>
+              </tal:block>
+            </td>
+          </tal:block>
+        </tal:block>
+      </tr>
+    </table>
+  </tal:block>
+</metal:block>
