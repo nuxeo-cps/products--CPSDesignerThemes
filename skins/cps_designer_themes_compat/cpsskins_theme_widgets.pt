@@ -72,18 +72,15 @@ tal:define="themes theme_engine/listAllThemes;
 </metal:block>
 
 <metal:block define-macro="pagetabs"
-tal:define="pages theme_container/getPages;">
+tal:define="pages theme_engine/listThemePages;">
   <table class="pageTabs" cellpadding="0" cellspacing="0" summary="">
     <tr>
       <tal:block repeat="page pages">
         <td tal:define="
-          page_title page/title_or_id;
-          page_id page/getId;
-          page_url python: base_url + utool.getRelativeUrl(page);
+          page_title page/title;
+          page_id page/id;
           we_are_here python: page_id == current_page;
           default_page python: page['default'];
-          styles_list python: page.getApplicableStyles();
-          align_list page/listHorizontalAlignments|nothing;
           style python: default_page and 'text-decoration: underline' or '';"
         tal:attributes="class python: we_are_here and 'selected' or None">
           <div class="contentDest" tal:attributes="dest_page page_id">
@@ -95,13 +92,11 @@ tal:define="pages theme_container/getPages;">
              pageid python: not we_are_here and page_id or None;
              icon python: base_url + page.getIcon(1);
              alignments python: '|'.join(align_list);
-             styles python: '|'.join([s['meta_type'] for s in styles_list]);
-             isalignable python: page.isAlignable();
              haslayout python: 1;
              prompt_id python: 1;
-             notdefault python: not page.isDefaultPage() or None;
+             notdefault python: not default_page;
              title page_title;
-             contenturl page_url">
+             ">
               <img src="" alt="" width="12" height="12"
                tal:attributes="src string:${base_url}cpsskins_images/edit-12.png" />
             </span>

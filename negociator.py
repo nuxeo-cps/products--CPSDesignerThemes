@@ -133,6 +133,12 @@ class EngineAdapter(object):
         This includes the resolved theme."""
         return self.lookupContainer().listAllThemes()
 
+    security.declarePublic('listThemePages')
+    def listThemePages(self, editing=False):
+        """List all available theme pages for negotiated theme."""
+        engine = self.getEngine(editing=editing)
+        return self.lookupContainer().listAllPagesFor(engine.theme_name)
+
 InitializeClass(EngineAdapter)
 
 class RootContainerFinder:

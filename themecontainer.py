@@ -38,6 +38,8 @@ from Products.CPSUtil.PropertiesPostProcessor import PropertiesPostProcessor
 
 from engine import get_engine_class
 from utils import rewrite_uri
+from constants import NS_URI
+
 from interfaces import IResourceTraverser
 
 _marker = object()
@@ -318,5 +320,27 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
                 # could use a richer theme descriptor object
                 res.append(dict(id=f, title=f, default=f==self.default_theme))
         return tuple(res)
+
+    @classmethod
+    def isPageFile(self, fpath):
+        """Tell whether the file with given path is a theme page.
+
+        TODO: currently, a pure static html page wouldn't pass it"""
+        if not os.path.isfile(fpath):
+            return False
+        # lame, but better for now than trying and parse everything
+        fobj = open(fpath)
+        extract = fobj.read(1000)
+        fobj.close()
+        return re.search(r'<(html|HTML)[^>]*xmlns[^=>]*=[\'"]%s[^>]*>' % NS_URI,
+                         extract) is not None
+
+    def listAllPagesFor(self, theme):
+        path = os.path.join(self.getFSPath(), theme)
+        return tuple(dict(title=f, id=f,
+                          default=f==self.computePageFileName(
+                                                self.default_page))
+                     for f in os.listdir(path)
+                     if self.isPageFile(os.path.join(path, f)))
 
 InitializeClass(FSThemeContainer)

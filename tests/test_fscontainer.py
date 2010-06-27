@@ -55,7 +55,13 @@ class TestFsContainer(ZopeTestCase):
     def testListAllThemes(self):
         self.assertEquals(self.container.listAllThemes(), (
             dict(id='theme1', title='theme1', default=True),
-            dict(id='theme2', title='theme2', default=False)))
+            dict(id='theme2', title='theme2', default=False),
+            dict(id='theme3', title='theme3', default=False)))
+
+    def testListPagesFor(self):
+        self.assertEquals(self.container.listAllPagesFor('theme3'), (
+            dict(id='page1.html', title='page1.html', default=False),))
+
 
     def testCssUriRewrite(self):
         sheet = self.container['theme1']['front.css']
