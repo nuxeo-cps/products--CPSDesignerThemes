@@ -310,5 +310,13 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
         """No cache yet."""
         pass
 
+    def listAllThemes(self):
+        path = self.getFSPath()
+        res = []
+        for f in os.listdir(self.getFSPath()):
+            if os.path.isdir(os.path.join(path, f)):
+                # could use a richer theme descriptor object
+                res.append(dict(id=f, title=f, default=f==self.default_theme))
+        return tuple(res)
 
 InitializeClass(FSThemeContainer)

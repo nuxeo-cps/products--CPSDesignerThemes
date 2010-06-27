@@ -96,12 +96,20 @@ class EngineAdapter(object):
         To be implemented by subclasses."""
         raise NotImplementedError
 
-    def getEngine(self):
+    def getEngine(self, editing=False):
         """The fallback is up to the container."""
         engine = self.engine
         if engine is not None:
             return engine
-        theme, page = self.getThemeAndPageName()
+
+        if not editing:
+            theme, page = self.getThemeAndPageName()
+        else:
+            tmtool = getToolByName(self.context, 'portal_themes')
+            view_mode = tmtool.getViewMode()
+            theme = view_mode.get('theme')
+            page = view_mode.get('page')
+
         logger.debug("Requested theme: %r page: %r", theme, page)
         engine = self.engine = self.lookupContainer().getPageEngine(
             theme, page, cps_base_url=self.cps_base_url, fallback=True,
@@ -115,14 +123,21 @@ class EngineAdapter(object):
                                              request=self.request, **kw)
 
     security.declarePublic('effectiveThemeAndPageNames')
-    def effectiveThemeAndPageNames(self):
+    def effectiveThemeAndPageNames(self, editing=False):
         """Return the effective theme and page names"""
-        engine = self.getEngine()
+        engine = self.getEngine(editing=editing)
         return (engine.theme_name, engine.page_name)
 
     security.declarePublic('extractSlotElements')
     def extractSlotElements(self):
         return self.getEngine().extractSlotElements()
+
+    security.declarePublic('listAllThemes')
+    def listAllThemes(self):
+        """List all available themes in the same context.
+
+        This includes the resolved theme."""
+        return self.lookupContainer().listAllThemes()
 
 InitializeClass(EngineAdapter)
 

@@ -40,7 +40,8 @@ class TestFsContainer(ZopeTestCase):
     def afterSetUp(self):
         cont = FSThemeContainer('container')
         cont.manage_changeProperties(
-            relative_path='Products/CPSDesignerThemes/tests')
+            relative_path='Products/CPSDesignerThemes/tests',
+            default_theme='theme1')
         self.folder._setObject(cont.getId(), cont)
         self.folder.portal_url = FakeUrlTool()
         self.container = self.folder.container
@@ -50,6 +51,11 @@ class TestFsContainer(ZopeTestCase):
     def testSecurity(self):
         self.assertRaises(ValueError, self.container.manage_changeProperties,
                     relative_path='../htaccess')
+
+    def testListAllThemes(self):
+        self.assertEquals(self.container.listAllThemes(), (
+            dict(id='theme1', title='theme1', default=True),
+            dict(id='theme2', title='theme2', default=False)))
 
     def testCssUriRewrite(self):
         sheet = self.container['theme1']['front.css']

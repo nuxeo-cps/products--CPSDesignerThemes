@@ -1,7 +1,7 @@
-<metal:block define-macro="head" 
+<metal:block define-macro="head"
   tal:define="base_url python: request.get('cpsskins_base_url', '');
 	      global theme_engine python: modules['Products.CPSDesignerThemes.negociator'].adapt(here, request);
-	      current_view theme_engine/effectiveThemeAndPageNames;
+	      global current_view python:theme_engine.effectiveThemeAndPageNames(editing=True);
 	      global current_theme python: current_view[0];
 	      global current_page python: current_view[1];
 
