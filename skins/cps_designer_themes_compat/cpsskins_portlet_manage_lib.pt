@@ -291,11 +291,9 @@ tal:define="sections python: [ 'portlet_slots', 'site_structure', 'portlet_brows
 
 <metal:block define-macro="main_canvas">
   <table cellpadding="0" cellspacing="3" width="100%">
-    <tr tal:repeat="slotelt theme_engine/extractSlotElements">
-      <tal:block define="slot python:slotelt[0]">
-	<metal:block
-	    use-macro="here/cpsskins_portlet_manage_lib/macros/portlet_slot" />
-      </tal:block>
+    <tr tal:repeat="slot theme_engine/listSlots">
+      <metal:block
+	  use-macro="here/cpsskins_portlet_manage_lib/macros/portlet_slot" />
     </tr>
   </table>
 </metal:block>
@@ -345,7 +343,7 @@ tal:define="sections python: [ 'portlet_slots', 'site_structure', 'portlet_brows
          tal:content="bc/id" />
       </th>
     </tr>
-    <tal:block repeat="slot page_container/getSlots">
+    <tal:block repeat="slot theme_engine/listSlots">
     <tr>
       <td class="portletSlotGroup"
           tal:attributes="colspan python: here_depth > 0 and here_depth + 1 or None"

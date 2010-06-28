@@ -122,9 +122,12 @@ class EngineAdapter(object):
         engine = self.getEngine(editing=editing)
         return (engine.theme_name, engine.page_name)
 
-    security.declarePublic('extractSlotElements')
-    def extractSlotElements(self):
-        return self.getEngine().extractSlotElements()
+    security.declarePublic('listSlots')
+    def listSlots(self):
+        """Return the list of all slots known to this engine.
+        TODO : still has the side effects of engine's extractSlotElements.
+        """
+        return [x[0] for x in self.getEngine().extractSlotElements()]
 
     security.declarePublic('listAllThemes')
     def listAllThemes(self):
