@@ -79,8 +79,8 @@
 
     <tal:block condition="not:wysiwyg">
       <div class="editForm" tal:condition="python: panel=='unused_portlets'">
-        <tal:block define="hidden_slots python: here.cpsskins_listHiddenSlots(theme=current_theme)"
-         condition="hidden_slots">
+        <tal:block define="hidden_slots theme_engine/listHiddenSlots"
+		   condition="hidden_slots">
           <metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/unused_portlets_panel" />
         </tal:block>
       </div>
