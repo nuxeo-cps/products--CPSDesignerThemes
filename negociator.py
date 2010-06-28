@@ -129,6 +129,14 @@ class EngineAdapter(object):
         """
         return [x[0] for x in self.getEngine().extractSlotElements()]
 
+    security.declarePublic('listHiddenSlots')
+    def listHiddenSlots(self):
+        """List all existing portlet slots that are not used by this engine."""
+        ptltool = getToolByName(self.context, 'portal_cpsportlets')
+        engine_slots = self.listSlots()
+        return [slot for slot in ptltool.listPortletSlots()
+                if slot not in engine_slots]
+
     security.declarePublic('listAllThemes')
     def listAllThemes(self):
         """List all available themes in the same context.
