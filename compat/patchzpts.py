@@ -17,14 +17,11 @@
 #
 # $Id$
 
-from zope.component import getMultiAdapter
-
 from Products.PageTemplates.PageTemplate import PageTemplate
 from Products.PageTemplates.PageTemplate import PTRuntimeError
 from Products.PageTemplates.PageTemplate import PageTemplateTracebackSupplement
 from Products.PageTemplates.Expressions import getEngine
-
-from Products.CPSDesignerThemes.interfaces import IThemeEngine
+from Products.CPSDesignerThemes.negociator import adapt
 
 from talslotrecorder import TALSlotRecordingInterpreter
 
@@ -54,8 +51,7 @@ def pt_render(self, source=0, extra_context={}):
     if slots is not None:
         # We're assuming the sole use of <metal:slot-recorder>
         # is to pass to the rendering theme engine
-        # XXX maybe restore some flexibility by using a named utility/adpater ?
-        engine = getMultiAdapter((c['context'], c['request']), IThemeEngine)
+        engine = adapt(c['context'], c['request'])
         return engine.renderCompat(metal_slots=slots,
                                    pt_output=output.getvalue())
 

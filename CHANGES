@@ -3,6 +3,7 @@ Requires
 -
 New features
 ~~~~~~~~~~~~
+- #2168: adapted the portlets editor to CPSDesignerThemes
 - #2142: cps-cms.org based namespaces (theme and zcml directives)
 - #2138: provide option to control rewriting of absolute path URIs
 - Charset independency (UTF-8, ISO-8859, ...)
