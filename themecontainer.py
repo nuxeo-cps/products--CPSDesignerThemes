@@ -316,6 +316,8 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
         path = self.getFSPath()
         res = []
         for f in os.listdir(self.getFSPath()):
+            if f.startswith('.'):
+                continue
             if os.path.isdir(os.path.join(path, f)):
                 # could use a richer theme descriptor object
                 res.append(
