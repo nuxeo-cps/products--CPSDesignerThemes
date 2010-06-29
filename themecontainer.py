@@ -318,8 +318,10 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
         for f in os.listdir(self.getFSPath()):
             if os.path.isdir(os.path.join(path, f)):
                 # could use a richer theme descriptor object
-                res.append(dict(id=f, title=f, default=f==self.default_theme))
-        return tuple(res)
+                res.append(
+                    (f, dict(id=f, title=f, default=f==self.default_theme)))
+        res.sort()
+        return tuple(d for _, d in res)
 
     @classmethod
     def isPageFile(self, fpath):
