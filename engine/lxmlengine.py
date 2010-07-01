@@ -114,7 +114,9 @@ class LxmlEngine(ElementTreeEngine):
         abs_rewrite = self.uri_absolute_path_rewrite
         for tag, attr in LINK_HTML_DOCUMENTS.items():
             for elt in from_elt.iterfind('.//{%s}%s' % (NS_XHTML, tag)):
-                uri = elt.attrib[attr]
+                uri = elt.attrib.get(attr)
+                if uri is None:
+                    continue
                 try:
                     new_uri = rewriter_func(uri=uri,
                         absolute_base=self.theme_base_uri,
