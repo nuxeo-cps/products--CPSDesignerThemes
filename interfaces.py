@@ -43,6 +43,9 @@ class IThemeContainer(Interface):
 
         if no page is specified, the whole theme is being invalidated."""
 
+    def listAllThemes():
+        """Return the list of all avalaible themes from this container."""
+
 class IResourceTraverser(Interface):
 
     pass

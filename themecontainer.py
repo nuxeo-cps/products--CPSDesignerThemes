@@ -38,6 +38,8 @@ from Products.CPSUtil.PropertiesPostProcessor import PropertiesPostProcessor
 
 from engine import get_engine_class
 from utils import rewrite_uri
+from constants import NS_URI
+
 from interfaces import IResourceTraverser
 
 _marker = object()
@@ -301,11 +303,48 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
                           theme_base_uri=self.absolute_url_path() + '/' + theme,
                           page_uri='/' + page_rpath,
                           cps_base_url=cps_base_url,
-                          encoding=encoding)
+                          encoding=encoding,
+                          theme_name=t,
+                          page_name=p,
+                          )
 
     def invalidate(self, theme, page=None):
         """No cache yet."""
         pass
 
+    def listAllThemes(self):
+        path = self.getFSPath()
+        res = []
+        for f in os.listdir(self.getFSPath()):
+            if f.startswith('.'):
+                continue
+            if os.path.isdir(os.path.join(path, f)):
+                # could use a richer theme descriptor object
+                res.append(
+                    (f, dict(id=f, title=f, default=f==self.default_theme)))
+        res.sort()
+        return tuple(d for _, d in res)
+
+    @classmethod
+    def isPageFile(self, fpath):
+        """Tell whether the file with given path is a theme page.
+
+        TODO: currently, a pure static html page wouldn't pass it"""
+        if not os.path.isfile(fpath):
+            return False
+        # lame, but better for now than trying and parse everything
+        fobj = open(fpath)
+        extract = fobj.read(1000)
+        fobj.close()
+        return re.search(r'<(html|HTML)[^>]*xmlns[^=>]*=[\'"]%s[^>]*>' % NS_URI,
+                         extract) is not None
+
+    def listAllPagesFor(self, theme):
+        path = os.path.join(self.getFSPath(), theme)
+        return tuple(dict(title=f, id=f,
+                          default=f==self.computePageFileName(
+                                                self.default_page))
+                     for f in os.listdir(path)
+                     if self.isPageFile(os.path.join(path, f)))
 
 InitializeClass(FSThemeContainer)

@@ -1,0 +1,577 @@
+<metal:block define-macro="box">
+  <div
+   tal:define="ypos portlet/getOrder;
+               portlet_id portlet/getId;
+               portlet_url portlet/getURL;
+               portlet_title portlet/title_or_id;
+               portlet_folder portlet/getLocalFolder;
+               portlet_rurl portlet/getRelativeUrl;
+               fti portlet/getTypeInfo;
+               portlet_type fti/title_or_id;
+               portlet_icon fti/getIcon;
+               portlet_folder portlet/getLocalFolder;
+               portlet_folder_rurl python: utool.getRelativeUrl(portlet_folder);
+               editable python:checkPerm('Manage Portlets', portlet);
+               box_selected python: portlet == here or portlet_id == selected_portlet"
+   tal:attributes="portlet_rurl portlet_rurl;
+                   src_rurl portlet_folder_rurl;
+                   src_ypos python: ypos and ypos or 0;
+                   src_slot slot;
+                   editable editable;
+                   class python: editable and 'boxGroupBoxSlot portletBoxDrag' or 'boxGroupBoxSlot'">
+    <div
+     tal:define="box_style python: box_selected and 'border: 2px solid #000' or 'border: none'"
+      tal:attributes="style box_style;
+                      class python: folder_editable and 'portletBoxDest' or None;
+                      insert_url folder_url;
+                      dest_slot slot;
+                      dest_ypos python: ypos and ypos or 0">
+      <div tal:attributes="class slot_class">
+      <div class="title boxGroupBoxTitle"
+       tal:condition="editable" style="display:block; padding-right: 0">
+        <a tal:attributes="onclick string:newWindow('${base_url}${portlet_rurl}/cpsskins_portlet_edit')"
+         tal:content="portlet/title_or_id" href="javascript:void(0)"/>
+      </div>
+      <div class="boxGroupBoxBody portletBoxEditMenu"
+       tal:attributes="portlet_id portlet_id;
+                       portlet_url string:${base_url}${portlet_rurl};
+                       portlet_rurl portlet_rurl;
+                       portlet_folder_url string:${base_url}${portlet_folder_rurl};
+                       folder_url folder_url;
+                       insert_url folder_url;
+                       folder_editable folder_editable;
+                       icon portlet_icon;
+                       title portlet_title;
+                       editable editable;
+                       src_ypos python: ypos and ypos or 0;
+                       src_slot slot">
+        <div class="body">
+          <img src="" width="16" height="16" alt=""
+          tal:condition="nocall:portlet_icon"
+          tal:attributes="src portlet_icon" />
+          <em tal:content="structure python: cpsmcat(portlet_type)" />
+          <p>
+            <tal:block i18n:translate="listingheader_location" />:
+            <em tal:content="python: '/' + portlet_folder.absolute_url(1)" />
+          </p>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+</metal:block>
+
+<metal:block define-macro="portlet_add_panel">
+  <table class="contentbox" cellpadding="2" cellspacing="1" summary=""
+   tal:define="til here/cpsskins_listPortlets">
+    <tr>
+      <tal:block repeat="ti til">
+        <td class="PortletAdd"
+         tal:attributes="ptype_id ti/id">
+          <img src="" alt="" tal:define="title ti/Title" width="16" height="16"
+           i18n:attributes="title"
+           tal:attributes="src ti/getIcon;
+                           title title" /><br/>
+        </td>
+      </tal:block>
+    </tr>
+  </table>
+</metal:block>
+
+<metal:block define-macro="portlet_add_form">
+  <tal:block define="til here/cpsskins_listPortlets">
+    <dl class="contentlist">
+      <tal:block repeat="ti til">
+        <dt tal:define="choice_id string:choice_${repeat/ti/number}">
+          <input name="ptype_id" type="radio"
+           tal:attributes="value ti/id;
+                           id choice_id" />
+          <img width="16" height="16" alt=""
+           tal:attributes="src ti/getIcon" />
+          <label for="" tal:attributes="for choice_id">
+            <strong tal:define="title ti/Title"
+                    tal:content="python: mcat and mcat(title) or title"
+                    i18n:translate="" />
+          </label>
+        </dt>
+        <dd tal:define="title ti/description"
+            tal:content="python: mcat and mcat(title) or title"
+            i18n:translate="" />  
+      </tal:block>
+    </dl>
+  </tal:block>
+</metal:block>
+
+<metal:block define-macro="contextual_menu" i18n:domain="cpsskins"
+  tal:define="ttool here/portal_types">
+  <div id="choice-context-menu" class="context-menu">
+    <div class="context-menu-header"
+         filter="Portlet_prepare_element_menu(pd_filter_object)"></div>
+    <div class="context-menu-item" onmouseup="Choice_edit()"
+     tal:attributes="filter string:pd_selected_item && pd_selected_item.getAttribute('editable') == 1">
+      <img width="16" height="16" 
+         tal:attributes="src string:${base_url}cpsskins_images/edit-16.png" />
+      <tal:block i18n:translate="" 
+         define="title string:_menu_Edit_"
+         content="python: mcat and mcat(title) or title" />
+    </div>
+    <div class="context-menu-item" onmouseup="Choice_copy_to_clipboard()"
+     tal:attributes="filter string:pd_selected_item && pd_selected_item.getAttribute('editable') == 1">
+      <img width="16" height="16" 
+         tal:attributes="src string:${base_url}cpsskins_images/copy-16.png" />
+      <tal:block i18n:translate="" 
+         define="title string:_menu_Copy_"
+         content="python: mcat and mcat(title) or title" />
+    </div>
+    <div class="context-menu-item" onmouseup="Choice_paste_from_clipboard()"
+     tal:condition="nocall:clipboard_portlet"
+     tal:attributes="filter string:pd_selected_item && pd_selected_item.getAttribute('folder_editable') == 1">
+      <img width="16" height="16" 
+         tal:attributes="src string:${base_url}cpsskins_images/paste-16.png" />
+      <tal:block i18n:translate="" 
+         define="title string:_menu_Paste_"
+         content="python: mcat and mcat(title) or title" />
+    </div>
+    <div class="context-menu-item" onmouseup="Choice_duplicate()"
+     tal:attributes="filter string:pd_selected_item && pd_selected_item.getAttribute('editable') == 1">
+      <img width="16" height="16" 
+         tal:attributes="src string:${base_url}cpsskins_images/duplicate-16.png" />
+      <tal:block i18n:translate="" 
+         define="title string:_menu_Duplicate_"
+         content="python: mcat and mcat(title) or title" />
+    </div>
+    <div class="context-menu-item" onmouseup="Choice_insert()"
+     tal:attributes="filter string:pd_selected_item && pd_selected_item.getAttribute('folder_editable') == 1">
+       <img width="16" height="16" 
+         tal:attributes="src string:${base_url}cpsskins_images/insert-16.png" />
+       <tal:block i18n:translate="" 
+         define="title string:_menu_Insert_"
+         content="python: mcat and mcat(title) or title" />
+    </div>
+    <div class="context-menu-item" onmouseup="Choice_delete()"
+     tal:define="msg string:_confirm delete_;
+                 msg python: cpsskins_mcat and cpsskins_mcat(msg) or msg"
+     tal:attributes="
+       onmouseup python:'Choice_delete(\'%s\')' % msg;
+       filter string:pd_selected_item && pd_selected_item.getAttribute('editable') == 1">
+       <img width="16" height="16" 
+         tal:attributes="src string:${base_url}cpsskins_images/delete-16.png" />
+       <tal:block i18n:translate="" 
+         define="title string:_menu_Delete_"
+         content="python: mcat and mcat(title) or title" />
+    </div>
+  </div>
+</metal:block>
+
+<metal:block define-macro="navigate"
+tal:define="sections python: [ 'portlet_slots', 'site_structure', 'portlet_browser', 'unused_portlets']">
+  <div class="mainFormTab">
+    &nbsp;
+    <tal:block repeat="section sections">
+      <a
+      tal:define="url string:${tmtool_url}/setViewMode?portlets_panel=$section&amp;reload=1;
+                  title python:'%s_panel' % section" i18n:translate=""
+       tal:attributes="href url; class python: panel == section and 'selected' or None;"
+      tal:content="python:mcat and mcat(title) or title" />
+    </tal:block>
+    &nbsp;
+    <a class="exit"
+       tal:attributes="href string:${here_url}/;
+                       accesskey ptltool/getAccessKey"
+       tal:define="title string:_Exit_" i18n:translate=""
+       tal:content="python:mcat and mcat(title) or title" />
+ </div>
+</metal:block>
+
+<metal:block define-macro="clipboard" i18n:domain="cpsskins">
+  <div class="clipboardBox"
+    tal:define="portlet nocall:clipboard_portlet"
+    tal:condition="nocall:portlet">
+    <strong i18n:translate=""
+     tal:define="title string:_clipboard_"
+     tal:content="python: mcat and mcat(title) or title" />
+      <div class="portletBoxDrag"
+       tal:define="ypos portlet/getOrder;
+                   portlet_folder portlet/getLocalFolder;
+                   portlet_folder_rurl python: utool.getRelativeUrl(portlet_folder);
+                   portlet_rurl portlet/getRelativeUrl;
+                   portlet_depth portlet/getDepth"
+       tal:attributes="copy python: 1;
+                       portlet_rurl portlet_rurl;
+                       src_rurl portlet_folder_rurl;
+                       src_ypos python: ypos and ypos or 0;
+                       src_slot portlet/getSlot;">
+        <img src="" width="16" height="16" alt="" align="middle"
+         tal:attributes="src python: base_url + portlet.getIcon(1)" />
+        <span tal:content="portlet/title_or_id" />
+    </div>
+  </div>
+</metal:block>
+
+<metal:block define-macro="empty_slot">
+  <div style="margin:4px"
+   tal:condition="python:len(portlets) == 0"
+   tal:attributes="dest_slot slot;
+                   class python: folder_editable and 'portletBoxDest' or None;
+                   dest_ypos python: 0;
+                   insert_url folder_url">
+    <div class="portletBoxEditMenu"
+     tal:attributes="title slot_title;
+                     src_ypos python: 0;
+                     insert_url folder_url;
+                     folder_url folder_url;
+                     folder_editable folder_editable;
+                     icon slot_icon;
+                     src_slot slot">
+      <div i18n:attributes="title"
+       tal:define="title string:_You can drop a Portlet into this area_"
+       tal:attributes="title title"
+       tal:content="structure string:&nbsp;" />
+    </div>
+  </div>
+</metal:block>
+
+<metal:block define-macro="box_slot">
+    <tal:block repeat="portlet portlets"
+     define="slot_class string:boxColor${content/boxcolor|nothing} boxShape${content/boxshape|nothing}">
+      <metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/box" />
+    </tal:block>
+</metal:block>
+
+<metal:block define-macro="override_control" i18n:domain="cpsskins">
+  <div style="float:right; padding: 4px">
+    <a tal:condition="not:override"
+    tal:attributes="href string:${tmtool_url}/setViewMode?portlets_override=1&reload=1">
+      <img src="" width="16" height="16" i18n:attributes="title"
+       tal:attributes="title string:_Hide_overriden_portlets_;
+         src string:${base_url}cpsskins_images/portlet_override.png"/>
+    </a>
+    <a tal:condition="override"
+    tal:attributes="href string:${tmtool_url}/setViewMode?portlets_override=0&reload=1">
+      <img src="" width="16" height="16" i18n:attributes="title"
+       tal:attributes="title string:_Reveal_overriden_portlets_;
+         src string:${base_url}cpsskins_images/portlet_nooverride.png"/>
+    </a>
+  </div>
+</metal:block>
+
+<metal:block define-macro="breadcrumbs">
+  <div class="navSubFolders"
+   tal:define="contents python: ptltool.getFolders(context=bmf)"
+   tal:condition="contents">
+    <form action="cpsskins_url_redirect" method="get">
+      <select name="url" onChange="submit()">
+        <option value="">...</option>
+        <tal:block repeat="content contents">
+          <option
+           tal:attributes="value string:${content/absolute_url}/portlet_manage_form"
+           tal:content="python:content.getId()" />
+        </tal:block>
+      </select>
+    </form>
+  </div>
+  <div class="navBreadCrumbs">
+    <tal:block repeat="bc python: ptltool.getBreadCrumbs(context=here)">
+      <span class="portletBoxDest"
+       tal:define="rpath bc/rpath;
+                   url python: rpath and base_url + rpath + '/' or base_url"
+       tal:omit-tag="not:bc/editable"
+       tal:attributes="insert_url url;
+                       dest_rurl rpath;
+                       dest_ypos python: 0">
+        <a href=""
+         tal:content="string:${bc/id}/" 
+         tal:attributes="href string:${url}portlet_manage_form;
+                         title bc/title" />
+      </span>
+    </tal:block>
+  </div>
+  <br style="clear:both" />
+</metal:block>
+
+<metal:block define-macro="main_canvas">
+  <table cellpadding="0" cellspacing="3" width="100%">
+    <tr tal:repeat="slot theme_engine/listSlots">
+      <metal:block
+	  use-macro="here/cpsskins_portlet_manage_lib/macros/portlet_slot" />
+    </tr>
+  </table>
+</metal:block>
+
+<metal:block define-macro="portlet_slot">
+  <td tal:define="slot_title slot; slot_icon nothing">
+    <div class="boxGroupBoundingBox">
+      <div tal:content="slot" class="boxGroupBoxSlotTitle" />
+      <tal:block define="portlets python:ptltool.getPortlets(context=here, slot=slot, visibility_check=0, override=override, guard_check=0)">
+	<metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/box_slot" />
+	<metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/empty_slot"/>
+      </tal:block>
+    </div>
+</td>
+</metal:block>
+
+<metal:block define-macro="unused_portlets_panel">
+  <h1 class="fancy" i18n:translate="heading_unused_portlets" i18n:domain="cpsskins">Unused portlets</h1>
+  <p i18n:translate="description_unused_portlets" i18n:domain="cpsskins">Unused portlets</p>
+  <tal:block repeat="hidden_slot hidden_slots">
+    <tal:block define="portlets python:ptltool.getPortlets(here, hidden_slot)"
+     condition="portlets">
+      <h2 class="fancy" tal:content="hidden_slot" />
+      <metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/portlet_browser" />
+    </tal:block>
+  </tal:block>
+</metal:block>
+
+<metal:block define-macro="site_structure"
+  tal:define="here_depth python: len(utool.getRelativeContentPath(bmf))">
+  <h1 class="fancy" 
+   i18n:translate="heading_site_structure" 
+   i18n:domain="cpsskins">Site structure</h1>
+  <span i18n:translate="description_portlets_visible_from">Portlets visible from</span>
+  <em tal:content="folder_url" />
+  <br style="clear: both" />
+
+  <table border="0" width="100%" cellpadding="3" cellspacing="2">
+    <tr>
+      <th tal:repeat="bc python: ptltool.getBreadCrumbs(context=here)">
+        <span class="portletBoxDest" style="cursor:help"
+         tal:omit-tag="not:bc/editable"
+         tal:attributes="insert_url string:${base_url}${bc/rpath};
+                         dest_rurl bc/rpath;
+                         title bc/title;
+                         dest_ypos python: 0"
+         tal:content="bc/id" />
+      </th>
+    </tr>
+    <tal:block repeat="slot theme_engine/listSlots">
+    <tr>
+      <td class="portletSlotGroup"
+          tal:attributes="colspan python: here_depth > 0 and here_depth + 1 or None"
+          tal:content="slot" />
+    </tr>
+    <tal:block define="portlets python:ptltool.getPortlets(context=here, override=override,
+                                                           visibility_check=0, slot=slot)"
+               repeat="portlet portlets">
+      <tr tal:define="ypos portlet/getOrder;
+                      fti portlet/getTypeInfo;
+                      portlet_id portlet/getId;
+                      portlet_title portlet/title_or_id;
+                      portlet_type fti/title_or_id;
+                      portlet_icon fti/getIcon;
+                      portlet_url portlet/getURL;
+                      portlet_folder portlet/getLocalFolder;
+                      portlet_folder_rurl python: utool.getRelativeUrl(portlet_folder);
+                      portlet_folder_url string:${base_url}${portlet_folder_rurl};
+                      portlet_rurl portlet/getRelativeUrl;
+                      portlet_depth portlet/getDepth;
+                      group portlet/getSlot;
+                      editable python:checkPerm('Manage Portlets', portlet);
+                      selected python: portlet_id == selected_portlet">
+        <td tal:condition="portlet_depth"
+         tal:attributes="colspan python: portlet_depth"></td>
+        <td style="border-bottom: 1px dotted #ccc">
+          <div 
+           tal:attributes="portlet_rurl portlet_rurl;
+                           portlet_url string:${base_url}${portlet_rurl};
+                           portlet_folder_url portlet_folder_url;
+                           folder_url folder_url;
+                           insert_url portlet_folder_url;
+                           icon portlet_icon;
+                           title portlet_title;
+                           portlet_id portlet_id;
+                           editable editable;
+                           folder_editable python:checkPerm('Manage Portlets', portlet_folder);
+                           src_rurl portlet_folder_rurl;
+                           src_ypos python: ypos and ypos or 0;
+                           src_slot group;
+                           class python: editable and 'portletBoxDrag portletBoxEditMenu' or 'portletBoxEditMenu'">
+            <div
+             tal:attributes="insert_url portlet_folder_url;
+                             dest_rurl portlet_folder_rurl;
+                             dest_slot group;
+                             dest_ypos python: ypos and ypos or 0;
+                             class python: folder_editable and 'portletBoxDest' or None">
+              <div class="portletInfo"
+               tal:attributes="style python: selected and 'border: 2px solid #000' or ''">
+                <a tal:attributes="onclick string:newWindow('${base_url}${portlet_rurl}/edit_form')"
+                tal:content="portlet/title_or_id" href="javascript:void(0)"/>
+                <p>
+                  <img width="16" height="16" alt=""
+                   tal:condition="nocall:portlet_icon"
+                   tal:attributes="src portlet_icon;
+                                   title python: cpsmcat(portlet_type)" />
+                  <em tal:content="structure python: cpsmcat(portlet_type)" />.
+                  <span tal:content="portlet/description" /><br/>
+                   
+                  <small tal:define="vrange portlet/getVisibilityRangeMsgid"
+                   tal:condition="vrange">
+                    <tal:block i18n:translate="">cpsportlets_common_visibility_range_label</tal:block>:
+                    <tal:block content="vrange" i18n:translate="" />
+                  </small>
+                </p>
+              </div>
+            </div>
+          </div>
+        </td> 
+        <td style="border-bottom: 1px solid #ccc"
+         tal:condition="python: here_depth != portlet_depth"
+         tal:attributes="colspan python: here_depth - portlet_depth">
+        </td> 
+      </tr>       
+    </tal:block> 
+    </tal:block> 
+  </table>    
+</metal:block>
+
+<metal:block define-macro="browser_panel"
+  tal:define="topic request/form/topic|nothing;
+              type request/form/type|nothing;
+              selection python: topic or type">
+
+  <h1 class="fancy"
+   i18n:translate="heading_portlet_browser"
+   i18n:domain="cpsskins">Portlet browser</h1>
+
+  <div tal:condition="selection">
+    <a tal:attributes="href string:${request/URL0}"
+       i18n:translate="" class="linkUp"
+       tal:define="title string:_Other portlets_"
+       tal:content="python: mcat and mcat(title) or title" />
+    <br/>
+    <tal:block define="topics python: topic and (topic,) or ();
+                       portal_types python: type and (type,) or ();
+                       portlets python: ptltool.listPortlets(topics=topics, portal_types=portal_types)">
+      <metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/portlet_browser" />
+    </tal:block>
+  </div>
+
+  <tal:block condition="not:selection">
+    <h2 class="fancy" i18n:translate="heading_portlet_browser_by_topic"
+     i18n:domain="cpsskins">By topic</h2>
+    <div class="topicFolder">
+      <ul tal:define="topics_voc here/portal_vocabularies/subject_voc|nothing"
+          tal:condition="topics_voc">
+        <tal:block repeat="key python: topics_voc.keys()">
+          <tal:block define="portlets python: ptltool.listPortlets(topics=(key,));
+                             nb_portlets python: len(portlets)"
+           condition="python: nb_portlets &gt; 0">
+            <li>
+              <a href=""
+               tal:attributes="href string:${request/URL0}?topic=$key">
+               <tal:block content="topics_voc/?key" />
+               (<tal:block content="nb_portlets" />)
+              </a>
+            </li>
+          </tal:block>
+        </tal:block>
+      </ul>
+      <div style="clear:both"></div>
+    </div>
+    <br />
+    <h2 class="fancy" i18n:translate="heading_portlet_browser_by_type"
+     i18n:domain="cpsskins">By type</h2>
+    <div class="typeFolder">
+      <ul tal:define="
+         portal_types nocall:here/portal_types;
+         ptltool nocall:here/portal_cpsportlets;
+         types ptltool/listPortletTypes">
+        <tal:block repeat="type types">
+          <tal:block define="
+             portlets python: ptltool.listPortlets(portal_types=(type,));
+             nb_portlets python: len(portlets)"
+           condition="python: nb_portlets &gt; 0">
+            <li tal:define="icon python: portal_types[type].getIcon()">
+              <a href="" tal:attributes="href string:${request/URL0}?type=$type">
+                <img src="" tal:attributes="src icon" width="16" height="16" />
+                <tal:block content="type" />
+                (<tal:block content="nb_portlets" />)
+              </a>
+            </li>
+          </tal:block>
+        </tal:block>
+      </ul>
+      <div style="clear:both"></div>
+    </div>
+  </tal:block>
+</metal:block>
+
+<metal:block define-macro="portlet_browser">
+  <form tal:condition="portlets" action="cpsskins_copy_to_clipboard"
+   tal:attributes="action string:${base_url}cpsskins_copy_to_clipboard">
+    <table class="browser" summary="" cellpadding="0" cellspacing="0">
+      <tr>
+        <th>&nbsp;</th>
+        <th>&nbsp;</th>
+        <th tal:define="title string:_Title_" i18n:translate=""
+         tal:content="python: mcat and mcat(title) or title">Title</th>
+        <th tal:define="title string:_Description_" i18n:translate=""
+         tal:content="python: mcat and mcat(title) or title">Description</th>
+        <th tal:define="title string:_Creator_" i18n:translate=""
+         tal:content="python: mcat and mcat(title) or title">Creator</th>
+        <th tal:define="title string:_Location_" i18n:translate=""
+         tal:content="python: mcat and mcat(title) or title">Location</th>
+        <th>&nbsp;</th>
+      </tr>
+      <tal:block repeat="portlet portlets">
+        <tr tal:define="
+          ypos portlet/getOrder;
+          fti portlet/getTypeInfo;
+          portlet_id portlet/getId;
+          portlet_title portlet/title_or_id;
+          portlet_type fti/title_or_id;
+          portlet_icon fti/getIcon;
+          portlet_url portlet/getURL;
+          portlet_creator portlet/getCreator;
+          portlet_folder portlet/getLocalFolder;
+          portlet_folder_rurl python: utool.getRelativeUrl(portlet_folder);
+          portlet_rurl portlet/getRelativeUrl;
+          portlet_folder_url string:${base_url}${portlet_folder_rurl};
+          editable python: checkPerm('Manage Portlets', portlet);
+          onclick_string string:newWindow('${portlet_url}/edit_form');
+          selected python: portlet_id == selected_portlet;
+          even repeat/portlet/even;"
+        tal:attributes="class python: even and 'even' or None">
+          <td width="20">
+            <input type="radio" name="object_rurl:list" value=""
+             tal:attributes="value portlet_rurl" />
+          </td>
+          <td width="20">
+            <img width="16" height="16" alt=""
+             tal:condition="nocall:portlet_icon"
+             tal:attributes="
+               src portlet_icon;
+               title python: cpsmcat(portlet_type)" />
+          </td>
+          <td>
+            <a style="cursor: help" i18n:translate=""
+             href="javascript:void(0)"
+             tal:attributes="
+               onclick python: editable and onclick_string or None;
+               onmouseover string:toggle('$portlet_id');
+               onmouseout string:toggle('$portlet_id')"
+             tal:content="portlet_title" />
+          </td>
+          <td tal:content="portlet/description" />
+          <td tal:content="portlet_creator" />
+          <td tal:content="portlet_folder_url" />
+          <td>
+          </td>
+        </tr>
+      </tal:block>
+    </table>
+    <p>
+      <input type="submit" name="copy" value="Copy"
+       i18n:attributes="value"
+       tal:define="title string:_Copy_"
+       tal:attributes="value python: mcat and mcat(title) or title" />
+    </p>
+  </form>
+
+  <tal:block repeat="portlet portlets">
+    <div class="previewBox hidden"
+     tal:define="portlet_id portlet/getId"
+     tal:attributes="id portlet_id"
+     tal:content="structure python: portlet.render_cache(portlet=portlet,
+                                                         context_obj=here)" />
+  </tal:block>
+</metal:block>

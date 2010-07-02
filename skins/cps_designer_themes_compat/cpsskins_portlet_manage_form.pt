@@ -1,0 +1,115 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html tal:define="global boxedit python:1;
+                  utool nocall:here/portal_url;
+                  tmtool here/portal_themes;
+		  tmtool_url tmtool/absolute_url;
+                  mcat python: tmtool.getTranslationService();
+                  cpsskins_mcat python: tmtool.getTranslationService(cat='cpsskins');
+                  mtool here/portal_membership;
+                  ptltool nocall:here/portal_cpsportlets;
+                  context_url python:here.getContextUrl(utool=utool);
+                  base_url python: here.cpsskins_getBaseUrl();
+
+                  view_mode tmtool/getViewMode;
+                  panel view_mode/portlets_panel|string:portlet_slots;
+                  wysiwyg python: panel == 'wysiwyg';
+                  selected_portlet view_mode/selected_portlet|nothing;
+                  override view_mode/portlets_override|python:1;
+                  override python:int(override);
+                  clipboard view_mode/clipboard|nothing;
+                  portal_path python: utool.getPortalPath();
+                  clipboard_portlet python: clipboard and here.restrictedTraverse(portal_path + '/' + str(clipboard), default=None) or nothing;
+                  cpsmcat python: tmtool.getTranslationService(cat='default');
+                  checkPerm nocall:mtool/checkPermission;
+                  bmf python: ptltool.getBottomMostFolder(context=here);
+                  folder_url python: base_url + utool.getRelativeUrl(bmf);
+                  folder_editable python: checkPerm('Manage Portlets', bmf);">
+
+<tal:block condition="python:not checkPerm('Manage Portlets', here)">
+  <tal:block define="dummy request/RESPONSE/unauthorized" />
+</tal:block>
+
+<metal:block use-macro="here/cpsskins_global_defines/macros/defines" />
+<head>
+  <metal:block use-macro="here/cpsskins_main_template_portlet_edit/macros/head" />
+  <style type="text/css" media="all"
+   tal:content="string:@import url(${here/portal_url}/cpsskins_theme_edit.css);" />
+  <script type="text/javascript" src="cpsskins_pdlib.js"></script>
+  <script type="text/javascript" src="cpsskins_portlet_edit.js"></script>
+</head>
+
+<body tal:attributes="
+  style python: panel != 'wysiwyg' and 'background-color: #fff' or None;
+  class python: page_container and 'color%s' % page_container.color or None">
+  <div class="floatingHeader">
+   <h1 class="screenname" i18n:translate=""
+    tal:define="title string:_Portlet editor_"
+    tal:content="python: mcat and mcat(title) or title">Portlet editor</h1>
+   <metal:block
+    use-macro="here/cpsskins_portlet_manage_lib/macros/clipboard" />
+   <metal:block
+    use-macro="here/cpsskins_portlet_manage_lib/macros/navigate" />
+   <br style="clear:both" />
+  </div>
+
+  <div class="editSpace">
+    <tal:block define="theme_editable python:0"
+      condition="python: panel in ['portlet_slots', 'wysiwyg', 'site_structure']">
+      <metal:block use-macro="here/cpsskins_theme_widgets/macros/themetabs" />
+      <metal:block use-macro="here/cpsskins_theme_widgets/macros/pagetabs" />
+    </tal:block>
+
+    <tal:block condition="python: panel in ['site_structure', 'portlet_slots', 'wysiwyg']">
+      <metal:block
+       use-macro="here/cpsskins_portlet_manage_lib/macros/override_control" />
+      <metal:block
+       use-macro="here/cpsskins_portlet_manage_lib/macros/breadcrumbs" />
+    </tal:block>
+
+    <tal:block condition="wysiwyg">
+        <metal:block use-macro="here/cpsskins_main_template_portlet_edit/macros/main">
+        <metal:block fill-slot="maincontent">
+          <div style="border: 1px solid black; padding: 20px"
+           i18n:translate=""
+           tal:define="title string:_Main content_"
+           tal:content="python: mcat and mcat(title) or title">Main slot</div>
+        </metal:block>
+      </metal:block>
+    </tal:block>
+
+    <tal:block condition="not:wysiwyg">
+      <div class="editForm" tal:condition="python: panel=='unused_portlets'">
+        <tal:block define="hidden_slots theme_engine/listHiddenSlots"
+		   condition="hidden_slots">
+          <metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/unused_portlets_panel" />
+        </tal:block>
+      </div>
+
+      <div class="editForm"
+       tal:condition="python: panel == 'site_structure'">
+       <metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/site_structure" />
+      </div>
+
+      <div class="editForm"
+       tal:condition="python: panel == 'portlet_slots'">
+       <metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/main_canvas" />
+      </div>
+
+      <div class="editForm"
+       tal:condition="python: panel == 'portlet_browser'">
+       <metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/browser_panel" />
+      </div>
+    </tal:block>
+  </div>
+
+  <metal:block use-macro="here/cpsskins_portlet_manage_lib/macros/contextual_menu" />
+
+  <!-- Begin pdlib footer -->
+  <div id="drag-feedback-box"></div>
+    <script type="text/javascript"><!--
+    pd_setupPage();
+    // --></script>
+  <!-- End pdlib footer -->
+
+  </body>
+</html>

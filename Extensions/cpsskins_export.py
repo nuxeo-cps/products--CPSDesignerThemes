@@ -42,6 +42,8 @@ class ExportEngine(EngineClass):
         self.cps_base_url = cps_base_url
         self.theme_base_uri = ''
         self.page_uri = ''
+        self.uri_absolute_path_rewrite = False
+        self.encoding = 'utf-8'
 
     def stripHeadElement(self):
         # XXX Actually expects EngineClass to subclass ElementTreeEngine

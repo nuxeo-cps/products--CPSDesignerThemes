@@ -1,0 +1,94 @@
+==================
+THEMES NEGOCIATION
+==================
+
+:Author: Georges Racinet
+
+.. sectnum::    :depth: 4
+.. contents::   :depth: 4
+
+Introduction
+============
+
+Negociation is the process of deciding which theme and page should be
+applied on the current request.
+
+In CPSDesignerThemes, the negociation is flexible and can be changed
+through the Zope Component architecture. See at the end of this
+section to learn how.
+
+The standard (CPSSkins) negociator
+==================================
+
+We describe here shortly the standard negociator that ships with
+CPSDesignerThemes : the CPSSkins Theme Negociator. As the name
+suggests, this negociator is designed to be strictly compatible with
+the negociation logic implemented in CPSSkins, the theme
+engine that has been the standard system up to CPS 3.4.x series,
+except of course that theme and page names must be taken in the sense
+of CPSDesignerThemes : themes are toplevel file system folders
+inside the area specified in the root container object
+(``.cps_themes`` at the root of your portal).
+
+TODO EXPAND CPSSkins part from CPSSkins doc.
+
+Note: for local bindings, the official property or script name
+ for this negociator is ``.cps_themes_bindings`` instead of CPSSkins'
+ ``.cpsskins_theme``. However the latter is recognized if and only if the former
+ is not present.
+
+Besides reimplementing the logic described in CPSSkins documentation,
+this negociator adds the possibility to specify local method
+themes. These bind the method used for publication (e.g, ``index_html``,
+``folder_view``, ``folder_contents``...) to the theme and page, as in::
+
+   folver_view:0-3:default+Front
+
+This means "if the current method is folder_view, from this folder and
+down to 3 levels below (inclusive), apply the ``Front`` page of
+``default`` themes.
+
+This is in particular how CPSSkins' global method themes are to be
+translated into CPSDesigner ones. There's an upgrade step for that.
+
+
+The Cherry Picking negociator
+=============================
+This negociator is *deprecated*. It had been introduced mainly to
+support local method themes. Although deprecated, it is currently the
+only builtin negociator that can bind a theme or page to a
+non-folderish document.
+
+Check the docstring of ``Products.CPSDesignerThemes.negociator`` for
+more detail.
+
+Changing the negociator
+=======================
+
+Negociators actually adapt a context and request to a theme engine.
+For instance, to use the Cherry Picking negociator, put the following
+in your Product's ``overrides.zcml``::
+
+  <adapter
+      provides="Products.CPSDesignerThemes.interfaces.IThemeEngine"
+      for="OFS.interfaces.IObjectManager
+	   zope.publisher.interfaces.http.IHTTPRequest"
+      factory="Products.CPSDesignerThemes.negociator.CherryPickingCPSSkinsThemeNegociator"
+      />
+
+You can of course use the same principle to hook your own custom
+negociator, or one that's been written by a third party.
+
+Writing a custom negociator
+===========================
+
+Assuming using the root themes container only is enough for you, we
+strongly suggest to subclass
+``Products.CPSDesignerThemes.negociator.EngineAdapter`` and override
+the ``getThemeAndPageName`` method.
+
+
+.. Local Variables:
+.. mode: rst
+.. End:
+.. vim: set filetype=rst:

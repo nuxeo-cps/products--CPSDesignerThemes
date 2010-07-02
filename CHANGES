@@ -3,15 +3,10 @@ Requires
 -
 New features
 ~~~~~~~~~~~~
-- #2142: cps-cms.org based namespaces (theme and zcml directives)
-- #2138: provide option to control rewriting of absolute path URIs
-- Charset independency (UTF-8, ISO-8859, ...)
+-
 Bug fixes
 ~~~~~~~~~
-- #2150: missing header and sub METAL macro slots
-- #2139: automatically specify correct charset in <meta> tags
-- #2135: Fully specified URI rewriting is too specific
-- #2137: Accept any extension for theme pages
+- #2172: tolerance for elements lacking their src or href
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 

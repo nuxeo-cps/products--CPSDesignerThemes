@@ -73,6 +73,10 @@ class EngineTestCase(unittest.TestCase):
         self.assertXhtmlTagEquals(frame, 'p')
         self.assertEquals(self.getAttribs(frame), {})
 
+    def test_srcHref(self):
+        # See #1972
+        engine = self.getEngine('theme1', 'no-src-href.html')
+
     def test_entities(self):
         engine = self.getEngine('theme1', 'simple_slot.html')
         slot_name, slot = engine.extractSlotElements().next()

@@ -1,0 +1,762 @@
+<metal:block define-macro="themetabs"
+tal:define="themes theme_engine/listAllThemes;
+            externalthemes tmtool/getExternalThemeIds">
+  <table class="themeTabs" cellpadding="0" cellspacing="0" 
+  border="0" summary="">
+    <tr>
+      <tal:block repeat="theme themes">
+        <tal:block define="
+             theme_id theme/id;
+             theme_title theme/title;
+             we_are_here python: theme_id == current_theme; 
+             default_theme python: theme['default'];
+             style python: default_theme and 'text-decoration: underline' or '';
+             style python: theme_id in externalthemes and style + ';; color: #aaa' or style;
+          ">
+          <td
+          tal:attributes="class python: we_are_here and 'ltabselected' or 'ltab'">
+            <img src="" alt="" width="5" height="5"
+            tal:attributes="src string:${base_url}cpsskins_images/ltab.png" />
+          </td>
+          <td
+          tal:attributes="class python: we_are_here and 'tabselected' or 'tab'">
+            <div class="contentDest" tal:attributes="dest_theme theme_id">
+              <a interactive="1" tal:attributes="
+                 href string:${tmtool_url}/setViewMode?theme=$theme_id&amp;scrolly=0&amp;reload=1;
+                 style style">
+                <tal:block content="theme_title" />
+                <img src="" alt="" width="16" height="16"
+                tal:condition="python: theme_id in externalthemes"
+                tal:attributes="src string:${base_url}cpsskins_images/img_externaltheme.png" />
+              </a>
+              <span class="ContextualMenu"  tal:condition="theme_editable"
+               tal:attributes="themeid python: not we_are_here and theme_id or None;
+                               icon python:base_url + theme.getIcon(1);
+                               istheme python: 1;
+                               title theme_title;
+                               prompt_id python: 1;
+                               notdefault python: not theme.isDefaultTheme() or None;
+                               styles python:''">
+                <img src="" alt="" width="12" height="12"
+                 tal:attributes="src string:${base_url}cpsskins_images/edit-12.png" />
+              </span>
+            </div>
+          </td>
+          <td
+          tal:attributes="class python: we_are_here and 'rtabselected' or 'rtab'">
+            <img alt="" src="" width="5" height="5"
+            tal:attributes="src string:${base_url}cpsskins_images/rtab.png" />
+          </td>
+          <td class="separator"></td>
+        </tal:block>
+      </tal:block>
+      <tal:block condition="theme_editable">
+        <td class="ltab">
+          <img alt="" src="" width="5" height="5"
+          tal:attributes="src string:${base_url}cpsskins_images/ltab.png" />
+        </td>
+        <td class="tab">
+          <a i18n:attributes="title"
+           tal:define="title string:_Add a theme_"
+           tal:attributes="href string:${base_url}cpsskins_theme_add;
+                           title python: mcat and mcat(title) or title"
+           tal:content="structure string:&nbsp;+&nbsp;" />
+        </td>
+        <td class="rtab">
+          <img alt="" src="" width="5" height="5"
+          tal:attributes="src string:${base_url}cpsskins_images/rtab.png" />
+        </td>
+      </tal:block>
+    </tr>
+  </table>
+</metal:block>
+
+<metal:block define-macro="pagetabs"
+tal:define="pages theme_engine/listThemePages;">
+  <table class="pageTabs" cellpadding="0" cellspacing="0" summary="">
+    <tr>
+      <tal:block repeat="page pages">
+        <td tal:define="
+          page_title page/title;
+          page_id page/id;
+          we_are_here python: page_id == current_page;
+          default_page python: page['default'];
+          style python: default_page and 'text-decoration: underline' or '';"
+        tal:attributes="class python: we_are_here and 'selected' or None">
+          <div class="contentDest" tal:attributes="dest_page page_id">
+            <a interactive="1" tal:attributes="
+             href string:${tmtool_url}/setViewMode?page=$page_id&amp;scrolly=0&amp;reload=1;
+             style style"
+             tal:content="page_title" />
+            <span tal:condition="theme_editable" class="ContextualMenu" tal:attributes="
+             pageid python: not we_are_here and page_id or None;
+             icon python: base_url + page.getIcon(1);
+             alignments python: '|'.join(align_list);
+             haslayout python: 1;
+             prompt_id python: 1;
+             notdefault python: not default_page;
+             title page_title;
+             ">
+              <img src="" alt="" width="12" height="12"
+               tal:attributes="src string:${base_url}cpsskins_images/edit-12.png" />
+            </span>
+          </div>
+        </td>
+      </tal:block>
+      <td tal:condition="theme_editable">
+        <a class="addItem"
+         tal:attributes="href string:${theme_container_url}/cpsskins_page_add"
+         tal:content="structure string:&nbsp;+&nbsp;" />
+      </td>
+    </tr>
+  </table>
+</metal:block>
+
+<metal:block define-macro="navigate" i18n:domain="cpsskins"
+tal:define="sections python: ['layout', 'mixed', 'wysiwyg'];
+            can_manage python: checkPerm('Manage portal', tmtool);
+            cat request/cat|string:general">
+  <div class="mainFormTab">
+    <tal:block repeat="section sections">
+      <a
+      tal:define="url string:${tmtool_url}/setViewMode?themes_panel=$section&amp;reload=1;
+                  title python:'_%s mode_' % section" i18n:translate=""
+       tal:attributes="href url; class python: panel == section and 'selected' or None;"
+       tal:content="python:mcat and mcat(title) or title" />
+    </tal:block>
+    &nbsp;
+    <a tal:attributes="href url;
+                    class python: panel=='palettes' and 'selected' or ''"
+    tal:define="url string:${tmtool_url}/setViewMode?themes_panel=palettes&amp;reload=1;
+                title string:_Palettes_" i18n:translate=""
+    tal:content="python:mcat and mcat(title) or title" />
+    <a tal:attributes="href url;
+                    class python: panel=='images' and 'selected' or ''"
+    tal:define="url string:${tmtool_url}/setViewMode?themes_panel=images&amp;reload=1;
+                title string:_Images_" i18n:translate=""
+    tal:content="python:mcat and mcat(title) or title" />
+    <a tal:attributes="href url;
+                    class python: panel=='styles' and 'selected' or ''"
+    tal:define="url string:${tmtool_url}/setViewMode?themes_panel=styles&amp;reload=1;
+                title string:_Styles_" i18n:translate=""
+    tal:content="python:mcat and mcat(title) or title" />
+    &nbsp;
+    <a tal:attributes="href url;
+                    class python: panel=='theme_manager' and 'selected' or ''"
+    tal:define="url string:${tmtool_url}/setViewMode?themes_panel=themes_manager&amp;reload=1;
+                title string:_Themes manager_" i18n:translate=""
+    tal:content="python:mcat and mcat(title) or title" />
+    &nbsp;
+    <a class="exit"
+       tal:define="ptltool nocall:here/portal_cpsportlets|nothing;
+       title string:_Portlet editor_"
+       tal:condition="python:ptltool is not None and checkPerm('Manage Portlets', ptltool)"
+       tal:attributes="href string:${base_url}cpsskins_portlet_manage_form;
+                       accesskey ptltool/getAccessKey"
+       i18n:translate=""
+       tal:content="python:mcat and mcat(title) or title" />
+    <a class="exit"
+       tal:condition="can_manage" 
+       tal:attributes="href string:${tmtool_url}/manage_main"
+       tal:define="title string:_ZMI_" i18n:translate="" 
+       tal:content="python:mcat and mcat(title) or title" />
+    <a class="exit"
+       tal:attributes="href string:${theme_container_url}/cpsskins_exit;
+                       accesskey tmtool/getAccessKey"
+       tal:define="title string:_Exit_" i18n:translate=""
+       tal:content="python:mcat and mcat(title) or title" />
+  </div>
+</metal:block>
+
+<metal:block define-macro="simulate_hierarchy" i18n:domain="cpsskins">
+  <div class="simulate_hierarchies"
+  tal:define="sim_url request/form/sim_url|nothing; 
+	      stylecat request/form/cat|nothing">
+    <form style="margin: 0px; padding:0px;" action=""
+    tal:attributes="action string:${base_url}cpsskins_theme_manage_form">
+      <input type="hidden" name="cat"
+      tal:attributes="value stylecat" />
+      <select name="sim_url" onchange="submit()"
+       tal:condition="display_url_simulation">
+        <option tal:define="title string:_Simulate this URL ..._"
+            tal:content="python: mcat and mcat(title) or title"
+            i18n:translate="" />
+        <tal:block repeat="hier here/cpsskins_listPaths">
+          <option
+          tal:attributes="value hier; selected python: sim_url == hier"
+           tal:content="hier"></option>
+        </tal:block>
+      </select>
+      <select tal:condition="not:display_url_simulation">
+        <option tal:define="title string:_Not available in layout mode_"
+            tal:content="python: mcat and mcat(title) or title"
+            i18n:translate="" />
+      </select>
+    </form>
+  </div>
+</metal:block>
+
+<metal:block define-macro="contextual_menu" i18n:domain="cpsskins"
+  tal:define="cpsskins_mcat python: tmtool.getTranslationService(cat='cpsskins');">
+  <div id="choice-context-menu" class="context-menu">
+    <div class="context-menu-header"
+         filter="Content_prepare_element_menu(pd_filter_object)"></div>
+    <div class="context-menu-item" onmouseup="Choice_edit()"
+         filter="pd_selected_item">
+      <img width="16" height="16" 
+         tal:attributes="src string:${base_url}cpsskins_images/edit-16.png" />
+      <tal:block i18n:translate="" 
+         define="title string:_menu_Edit_"
+         content="python: mcat and mcat(title) or title" /> ...
+    </div>
+    <div class="context-menu-item" onmouseup="Choice_action('manage_theme')"
+    tal:attributes="filter string:pd_selected_item && pd_selected_item.getAttribute('istheme')">
+      <img width="16" height="16" 
+         tal:attributes="src string:${base_url}cpsskins_images/manage-16.png" />
+      <tal:block i18n:translate="" 
+         define="title string:_menu_Manage_"
+         content="python: mcat and mcat(title) or title" />
+    </div>
+    <div class="context-menu-item" onmouseup="Choice_edit_layout()"
+    tal:attributes="filter string:pd_selected_item && pd_selected_item.getAttribute('haslayout')">
+      <img width="16" height="16" 
+         tal:attributes="src string:${base_url}cpsskins_images/edit_layout-16.png" />
+      <tal:block i18n:translate=""
+         define="title string:_menu_Set layout_"
+         content="python: mcat and mcat(title) or title" />
+    </div>
+    <div class="context-menu-item" onmouseup="Choice_edit_styles()"
+    tal:attributes="filter string:pd_selected_item && pd_selected_item.getAttribute('styles')">
+      <img width="16" height="16" 
+         tal:attributes="src string:${base_url}cpsskins_images/edit_styles-16.png" />
+      <tal:block i18n:translate="" 
+         define="title string:_menu_Set styles_"
+         content="python: mcat and mcat(title) or title" />
+    </div>
+    <div class="context-menu-item" onmouseup="Choice_set_default()"
+    tal:attributes="filter string:pd_selected_item && pd_selected_item.getAttribute('notdefault')">
+      <img width="16" height="16" 
+         tal:attributes="src string:${base_url}cpsskins_images/set_default-16.png" />
+      <tal:block i18n:translate="" 
+         define="title string:_menu_Set_as_default_"
+         content="python: mcat and mcat(title) or title" />
+    </div>
+    <div class="context-menu-item" onmouseup="Choice_insert()"
+    tal:attributes="filter string:pd_selected_item && pd_selected_item.getAttribute('blockurl')">
+       <img width="16" height="16" 
+         tal:attributes="src string:${base_url}cpsskins_images/insert-16.png" />
+       <tal:block i18n:translate="" 
+         define="title string:_menu_Insert_"
+         content="python: mcat and mcat(title) or title" />
+    </div>
+    <div class="context-menu-item"
+     tal:define="msg string:_enter_new_id_;
+                 msg python: cpsskins_mcat and cpsskins_mcat(msg) or msg"
+     tal:attributes="onmouseup python:'Choice_action(\'duplicate\', \'%s\')' % msg"
+         filter="pd_selected_item">
+       <img width="16" height="16" 
+         tal:attributes="src string:${base_url}cpsskins_images/duplicate-16.png" />
+       <tal:block i18n:translate="" 
+         define="title string:_menu_Duplicate_"
+         content="python: mcat and mcat(title) or title" />
+    </div>
+
+    <div class="context-submenu-header"
+     tal:attributes="filter string:pd_selected_item && pd_selected_item.getAttribute('styles')">
+      <img width="16" height="16" 
+       tal:attributes="src string:${base_url}cpsskins_images/set_property-16.png" />
+      <tal:block i18n:translate=""
+       define="title string:_menu_Edit styles_"
+       content="python: mcat and mcat(title) or title" /> ...
+      <div class="context-submenu">
+        <tal:block repeat="ti tmtool/listStyleTypes">
+          <div class="context-menu-item"
+           tal:define="style_type ti/Metatype|nothing;
+                       style_icon ti/getIcon"
+           tal:attributes="onmouseup string:Choice_style('${style_type}');
+                           filter string:pd_selected_item && (pd_selected_item.getAttribute('styles').indexOf('${style_type}') >= 0)">
+            <img width="16" height="16" 
+             tal:attributes="src string:${base_url}${style_icon}" />
+            <tal:block i18n:translate="" 
+             define="title python: '_menu_%s_' % style_type"
+             content="python: mcat and mcat(title) or title" />
+          </div>
+        </tal:block>
+      </div>
+    </div>
+
+    <div class="context-submenu-header"
+     tal:attributes="filter string:pd_selected_item && pd_selected_item.getAttribute('isalignable')">
+      <img width="16" height="16" 
+       tal:attributes="src string:${base_url}cpsskins_images/set_property-16.png" />
+      <tal:block i18n:translate=""
+       define="title string:_menu_Set alignment_"
+       content="python: mcat and mcat(title) or title" /> ...
+      <div class="context-submenu">
+        <div class="context-menu-item" onmouseup="Choice_align('left')"
+         tal:attributes="filter string:pd_selected_item && pd_selected_item.getAttribute('isalignable') && (pd_selected_item.getAttribute('alignments').indexOf('left') >= 0)">
+          <img width="16" height="16" 
+           tal:attributes="src string:${base_url}cpsskins_images/align_left.png" />
+          <tal:block i18n:translate="" 
+           define="title string:_menu_Align left_"
+           content="python: mcat and mcat(title) or title" />
+        </div>
+        <div class="context-menu-item" onmouseup="Choice_align('center')"
+         tal:attributes="filter string:pd_selected_item && pd_selected_item.getAttribute('isalignable') && (pd_selected_item.getAttribute('alignments').indexOf('center') >= 0)">
+          <img width="16" height="16" 
+           tal:attributes="src string:${base_url}cpsskins_images/align_center.png" />
+          <tal:block i18n:translate="" 
+           define="title string:_menu_Align center_"
+           content="python: mcat and mcat(title) or title" />
+        </div>
+        <div class="context-menu-item" onmouseup="Choice_align('right')"
+         tal:attributes="filter string:pd_selected_item && pd_selected_item.getAttribute('isalignable') && (pd_selected_item.getAttribute('alignments').indexOf('right') >= 0)">
+          <img width="16" height="16" 
+           tal:attributes="src string:${base_url}cpsskins_images/align_right.png" />
+          <tal:block i18n:translate="" 
+           define="title string:_menu_Align right_"
+           content="python: mcat and mcat(title) or title" />
+        </div>
+        <div class="context-menu-item" onmouseup="Choice_align('justify')"
+         tal:attributes="filter string:pd_selected_item && pd_selected_item.getAttribute('isalignable') && (pd_selected_item.getAttribute('alignments').indexOf('justify') >= 0)">
+          <img width="16" height="16" 
+           tal:attributes="src string:${base_url}cpsskins_images/align_justify.png" />
+          <tal:block i18n:translate="" 
+           define="title string:_menu_Align justify_"
+           content="python: mcat and mcat(title) or title" />
+        </div>
+      </div>
+    </div>
+    <div class="context-menu-item" 
+     tal:define="msg string:_confirm delete_;
+                 msg python: cpsskins_mcat and cpsskins_mcat(msg) or msg"
+     tal:attributes="onmouseup python:'Choice_action(\'delete\', \'%s\')' % msg"
+         filter="pd_selected_item">
+       <img width="16" height="16" 
+         tal:attributes="src string:${base_url}cpsskins_images/delete-16.png" />
+       <tal:block i18n:translate="" 
+         define="title string:_menu_Delete_"
+         content="python: mcat and mcat(title) or title" />
+    </div>
+  </div>
+</metal:block>
+
+<!-- Edit online -->
+<metal:block define-macro="edit_online" i18n:domain="cpsskins">
+  <a href="javascript:void(0)" i18n:translate=""
+  tal:define="title string:_edit online_;
+              here_url python: base_url + utool.getRelativeUrl(here)"
+  tal:attributes="href python:'%s/externalEdit_?path=%s' % (here_url, here_url)"
+  tal:content="python: mcat and mcat(title) or title" />
+</metal:block>
+
+<!-- Templets -->
+<metal:block define-macro="content_titlebar" i18n:domain="cpsskins">
+  <tal:block 
+  define="content_url python: base_url + utool.getRelativeUrl(content)">
+  &nbsp;
+  <a tal:condition="content/can_moveup"
+  i18n:attributes="title"
+  tal:define="title string:_Move up_"
+  tal:attributes="href string:${content_url}/cpsskins_move_content?direction=up;
+                  title python: mcat and mcat(title) or title">
+
+    <img width="12" height="12"
+    tal:attributes="src string:${base_url}cpsskins_images/img_moveup.png" />
+  </a>
+  <a title="Move down"
+  tal:condition="content/can_movedown"
+  i18n:attributes="title"
+  tal:define="title string:_Move down_"
+  tal:attributes="href string:${content_url}/cpsskins_move_content?direction=down;
+                  title python: mcat and mcat(title) or title">
+
+    <img width="12" height="12"
+    tal:attributes="src string:${base_url}cpsskins_images/img_movedown.png" />
+  </a>
+  <a title="Move left"
+  tal:condition="content/can_moveleft"
+  i18n:attributes="title"
+  tal:define="title string:_Move left_"
+  tal:attributes="href string:${content_url}/cpsskins_move_content?direction=left;
+                  title python: mcat and mcat(title) or title">
+
+    <img width="12" height="12"
+    tal:attributes="src string:${base_url}cpsskins_images/img_moveleft.png" />
+  </a>
+  <a title="Move right"
+  tal:condition="content/can_moveright"
+  i18n:attributes="title"
+  tal:define="title string:_Move right_"
+  tal:attributes="href string:${content_url}/cpsskins_move_content?direction=right;
+                  title python: mcat and mcat(title) or title">
+
+    <img width="12" height="12"
+    tal:attributes="src string:${base_url}cpsskins_images/img_moveright.png" />
+  </a>
+  &nbsp;&nbsp; 
+  </tal:block>
+</metal:block>
+
+<metal:block define-macro="insert_content" i18n:domain="cpsskins">
+  <div class="templetAddButton" 
+   tal:define="ypos ypos|python:0"
+   tal:attributes="xpos x_pos; 
+                   ypos ypos;
+                   dest_block block_rurl">
+    <a i18n:attributes="title" href="javascript:void(0)"
+    tal:define="title string:_Insert a Templet here_"
+    tal:attributes="onclick string:newWindow('${block_url}/add_content_form?content_xpos=$x_pos&amp;content_ypos=$ypos');
+                    title python: mcat and mcat(title) or title" >
+      <img width="12" height="12"
+      tal:attributes="src string:${base_url}cpsskins_images/img_addtemplet.png" />
+    </a>
+  </div>
+</metal:block>
+
+<metal:block define-macro="content_add_panel" i18n:domain="cpsskins">
+  <table class="contentbox" cellpadding="2" cellspacing="1"
+       tal:define="til here/cpsskins_listContents">
+    <tr>
+    <tal:block repeat="ti til">
+      <td class="ContentAdd"
+      tal:attributes="type_name ti/id">
+      <img tal:define="title python: '_%s_' % ti.Title()" width="16" height="16"
+           i18n:attributes="title"
+           tal:attributes="src ti/getIcon;
+                           title python: mcat and mcat(title) or title" /><br/>
+      </td>
+    </tal:block>
+    </tr>
+  </table>
+</metal:block>
+
+
+<!-- Page Blocks -->
+<metal:block define-macro="pageblock_titlebar" i18n:domain="cpsskins"
+tal:define="block_id pageblock/getId;
+            block_rurl python: utool.getRelativeUrl(pageblock);
+            block_url python: base_url + utool.getRelativeUrl(pageblock);
+            block_title pageblock/title_or_id;
+            block_width pageblock/width;
+            closed pageblock/closed|nothing;
+            stylecat request/form/style|nothing">
+  <div class="ContextualMenu"
+   tal:define="styles_list python: pageblock.getApplicableStyles()"
+   tal:attributes="contenturl block_url;
+                   haslayout python: 1;
+                   styles python: '|'.join([s['meta_type'] for s in styles_list]);
+                   title block_title;
+                   icon python: base_url + pageblock.getIcon(1)">
+  <table
+   tal:attributes="width block_width;
+                   class python: pageblock==here and 'pageBlockBoxTitleSelected' or 'pageBlockBoxTitle'; 
+                   style python: page_container.getCSSLayoutStyle()">
+    <tr>
+      <td class="no">&nbsp;
+      <a tal:condition="pageblock/can_moveup|nothing"
+      i18n:attributes="title" 
+      tal:define="title string:_Move up_"
+      tal:attributes="href string:${block_url}/cpsskins_move_pageblock?direction=up;
+                      title python: mcat and mcat(title) or title">
+
+        <img interactive="1"
+        width="12" height="12"
+        tal:attributes="src string:${base_url}cpsskins_images/img_moveup.png" />
+      </a>
+      <a tal:condition="pageblock/can_movedown|nothing"
+      i18n:attributes="title"
+      tal:define="title string:_Move down_"
+      tal:attributes="href string:${block_url}/cpsskins_move_pageblock?direction=down; 
+                      title python: mcat and mcat(title) or title">
+
+        <img interactive="1" width="12" height="12"
+        tal:attributes="src string:${base_url}cpsskins_images/img_movedown.png" />
+      </a>
+      &nbsp;&nbsp; 
+      <a i18n:attributes="title" 
+      tal:condition="pageblock/can_toggle"
+      tal:define="title string:_Minimize / Maximize_"
+      tal:attributes="href string:${block_url}/cpsskins_object_toggle;
+                      title python: mcat and mcat(title) or title">
+
+        <img interactive="1" width="12" height="12"
+        tal:condition="closed"
+        tal:attributes="src string:${base_url}cpsskins_images/img_close.png" />
+        <img interactive="1" width="12" height="12"
+        tal:condition="not:closed"
+        tal:attributes="src string:${base_url}cpsskins_images/img_open.png" />
+      </a>
+      </td>
+      <td>
+        <form action="" method="post"
+         tal:define="name string:pb_title_${block_id};
+                     submit_string string:saveScrollCoordinates('${name}')"
+         tal:attributes="name name;
+                         action string:${block_url}/cpsskins_edit">
+          <input type="hidden" name="scrollx" value="0" />
+          <input type="hidden" name="scrolly" value="0" /> 
+          <input type="hidden" name="redirect_url"
+           tal:attributes="value string:${base_url}cpsskins_theme_manage_form" /> 
+          <label for="maxcols" tal:define="title string:_Title_" i18n:translate=""
+           tal:content="python: mcat and mcat(title) or title" />:
+          <input interactive="1"
+           name="title" type="text" size="12"
+           tal:attributes="value block_title; onSubmit submit_string" />&nbsp;
+         </form>
+      </td>
+      <td>
+        <form action="" method="post"
+         tal:define="name string:pb_title_${block_id};
+                     submit_string string:saveScrollCoordinates('${name}')"
+         tal:attributes="name name;
+                         action string:${block_url}/cpsskins_edit">
+          <input type="hidden" name="scrollx" value="0" />
+          <input type="hidden" name="scrolly" value="0" /> 
+          <input type="hidden" name="redirect_url"
+           tal:attributes="value string:${base_url}cpsskins_theme_manage_form" /> 
+          <label for="width" tal:define="title string:_Width_" i18n:translate=""
+           tal:content="python: mcat and mcat(title) or title" />:
+          <input interactive="1"
+           name="width" type="text" size="4"
+           tal:attributes="value block_width; onSubmit submit_string" />&nbsp;
+        </form>
+      </td>
+      <td>
+        <form action="" method="post"
+         tal:define="name string:pb_title_${block_id};
+                     submit_string string:saveScrollCoordinates('${name}')"
+         tal:attributes="name name;
+                         action string:${block_url}/cpsskins_edit">
+          <input type="hidden" name="scrollx" value="0" />
+          <input type="hidden" name="scrolly" value="0" /> 
+          <input type="hidden" name="redirect_url"
+           tal:attributes="value string:${base_url}cpsskins_theme_manage_form" /> 
+          <label for="maxcols" tal:define="title string:_Columns_" i18n:translate=""
+           tal:content="python: mcat and mcat(title) or title" />:
+          <input interactive="1"
+           name="maxcols" type="string" size="2"
+           tal:attributes="value pageblock/maxcols; onSubmit submit_string" />
+        </form>
+      </td>
+    </tr>
+  </table>
+  </div>
+</metal:block>
+
+<metal:block define-macro="add_pageblock" i18n:domain="cpsskins">
+  <div class="pageBlockAddButton"
+   tal:define="page_container_url python: base_url + utool.getRelativeUrl(page_container)">
+    <form action=""
+    tal:attributes="action string:${page_container_url}/cpsskins_pageblock_add">
+      <input type="hidden" name="pageblock_ypos"
+      tal:attributes="value pageblock_ypos|nothing" />
+      <input type="image" i18n:attributes="title"
+      tal:define="title string:_Insert a page block_"
+      tal:attributes="src string:${base_url}cpsskins_images/img_addpageblock.png;
+                      title python: mcat and mcat(title) or title" />
+    </form>
+  </div>
+</metal:block>
+
+<!-- Cells -->
+<metal:block define-macro="movecell" i18n:domain="cpsskins">
+  <table cellpadding="0" cellspacing="0" width="100%" 
+  tal:condition="python: maxcols > 1"
+  class="moveCell" summary="Move cell">
+    <tr>
+      <td width="40%" align="right">
+        <a title="Move left"
+           i18n:attributes="title"
+           tal:condition="python: x_pos > 0"
+           tal:define="title string:_Move this cell to the left_"
+           tal:attributes="href string:${block_url}/cpsskins_move_cell?dir=left&xpos=$x_pos; 
+             title python: mcat and mcat(title) or title">
+          <img width="12" height="12"
+            tal:attributes="src string:${base_url}cpsskins_images/img_moveleft.png" />
+        </a>
+      </td>
+      <td width="10%" align="center">&nbsp;</td>
+      <td width="40%" align="left">
+        <a title="Move right"
+           i18n:attributes="title"
+           tal:condition="python: x_pos < maxcols-1"
+           tal:define="title string:_Move this cell to the right_"
+           tal:attributes="href string:${block_url}/cpsskins_move_cell?dir=right&amp;xpos=$x_pos; 
+             title python: mcat and mcat(title) or title">
+          <img width="12" height="12"
+            tal:attributes="src string:${base_url}cpsskins_images/img_moveright.png" />
+        </a>
+      </td>
+    </tr>
+  </table>
+</metal:block>
+
+<metal:block define-macro="cellsizer" i18n:domain="cpsskins"
+tal:define="cellwidth cellsize/cellwidth|nothing;
+            cellwidth python: cellwidth and cellwidth or '?'">
+  <table cellpadding="0" cellspacing="0" width="100%"
+  class="cellSizer" summary="Cell sizer">
+    <tr>
+      <td width="7px">
+        <img width="7" height="10"
+         tal:attributes="src string:${base_url}cpsskins_images/sizer_left.png" />
+      </td>
+      <td class="center">
+        <tal:block condition="nocall:cellsize">
+          <form action="" method="post"
+           tal:define="cellsize_url python: base_url + utool.getRelativeUrl(cellsize);
+                       name string:cellsize_${cellsize/getId}"
+           tal:attributes="name name;
+                           action string:${cellsize_url}/cpsskins_edit;
+                           onSubmit string:saveScrollCoordinates('${name}')">
+           <input type="hidden" name="scrollx" value="0" />
+           <input type="hidden" name="scrolly" value="0" /> 
+           <input type="hidden" name="redirect_url"
+            tal:attributes="value string:${base_url}cpsskins_theme_manage_form" />
+           <input name="cellwidth"
+            type="text" size="4" tal:attributes="value cellwidth" />
+          </form>
+        </tal:block>
+        <tal:block condition="not:cellsize">
+          <form action="" method="post"
+           tal:define="name string:cellsizer_add_${block_id}_${x_pos}"
+           tal:attributes="name name;
+                           action string:${block_url}/cpsskins_cellsizer_add;
+                           onSubmit string:saveScrollCoordinates('${name}')">
+            <input type="hidden" name="scrollx" value="0" />
+            <input type="hidden" name="scrolly" value="0" /> 
+            <input type="hidden" name="xpos" tal:attributes="value x_pos" />
+            <input name="cellwidth"
+             type="text" size="4" tal:attributes="value cellwidth" />
+          </form>
+        </tal:block>
+      </td>
+      <td width="7px" align="right">
+        <img width="7" height="10"
+         tal:attributes="src string:${base_url}cpsskins_images/sizer_right.png" />
+      </td>
+    </tr>
+  </table>
+</metal:block>
+
+<metal:block define-macro="cellblock_sizer" i18n:domain="cpsskins">
+  <table cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <tal:block define="objects python: content.getObjects();
+                         maxcols python: content['maxcols']"
+                 repeat="x_pos python: range(int(maxcols))">
+        <tal:block 
+         define="objects_in_xpos python: objects.get(x_pos, None);
+                 contents_in_xpos python: objects_in_xpos['contents'];
+                 cellsize python: objects_in_xpos['cellsizer'];
+                 cellwidth cellsize/cellwidth|nothing;">
+          <td tal:attributes="width cellwidth">
+            <tal:block define="block_id content/getId;
+                               block_url content/absolute_url">
+              <metal:block use-macro="here/cpsskins_theme_manage_lib/macros/cellsizer" />
+            </tal:block>
+          </td>
+        </tal:block>
+      </tal:block>
+    </tr>
+  </table>
+</metal:block>
+
+<metal:block define-macro="cellstyler" i18n:domain="cpsskins"
+tal:define="info cellstyle/getInfo|nothing;
+            edit_action info/edit|nothing; 
+            del_action info/delete|nothing">
+  <div class="cellStyler">
+    <a tal:condition="del_action/can_delete|nothing"
+    i18n:attributes="title"
+    tal:define="title string:_Delete_"
+    tal:attributes="href string:${del_action/url}; 
+                    title python: mcat and mcat(title) or title">
+      <img width="12" height="12"
+      tal:attributes="src string:${base_url}cpsskins_images/img_cellmod_delete.png" />
+    </a>
+    <a class="cellStyler" href="javascript:void(0)"
+    tal:condition="python: edit_action and cellstyle"
+    tal:define="class_string string:shape${cellstyle/shape|nothing};
+                title string:_Stylize this cell_"
+    i18n:attributes="title"
+    tal:attributes="title python: mcat and mcat(title) or title; 
+                    onclick string:newWindow('${edit_action/url}');
+                    class python: cellstyle == here and 'cellStylerSelected' or class_string;">
+      <tal:block content="cellstyle/color" />
+      <img
+      tal:attributes="src string:${base_url}cpsskins_images/cell_styler.png" />
+    </a>
+    <form class="cellStyler" tal:condition="not:cellstyle"
+     i18n:attributes="title"
+     tal:define="name string:cellstyler_${block_id}_${x_pos};
+                 title string:_Stylize this cell_;
+                 submit_string string:saveScrollCoordinates('${name}');;submit()"
+     tal:attributes="name name;
+                     title python: mcat and mcat(title) or title;
+                     action string:${block_url}/cpsskins_cellstyler_add">
+      <input type="hidden" name="scrollx" value="0" />
+      <input type="hidden" name="scrolly" value="0" />
+      <input type="hidden" name="xpos" value="" tal:attributes="value x_pos" />
+      <input type="image" width="16" height="16"
+       tal:attributes="onclick submit_string;
+                       src string:${base_url}cpsskins_images/cell_styler_add.png" />
+    </form>
+  </div>
+</metal:block>
+
+<metal:block define-macro="cellhider" i18n:domain="cpsskins"
+tal:define="cellhider python: objects_in_xpos['cellhider'];
+            info cellhider/getInfo|nothing; 
+            edit_action info/edit|nothing; 
+            del_action info/delete|nothing">
+  <div class="cellHider">
+    <a tal:condition="del_action/can_delete|nothing"
+    i18n:attributes="title"
+    tal:define="title string:_Delete_"
+    tal:attributes="href string:${del_action/url};
+                    title python: mcat and mcat(title) or title">
+      <img width="12" height="12"
+      tal:attributes="src string:${base_url}cpsskins_images/img_cellmod_delete.png" />
+    </a>
+    <a href="javascript:void(0)"
+    tal:condition="python: edit_action and cellhider"
+    i18n:attributes="title"
+    tal:define="title string:_Hide this cell_"
+    tal:attributes="title python: mcat and mcat(title) or title;
+                    onclick string:newWindow('${edit_action/url}');
+                    class python: cellhider == here and 'cellHiderSelected' or 'cellHider'">
+      <img width="20" height="20"
+      tal:attributes="src string:${base_url}cpsskins_images/img_cellhider.png" />
+    </a>
+    <form tal:condition="not:cellhider"
+     i18n:attributes="title"
+     tal:define="name string:cellhider_${block_id}_${x_pos};
+                 title string:_Hide this cell_;
+                 submit_string string:saveScrollCoordinates('${name}');;submit()"
+     tal:attributes="name name;
+                     title python: mcat and mcat(title) or title;
+                     action string:${block_url}/cpsskins_cellhider_add">
+      <input type="hidden" name="scrollx" value="0" />
+      <input type="hidden" name="scrolly" value="0" /> 
+      <input type="hidden" name="xpos" value="" tal:attributes="value x_pos" /> 
+      <input type="image" width="16" height="16"
+       tal:attributes="onclick submit_string;
+                       src string:${base_url}cpsskins_images/img_addcellhider.png" />
+    </form>
+  </div>
+</metal:block>
+
+<metal:block define-macro="emptycell" i18n:domain="cpsskins">
+  <div class="contentDest" i18n:attributes="title"
+   style="border: 1px dashed red; padding: 8px"
+   tal:condition="not:contents_in_xpos"
+   tal:define="title string:_You can drop a Templet into this area_"
+   tal:attributes="xpos x_pos; 
+                   ypos python: 0;
+                   title python: mcat and mcat(title) or title;
+                   dest_block block_rurl;
+                   block_url block_url">
+  </div>
+</metal:block>
