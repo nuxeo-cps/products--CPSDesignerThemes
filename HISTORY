@@ -1,4 +1,21 @@
 ===========================================================
+Package: CPSDesignerThemes 0.4.1
+===========================================================
+First release built by: gracinet at: 2010-07-06T16:35:47
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
+~~~~~~~~~
+- #2172: tolerance for elements lacking their src or href
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
 Package: CPSDesignerThemes 0.4.0
 ===========================================================
 First release built by: gracinet at: 2010-06-30T02:34:35
