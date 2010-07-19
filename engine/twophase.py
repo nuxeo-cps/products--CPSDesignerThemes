@@ -55,6 +55,11 @@ class TwoPhaseEngine(object):
             postponed = self.postponed_inclusions = []
 
         index = len(postponed)
+        if isinstance(fragment, unicode):
+            # this would be an accident and bad for perf btw.
+            # Portlets renderings are supposed to be encoded. Otherwise
+            # mixing with encoded strings -> UnicodeDecodeError
+            fragment = fragment.encode(self.encoding)
         postponed.append(fragment)
         return self.makeSimpleElement(self.fragment_inclusion_marker,
                                       content=str(index))

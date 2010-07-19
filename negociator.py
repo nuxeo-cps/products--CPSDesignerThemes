@@ -30,6 +30,8 @@ from Acquisition import aq_base, aq_parent, aq_inner
 from AccessControl import ModuleSecurityInfo
 from AccessControl import ClassSecurityInfo
 from Products.CMFCore.utils import getToolByName
+from Products.CPSUtil.text import get_final_encoding
+
 from themecontainer import FSThemeContainer
 
 from OFS.interfaces import IObjectManager
