@@ -1,4 +1,21 @@
 ===========================================================
+Package: CPSDesignerThemes 0.4.2
+===========================================================
+First release built by: gracinet at: 2010-07-26T22:48:40
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
+~~~~~~~~~
+- #2171: wrote unit tests for main content merging
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
 Package: CPSDesignerThemes 0.4.1
 ===========================================================
 First release built by: gracinet at: 2010-07-06T16:35:47
