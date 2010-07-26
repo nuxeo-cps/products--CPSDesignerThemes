@@ -191,6 +191,7 @@ def test_suite():
                           'engine/heads_merging.txt',
                           'engine/isolated_portlet.txt',
                           'engine/options.txt',
+                          'engine/main_content_merging.txt',
                           ):
             suite.addTest(
                 doctest.DocFileTest(test_file,

@@ -1,3 +1,7 @@
+==============================
+Merging logic for the portlets
+==============================
+
 PREPARATIONS
 >>> import os
 >>> from lxml import usedoctest

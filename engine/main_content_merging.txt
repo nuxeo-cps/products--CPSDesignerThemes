@@ -1,0 +1,63 @@
+==================================
+Merging logic for the main content
+==================================
+
+PREPARATIONS
+>>> import os
+>>> from lxml import usedoctest
+>>> from Products.CPSDesignerThemes.tests.test_engine import get_engine
+>>> from Products.CPSDesignerThemes.interfaces import IThemeEngine
+
+In the context of this test, we should have a predefined engine class
+(PageEngine). Let's demonstrate that:
+>>> IThemeEngine.implementedBy(PageEngine)
+True
+
+We'll keep a somple output of the main content for examples.
+>>> MAIN_CONTENT = '<h1>Hello</h1><p>Hello, eggs this is main.</p>'
+
+Let's demonstrate how the engine looks for the 'cps:main-content'
+attribute to merge the main content in there.
+>>> engine = get_engine(PageEngine, 'theme1', page='main_content.html')
+>>> engine.renderMainContent(main_content=MAIN_CONTENT)
+>>> print engine.serialize()
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+   <title>   </title>
+ </head>
+ <body>
+   <h2>Navigation</h2>
+   <ul><li>Go there !</li></ul>
+   <div> <h1>Hello</h1><p>Hello, eggs this is main.</p></div>
+ </body>
+</html>
+
+In case the main content is empty, the element is completely dropped
+>>> engine = get_engine(PageEngine, 'theme1', page='main_content.html')
+>>> engine.renderMainContent(main_content='')
+>>> print engine.serialize()
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+   <title>   </title>
+ </head>
+ <body>
+   <h2>Navigation</h2>
+   <ul><li>Go there !</li></ul>
+ </body>
+</html>
+
+Any content within the main content in the themes is being stripped:
+>>> engine = get_engine(PageEngine, 'theme1', page='main_content_child.html')
+>>> engine.renderMainContent(main_content=MAIN_CONTENT)
+>>> print engine.serialize()
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+   <title>Main content with a child</title>
+ </head>
+ <body>
+   <h2>Navigation</h2>
+   <ul><li>Go there !</li></ul>
+   <div> <h1>Hello</h1><p>Hello, eggs this is main.</p></div>
+ </body>
+</html>
+
