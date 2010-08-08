@@ -295,8 +295,9 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
                     "Tried theme '%s', page '%s', but didn't find  %s",
                     theme, p, page_path)
         else:
-            raise ValueError("Could not find suitables themes and page for"
-                              " the required %s and %s" % (theme, page))
+            raise ValueError("Could not find suitable themes and page for"
+                              " the required %s and %s in %s" % (
+                theme, page, self.getFSPath()))
 
         PageEngine = get_engine_class()
         return PageEngine(html_file=page_path,

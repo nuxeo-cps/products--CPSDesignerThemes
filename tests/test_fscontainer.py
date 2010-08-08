@@ -123,6 +123,14 @@ class TestFsContainer(ZopeTestCase):
         self.assertEquals(e.serialize().strip(),
                           '<html>cpsthm extension</html>')
 
+        # now wrong theme or path
+        self.assertRaises(ValueError, self.container.getPageEngine,
+                          'no-such-theme', 'page')
+        self.container.manage_changeProperties(relative_path='no-such-dir')
+        self.assertRaises(ValueError, self.container.getPageEngine, 'theme',
+                          'page')
+
+
 def test_suite():
     return unittest.TestSuite((
         unittest.makeSuite(TestFsContainer),

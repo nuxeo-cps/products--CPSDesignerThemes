@@ -6,7 +6,7 @@ New features
 -
 Bug fixes
 ~~~~~~~~~
--
+- Put fs path in exception message
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 
