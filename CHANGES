@@ -6,6 +6,7 @@ New features
 -
 Bug fixes
 ~~~~~~~~~
+- #2241: broken export step if no root container
 - Put fs path in exception message
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~

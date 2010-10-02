@@ -55,7 +55,7 @@ def exportRootThemesContainer(context):
     """Export the root themes container
     """
     site = context.getSite()
-    thc = getattr(site, ROOT_THEMES)
+    thc = getattr(site, ROOT_THEMES, None)
     if thc is None:
         logger = context.getLogger(NAME)
         logger.info("Nothing to export.")
