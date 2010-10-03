@@ -1,4 +1,22 @@
 ===========================================================
+Package: CPSDesignerThemes 0.4.3
+===========================================================
+First release built by: gracinet at: 2010-10-03T11:46:41
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
+~~~~~~~~~
+- #2241: broken export step if no root container
+- Put fs path in exception message
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
 Package: CPSDesignerThemes 0.4.2
 ===========================================================
 First release built by: gracinet at: 2010-07-26T22:48:40
