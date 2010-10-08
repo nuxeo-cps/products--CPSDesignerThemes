@@ -25,6 +25,8 @@ from zope.interface import implements
 
 from Products.CMFCore.utils import getToolByName
 
+from Products.CPSUtil.crashshield import shield_apply
+from Products.CPSUtil.crashshield import CrashShieldException
 from Products.CPSDesignerThemes.interfaces import IThemeEngine
 from Products.CPSDesignerThemes.constants import NS_URI
 from Products.CPSDesignerThemes.utils import rewrite_uri
@@ -55,6 +57,15 @@ def find_by_attribute(elt, attr_name, value=None):
     """For subclass."""
 
     raise NotImplementedError
+
+def render_shield_portlet(portlet, context_obj=None):
+    try:
+        __traceback_info__="portlet id: " + portlet.getId()
+        rendered = shield_apply(portlet, 'render_cache',
+                                context_obj=context_obj)
+    except CrashShieldException:
+        rendered = '<blink>!!!</blink>'
+    return rendered
 
 class BaseEngine(object):
     """Abstract base engine class
@@ -177,8 +188,8 @@ class BaseEngine(object):
                return mcat(portlet.title_or_id())
 
         return ( (titleI18n(portlet),
-                  portlet.render_cache(context_obj=context).strip())
-                for portlet in portlets if portlet is not None)
+                  render_shield_portlet(portlet, context_obj=context))
+                 for portlet in portlets if portlet is not None)
 
     def renderSimpleBody(self, body_content='', head_content='',
                          body_element=None, head_element=None,

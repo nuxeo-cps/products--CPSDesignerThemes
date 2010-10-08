@@ -3,7 +3,7 @@ Requires
 -
 New features
 ~~~~~~~~~~~~
--
+- #2091: leverage crashshield from CPSUtil
 Bug fixes
 ~~~~~~~~~
 -
