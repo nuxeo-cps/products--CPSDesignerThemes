@@ -1,4 +1,21 @@
 ===========================================================
+Package: CPSDesignerThemes 0.5.0
+===========================================================
+First release built by: gracinet at: 2010-10-13T11:36:06
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+- #2091: leverage crashshield from CPSUtil
+Bug fixes
+~~~~~~~~~
+-
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
 Package: CPSDesignerThemes 0.4.3
 ===========================================================
 First release built by: gracinet at: 2010-10-03T11:46:41
