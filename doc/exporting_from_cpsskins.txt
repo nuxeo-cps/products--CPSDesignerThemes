@@ -115,8 +115,7 @@ machine, and provide the base url of the host you retrieved the export
 from as a unique argument.
 
 Whatever your virtual hosting conditions are, this url must be of the
-following type:
- ``<scheme>://<hostname>[:<port>]``
+following form: ``<scheme>://<hostname>[:<port>]``.
 No trailing slash, NO PATH, even if the portal sits at
 ``http://localhost:8080/cps`` or even ``http://example.com/foo/bar/mysite``.
 

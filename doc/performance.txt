@@ -1,5 +1,7 @@
-Measurements with version 0.1
-=============================
+============================================
+Performances (measurements with version 0.1)
+============================================
+
 All times expressed in Zope Profiler in real time mode
 (slower than reality, in a consistent manner, I hope)
 
@@ -14,7 +16,8 @@ doesn't do anything else, so do not take them as proper scientific benchmarking.
 Host: 2 GHz MacBook (july 2008 entry model)
 
 View rendering of a news item document (page weight: 8.7 kB)
---------------------------------------
+------------------------------------------------------------
+
 Total time : 440 ms  Actual time (time wget...): .137s
 
 Total time spent in the engine (renderCompat)   : 170 ms
@@ -25,7 +28,8 @@ Engine time without serialization		:  15 ms
 For reference, doc.render()			: 130 ms
 
 Edit rendering of same document (page weight: 20.5 kB)
--------------------------------
+------------------------------------------------------
+
 Everything looks to be called twice in the profiler, but isn't.
 Probably a bug of the profiler itself, divide all profiler
 figures by 2.
@@ -38,7 +42,7 @@ Specific engine time                            : 186 ms
 Of which, final serialization                   : 150 ms
 Engine time without serialization		:  36 ms
 Of which: initial parsing			:   1 ms
-          URI rewriting				:   7 ms
+URI rewriting                                   :   7 ms
 
 Conclusion
 ----------
@@ -64,7 +68,7 @@ Specific engine time                            : 256 ms
 Of which, final serialization                   :  95 ms
 Engine time without serialization		: 161 ms
 Of which: initial parsing			:   1 ms
-          URI rewriting				:  18 ms
+URI rewriting                                   :  18 ms
 
 
 Performance of TwoPhaseElementTreeEngine (CPS 3.4 theme)
@@ -86,7 +90,7 @@ As we were hoping the serialisation is faster. The second phase runs
 even in non measurable time
 
 Performance of TwoPhaseElementTreeEngine (sample theme)
---------------------------------------------------------
+-------------------------------------------------------
 
 Total time: 558 ms
 Actual time: 122 ms
@@ -102,6 +106,7 @@ Engine time without serialization		:  12 ms
 
 Comparison TwoPhaseElementTreeEngine vs TwoPhaseLxmlEngine
 ----------------------------------------------------------
+
 (this is on a different host, with the CPS 3.4 exported theme)
 
 ElementTree (total time: 406 ms)
@@ -149,16 +154,7 @@ performance questions at the theme level are negligible anyway. A
 real dedicated theme would sit between the two of them.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+.. Local Variables:
+.. mode: rst
+.. End:
+.. vim: set filetype=rst:
