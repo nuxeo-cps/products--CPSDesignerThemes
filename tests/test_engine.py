@@ -31,6 +31,7 @@ from Products.CPSDesignerThemes.engine.lxmlengine import (
     TwoPhaseLxmlEngine)
 from Products.CPSDesignerThemes.constants import NS_XHTML
 from Products.CPSDesignerThemes.engine.exceptions import FragmentParseError
+from Products.CPSDesignerThemes.themecontainer import FSThemeContainer
 
 THEMES_PATH = os.path.join(INSTANCE_HOME, 'Products', 'CPSDesignerThemes',
                            'tests')
@@ -41,7 +42,7 @@ WT_REGEXP = re.compile(r'[\n ]*')
 
 def get_engine(EngineClass, theme, page='index.html', cps_base_url=None):
     f = open(os.path.join(THEMES_PATH, theme, page), 'r')
-    return EngineClass(html_file=f,
+    return EngineClass(html_file=f, container=FSThemeContainer,
                        theme_base_uri='/thm_base', encoding='iso-8859-15',
                        page_uri='/'+page, cps_base_url=cps_base_url)
 
@@ -192,6 +193,7 @@ def test_suite():
                           'engine/isolated_portlet.txt',
                           'engine/options.txt',
                           'engine/main_content_merging.txt',
+                          'engine/xinclude.txt',
                           ):
             suite.addTest(
                 doctest.DocFileTest(test_file,

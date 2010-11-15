@@ -20,6 +20,7 @@
 import os
 import re
 import logging
+import urlparse
 
 from DateTime.DateTime import DateTime
 from Globals import InitializeClass
@@ -37,7 +38,7 @@ from Products.CMFCore.FSImage import FSImage
 from Products.CPSUtil.PropertiesPostProcessor import PropertiesPostProcessor
 
 from engine import get_engine_class
-from utils import rewrite_uri
+from utils import rewrite_uri, normalize_uri_path
 from constants import NS_URI
 
 from interfaces import IResourceTraverser
@@ -266,6 +267,41 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
     def getBaseUri(self):
         return self.absolute_url_path()
 
+    @classmethod
+    def rewriteXincludeUri(self, uri, referer_uri):
+        """translate absolute path local URIs as relative paths.
+
+        This is because default XInclude processing resolves URIs as paths
+        on the file system.
+        also prevents going higher than the theme root (security).
+
+        >>> rewrite = FSThemeContainer.rewriteXincludeUri
+        >>> rewrite('/spam.html', '/master.html')
+        'spam.html'
+        >>> rewrite('/spam.html', '/fragments/frag1.html')
+        '../spam.html'
+        >>> try: rewrite('../spam.html', '/master.html')
+        ... except ValueError, e: print 'ValueError', e
+        ValueError forbidden: ../spam.html from /master.html
+        """
+        if uri.startswith('//'):
+            raise ValueError(uri)
+
+        uri = normalize_uri_path(uri)
+        if uri.startswith('/'):
+            base_uri = normalize_uri_path(referer_uri).split('/')[:-1]
+            steps =  len(base_uri)
+            if base_uri[0] == '':
+                steps -= 1
+            res = urlparse.urljoin('../' * steps, uri[1:])
+        else:
+            res = uri
+
+        resolved = urlparse.urljoin(referer_uri, res)
+        if resolved.startswith('..') or resolved.startswith('/..'):
+            raise ValueError('forbidden: %s from %s' % (uri, referer_uri))
+        return res
+
     def computePageFileName(self, page):
         """Compute local FS name from page Name"""
 
@@ -300,7 +336,7 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
                 theme, page, self.getFSPath()))
 
         PageEngine = get_engine_class()
-        return PageEngine(html_file=page_path,
+        return PageEngine(html_file=page_path, container=self,
                           theme_base_uri=self.absolute_url_path() + '/' + theme,
                           page_uri='/' + page_rpath,
                           cps_base_url=cps_base_url,

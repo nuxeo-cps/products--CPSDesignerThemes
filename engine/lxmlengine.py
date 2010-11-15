@@ -59,8 +59,9 @@ class LxmlEngine(ElementTreeEngine):
         # to read the DTD... unless there's no DTD !
         parser = etree.XMLParser(resolve_entities=False)
         self.tree = etree.parse(html_file, parser)
-        self.tree.xinclude()
         self.root = self.tree.getroot()
+        self.rewriteXiUris()
+        self.tree.xinclude()
 
     @classmethod
     def removeElement(self, elt):

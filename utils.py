@@ -17,7 +17,7 @@
 #
 # $Id$
 
-from urlparse import urlparse
+from urlparse import urlparse, urljoin
 
 def rewrite_uri(absolute_base='', referer_uri='/index.html', uri='',
                 cps_base_url=None, absolute_rewrite=True):
@@ -96,3 +96,25 @@ def rewrite_uri(absolute_base='', referer_uri='/index.html', uri='',
         local_base = referer_uri.rsplit('/', 1)[0] + '/'
 
     return absolute_base + local_base + uri
+
+def normalize_uri_path(p):
+    """Normalize a path URI
+
+    Remove .. and prevents climbing higher than the root
+    >>> normalize_uri_path('/a/b/../c')
+    '/c'
+    >>> normalize_uri_path('/a/b')
+    '/a/b'
+
+    special cases
+    >>> normalize_uri_path('a/../b')
+    '../b'
+    >>> normalize_uri_path('/a/../b')
+    '/../b'
+    """
+    # TODO brutal implementation
+    split = p.split('/../', 1)
+    if len(split) == 1:
+        return p
+    # normalizes as a side effect, would not work with '' as 2nd arg
+    return urljoin(split[0], '../'+split[1])
