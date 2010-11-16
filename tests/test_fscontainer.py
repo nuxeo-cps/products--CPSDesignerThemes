@@ -18,6 +18,7 @@
 # $Id$
 
 import unittest
+from zope.testing import doctest
 from Testing.ZopeTestCase import ZopeTestCase
 import Acquisition
 from ZPublisher.HTTPResponse import HTTPResponse
@@ -56,7 +57,9 @@ class TestFsContainer(ZopeTestCase):
         self.assertEquals(self.container.listAllThemes(), (
             dict(id='theme1', title='theme1', default=True),
             dict(id='theme2', title='theme2', default=False),
-            dict(id='theme3', title='theme3', default=False)))
+            dict(id='theme3', title='theme3', default=False),
+            dict(id='xinclude', title='xinclude', default=False),
+            ))
 
     def testListPagesFor(self):
         self.assertEquals(self.container.listAllPagesFor('theme3'), (
@@ -133,5 +136,7 @@ class TestFsContainer(ZopeTestCase):
 
 def test_suite():
     return unittest.TestSuite((
+        doctest.DocTestSuite('Products.CPSDesignerThemes.themecontainer',
+                             optionflags=doctest.NORMALIZE_WHITESPACE),
         unittest.makeSuite(TestFsContainer),
         ))

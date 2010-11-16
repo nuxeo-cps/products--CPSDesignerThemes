@@ -82,7 +82,7 @@ class BaseEngine(object):
         'Products.CPSDesignerThemes.engine.BaseEngine')
 
     def __init__(self, html_file=None, theme_base_uri='', page_uri='',
-                 cps_base_url=None, encoding=None,
+                 cps_base_url=None, encoding=None, container=None,
                  theme_name='', page_name=''):
         """Subclasses accept another argument: theme xml source.
 
@@ -90,15 +90,16 @@ class BaseEngine(object):
         take another argument, namely the preprocessed XML tree from cache
         """
         self.logger.debug("Engine : %s", self.__class__)
-        self.readTheme(html_file)
+        self.container = container
         self.theme_base_uri = theme_base_uri
         self.page_uri = page_uri
         self.cps_base_url = cps_base_url
         # The engine object will be carried along, storing corresponding
-        # theme and page
-        # for various logging and/or user feedback
+        # theme and page for various logging and/or user feedback.
+        # theme can also be used in XInclude URI rewriting
         self.page_name = page_name
         self.theme_name = theme_name
+        self.readTheme(html_file)
         # this is from this class point of view both input (portlets) and
         # output (rendered htm) encoding
         self.encoding = encoding

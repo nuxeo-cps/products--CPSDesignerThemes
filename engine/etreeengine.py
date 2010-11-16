@@ -39,6 +39,9 @@ except ImportError:
     except ImportError:
         ELEMENT_TREE_PRESENT = False
 
+if C_ELEMENT_TREE or ELEMENT_TREE_PRESENT:
+	from elementtree import ElementInclude # XInclude support
+
 import htmlentitydefs
 
 from zope.interface import implements
@@ -46,7 +49,7 @@ from zope.interface import implements
 from Products.CMFCore.utils import getToolByName
 
 from Products.CPSDesignerThemes.interfaces import IThemeEngine
-from Products.CPSDesignerThemes.constants import NS_URI, NS_XHTML
+from Products.CPSDesignerThemes.constants import NS_URI, NS_XHTML, NS_XINCLUDE
 from Products.CPSDesignerThemes.constants import XML_HEADER, XML_HEADER_NO_ENC
 from Products.CPSDesignerThemes.constants import BOOLEAN_OPTIONS
 from Products.CPSDesignerThemes.utils import rewrite_uri
@@ -108,9 +111,10 @@ class ElementTreeEngine(BaseEngine):
 
     def readTheme(self, html_file):
         """Parse the theme and inits the 'tree' and 'root' attributes"""
-        self.tree = ET.parse(html_file)
-        self.root = self.tree.getroot()
-
+        tree = self.tree = ET.parse(html_file)
+        root = self.root = self.tree.getroot()
+	self.rewriteXiUris()
+	ElementInclude.include(root)
     #
     # Internal engine API implementation. For docstrings, see BaseEngine
     #
@@ -245,6 +249,8 @@ class ElementTreeEngine(BaseEngine):
                 if uri is None:
                     continue
                 try:
+                    # GR TODO REFACTOR move rewriter_func logic to the container
+                    # this would be more logical and provide more flexibility
                     new_uri = rewriter_func(uri=uri,
                                             absolute_base=self.theme_base_uri,
                                             referer_uri=self.page_uri,
@@ -259,6 +265,14 @@ class ElementTreeEngine(BaseEngine):
             if style_elt.text:
                 style_elt.text = CSS_LINKS_RE.sub(self.styleAtImportRewriteUri,
                                               style_elt.text)
+
+    def rewriteXiUris(self):
+        for elt in self.root.findall('.//{%s}include' % NS_XINCLUDE):
+            uri = elt.attrib.get('href')
+            if uri is not None:
+                elt.attrib['href'] = self.container.rewriteXincludeUri(
+                    uri, self.page_uri, absolute_for=self.theme_name)
+
     def extractSlotElements(self):
         return ((slot.attrib.pop(SLOT_ATTR), slot)
                 for slot in self.findByAttribute(self.root, SLOT_ATTR))
