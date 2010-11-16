@@ -39,6 +39,9 @@ except ImportError:
     except ImportError:
         ELEMENT_TREE_PRESENT = False
 
+if C_ELEMENT_TREE or ELEMENT_TREE_PRESENT:
+	from elementtree import ElementInclude # XInclude support
+
 import htmlentitydefs
 
 from zope.interface import implements
@@ -108,9 +111,10 @@ class ElementTreeEngine(BaseEngine):
 
     def readTheme(self, html_file):
         """Parse the theme and inits the 'tree' and 'root' attributes"""
-        self.tree = ET.parse(html_file)
-        self.root = self.tree.getroot()
-
+        tree = self.tree = ET.parse(html_file)
+        root = self.root = self.tree.getroot()
+	self.rewriteXiUris()
+	ElementInclude.include(root)
     #
     # Internal engine API implementation. For docstrings, see BaseEngine
     #

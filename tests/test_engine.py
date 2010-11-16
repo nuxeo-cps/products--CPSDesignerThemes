@@ -190,7 +190,7 @@ def engines2test_case():
 def test_suite():
     suite = unittest.TestSuite()
 
-    for PageEngine in (#ElementTreeEngine, TwoPhaseElementTreeEngine,
+    for PageEngine in (ElementTreeEngine, TwoPhaseElementTreeEngine,
                        LxmlEngine, TwoPhaseLxmlEngine):
         suite.addTest(unittest.makeSuite(engines2test_case()[PageEngine]))
         for test_file in ('engine/portlets_merging.txt',
