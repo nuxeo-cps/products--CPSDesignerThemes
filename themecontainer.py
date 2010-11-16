@@ -267,15 +267,18 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
     def getBaseUri(self):
         return self.absolute_url_path()
 
-    @classmethod
-    def rewriteXincludeUri(self, uri, referer_uri):
-        """translate absolute path local URIs as relative paths.
+    def rewriteXincludeUri(self, uri, referer_uri, absolute_for=''):
+        """translate local URIs meant for XInclude in a resolvable way.
 
         This is because default XInclude processing resolves URIs as paths
         on the file system.
-        also prevents going higher than the theme root (security).
+        The default behaviour is meant for lxml (or libxml2 derived libraries):
+        local paths are interpreted from the current filesystem file (fine),
+        while absolute paths have to be re-rooted from the themes and
+        escape from the themes dir must be prevented (security).
 
-        >>> rewrite = FSThemeContainer.rewriteXincludeUri
+        >>> fsthm = FSThemeContainer('cont_id')
+        >>> rewrite = fsthm.rewriteXincludeUri
         >>> rewrite('/spam.html', '/master.html')
         'spam.html'
         >>> rewrite('/spam.html', '/fragments/frag1.html')
@@ -283,6 +286,21 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
         >>> try: rewrite('../spam.html', '/master.html')
         ... except ValueError, e: print 'ValueError', e
         ValueError forbidden: ../spam.html from /master.html
+
+        if absolute _for is non empty, the behaviour is quite different. This
+        is intended for the default ElementTree resolver: this time, URIs will
+        be interpreted from the current working directory (os.getcwd()) and
+        have to be translated in an absolute manner and the absolute_for kwarg
+        must be the current theme name:
+
+        >>> base_path = fsthm.getFSPath()
+        >>> res = rewrite('spam.html', '/master.html', absolute_for='thm1')
+        >>> res.startswith(base_path), os.path.split(res[len(base_path)+1:])
+        (True, ('thm1', 'spam.html'))
+        >>> res = rewrite('/spam.html', '/fragment/one.html',
+        ...               absolute_for='thm1')
+        >>> res.startswith(base_path), os.path.split(res[len(base_path)+1:])
+        (True, ('thm1', 'spam.html'))
         """
         if uri.startswith('//'):
             raise ValueError(uri)
@@ -300,6 +318,14 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
         resolved = urlparse.urljoin(referer_uri, res)
         if resolved.startswith('..') or resolved.startswith('/..'):
             raise ValueError('forbidden: %s from %s' % (uri, referer_uri))
+
+        # GR this was added afterwards in a lazy way. Implementation should be
+        # separate and simpler in that case
+        if absolute_for:
+            if resolved.startswith('/'):
+                resolved = resolved[1:]
+            return os.path.join(self.getFSPath(), absolute_for,
+                                *(resolved.split('/')))
         return res
 
     def computePageFileName(self, page):

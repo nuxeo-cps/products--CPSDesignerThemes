@@ -35,15 +35,20 @@ from Products.CPSDesignerThemes.themecontainer import FSThemeContainer
 
 THEMES_PATH = os.path.join(INSTANCE_HOME, 'Products', 'CPSDesignerThemes',
                            'tests')
+def getThemesPath():
+    return THEMES_PATH
 
 PORTLET1 = ('portlet1', '<ul id="portlet1"><li>foo</li></ul>')
 
 WT_REGEXP = re.compile(r'[\n ]*')
 
 def get_engine(EngineClass, theme, page='index.html', cps_base_url=None):
+    container = FSThemeContainer('cont_id')
+    container.getFSPath = getThemesPath
     f = open(os.path.join(THEMES_PATH, theme, page), 'r')
-    return EngineClass(html_file=f, container=FSThemeContainer,
+    return EngineClass(html_file=f, container=container,
                        theme_base_uri='/thm_base', encoding='iso-8859-15',
+                       theme_name=theme, page_name=page,
                        page_uri='/'+page, cps_base_url=cps_base_url)
 
 class EngineTestCase(unittest.TestCase):
@@ -185,7 +190,7 @@ def engines2test_case():
 def test_suite():
     suite = unittest.TestSuite()
 
-    for PageEngine in (ElementTreeEngine, TwoPhaseElementTreeEngine,
+    for PageEngine in (#ElementTreeEngine, TwoPhaseElementTreeEngine,
                        LxmlEngine, TwoPhaseLxmlEngine):
         suite.addTest(unittest.makeSuite(engines2test_case()[PageEngine]))
         for test_file in ('engine/portlets_merging.txt',

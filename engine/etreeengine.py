@@ -267,7 +267,7 @@ class ElementTreeEngine(BaseEngine):
             uri = elt.attrib.get('href')
             if uri is not None:
                 elt.attrib['href'] = self.container.rewriteXincludeUri(
-                    uri, self.page_uri)
+                    uri, self.page_uri, absolute_for=self.theme_name)
 
     def extractSlotElements(self):
         return ((slot.attrib.pop(SLOT_ATTR), slot)

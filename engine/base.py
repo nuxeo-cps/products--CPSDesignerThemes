@@ -94,12 +94,12 @@ class BaseEngine(object):
         self.theme_base_uri = theme_base_uri
         self.page_uri = page_uri
         self.cps_base_url = cps_base_url
-        self.readTheme(html_file)
         # The engine object will be carried along, storing corresponding
-        # theme and page
-        # for various logging and/or user feedback
+        # theme and page for various logging and/or user feedback.
+        # theme can also be used in XInclude URI rewriting
         self.page_name = page_name
         self.theme_name = theme_name
+        self.readTheme(html_file)
         # this is from this class point of view both input (portlets) and
         # output (rendered htm) encoding
         self.encoding = encoding
