@@ -6,7 +6,7 @@ New features
 -
 Bug fixes
 ~~~~~~~~~
--
+- #2281: load portlet required JavaScript resources
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 
