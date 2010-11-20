@@ -127,7 +127,6 @@ class LxmlEngine(ElementTreeEngine):
                     raise ValueError(
                         "Missing attribute %s on <%s> element" % (attr, tag))
                 elt.attrib[attr] = new_uri
-                self.logger.debug("URI Rewrite %s -> %s" % (uri, new_uri))
         for style_elt in from_elt.iterfind('.//{%s}%s' % (NS_XHTML, 'style')):
             if style_elt.text:
                 style_elt.text = CSS_LINKS_RE.sub(self.styleAtImportRewriteUri,

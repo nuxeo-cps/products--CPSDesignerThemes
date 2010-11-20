@@ -179,7 +179,6 @@ class ResourceTraverser(Acquisition.Explicit):
                                      relative_uri='/'.join((self.relative_uri,
                                                             name)))
         elif os.path.isfile(path):
-            self.logger.debug("Traverser : resource path is %s", path)
             ext = name.rsplit('.', 1)[-1]
             # TODO other types
             if ext in IMG_EXTENSIONS:

@@ -28,6 +28,8 @@ from StringIO import StringIO # use TAL's faster StringIO ?
 try:
     import cElementTree as ET
     C_ELEMENT_TREE = True
+    # TODO this warning must appear only if cElementTree is really used
+    # (not for subclasses like LxmlEngine)
     logger.warn("On cElementTree, apply cElementtree.c.patch to get rid of "
                 "issues with entities.")
 
@@ -254,7 +256,6 @@ class ElementTreeEngine(BaseEngine):
                     raise ValueError(
                         "Missing attribute %s on <%s> element" % (attr, tag))
                 elt.attrib[attr] = new_uri
-                self.logger.debug("URI Rewrite %s -> %s" % (uri, new_uri))
         for style_elt in self.root.findall('.//{%s}%s' % (NS_XHTML, 'style')):
             if style_elt.text:
                 style_elt.text = CSS_LINKS_RE.sub(self.styleAtImportRewriteUri,
