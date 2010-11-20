@@ -27,6 +27,8 @@ from Products.CMFCore.utils import getToolByName
 
 from Products.CPSUtil.crashshield import shield_apply
 from Products.CPSUtil.crashshield import CrashShieldException
+from Products.CPSUtil import resourceregistry
+from Products.CPSPortlets.CPSPortlet import PORTLET_RESOURCE_CATEGORY
 from Products.CPSDesignerThemes.interfaces import IThemeEngine
 from Products.CPSDesignerThemes.constants import NS_URI
 from Products.CPSDesignerThemes.utils import rewrite_uri
@@ -59,6 +61,9 @@ def find_by_attribute(elt, attr_name, value=None):
     raise NotImplementedError
 
 def render_shield_portlet(portlet, context_obj=None):
+    """Render the portlet within the crash shield.
+    Take javascript needs into account.
+    """
     try:
         __traceback_info__="portlet id: " + portlet.getId()
         rendered = shield_apply(portlet, 'render_cache',
@@ -138,7 +143,6 @@ class BaseEngine(object):
 
         head_element, body_element = self.parseHeadBody(pt_output,
                                                         self.encoding)
-
         head_content = '\n'.join((metal_slots.get(slot, '')
                                   for slot in METAL_HEAD_SLOTS))
 
@@ -247,6 +251,8 @@ class BaseEngine(object):
             self.mergeBodyElement(from_cps=body_element)
         if main_content is not None:
             self.renderMainContent(main_content)
+        head_content += resourceregistry.dump_category(
+            context, PORTLET_RESOURCE_CATEGORY)
         self.mergeHeads(head_content=head_content,
                         cps_global=head_element)
 
