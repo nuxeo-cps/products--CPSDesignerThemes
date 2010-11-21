@@ -3,10 +3,11 @@ Requires
 -
 New features
 ~~~~~~~~~~~~
--
+- #2152: XInclude support 
 Bug fixes
 ~~~~~~~~~
 - #2281: load portlet required JavaScript resources
+- Fixed doc format to be ReST compliant.
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 
