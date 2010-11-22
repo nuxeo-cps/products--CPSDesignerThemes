@@ -253,7 +253,7 @@ class BaseEngine(object):
         if main_content is not None:
             self.renderMainContent(main_content)
         head_content += resourceregistry.dump_category(
-            context, PORTLET_RESOURCE_CATEGORY)
+            context, PORTLET_RESOURCE_CATEGORY, base_url=self.cps_base_url)
         self.mergeHeads(head_content=head_content,
                         cps_global=head_element)
 
