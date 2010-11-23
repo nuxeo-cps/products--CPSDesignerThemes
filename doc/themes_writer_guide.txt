@@ -1,0 +1,391 @@
+===================
+Themes writer guide
+===================
+
+:Author: Georges Racinet
+
+.. sectnum::    :depth: 4
+.. contents::   :depth: 4
+
+Introduction
+============
+CPSDesigner themes has been the main theming system in CPS since
+version 3.5.0.
+
+A theme is a file hierarchy holding theme pages (enhanced xhtml) and
+other resources (stylesheets, images, video content, etc.).
+These are organized in the same way as a static website. The goal of this
+design is to make it possible to convert any existing website into a
+CPS theme.
+
+Theme pages and portlets
+------------------------
+
+Theme pages and portlets are the two sides of a case of separation
+between content and presentation.
+In a page produced by CPS, the dynamic content is organized in
+*portlets*, while the overall layout is provided by the theme page.
+
+Portlets have to be thought as logical units, ideally with as little
+presentation oriented markup as possible. For example, a navigation
+portlet presenting a folder hierarchy should render as nested ``<ul>``
+elements bearing class attributes.
+
+Portlets are organised in *slots*. These are just grouping markers on portlets,
+a bit like tags on blog posts ; one does not need to predeclare them.
+Typical names for slots would be "main_content" or "navigation".
+
+A theme page is a XHTML page with specific markup that ask the
+theme engine for inclusion of the rendered portlets from some slots
+in the final page. The slots are referenced explicitely in that
+specific markup. All portlets from the same slot are styled similarly.
+See "rendering logic" below for documentation on that specific markup
+
+The decision whether to render one particular portlet within a given
+slot has nothing to do with the themes engine. For completeness, let's
+just recall that it this is a whole process of its own depending on
+several parameters, including notably:
+
+ - the position of the portlet in the folder hierarchy, compared to
+   the current context,
+ - overridance rules,
+ - portlet guards (potentially programmatic)
+
+Documentation about this is available in the CPSPortlets products.
+
+Examples
+--------
+Sample themes can be found in ``CPSDesignerThemes/doc/sample_themes``
+and, starting with CPS 3.5, in ``CPSDefault/themes`` (exported from
+the CPSSkins theme for CPS 3.4).
+
+Namespace, DTD & charset
+------------------------
+The theme pages format is XHTML 1.0 strict, enhanced with the
+following dedicated namespace: http://cps-cms.org/ns/theme
+Currently, the only supported charset encoding for theme pages is UTF-8
+
+A full DTD and xml declaration looks like this::
+
+ <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+           "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+   <html xmlns="http://www.w3.org/1999/xhtml" lang="en"
+	 xmlns:cps="http://cps-cms.org/ns/theme"
+         xml:lang="en">
+
+In the sequel, we'll use the ``cps:`` prefix for this
+namespace.
+
+Remark: the DOCTYPE is actually the one for the produced HTML
+content. There is currently no DTD for theme pages themselves, and
+therefore no validator.
+
+Engines
+-------
+
+The part of CPSDesignerThemes actually responsible for the rendering work is
+called the *engine*. The product is meant to allow for easy
+replacement of the default engine (see the "engines" section).
+
+Some behaviours may depend on the chosen engine. For
+instance, there's no validation whatsoever by CPSDesignerThemes
+itself, but the current default engine implementation relies on a XML
+processing library (lxml) which does at least require the theme pages
+to be well-formed XML.
+
+
+Rendering Logic
+===============
+
+Calling portlet slots : an example
+----------------------------------
+
+Reminder: we use the ```cps:``` prefix for CPSDesignerThemes XML
+namespace. Let's start with an example to fix ideas::
+
+  <div cps:slot="selected_content" style="float:left;">
+    <div cps:portlet="frame" style="border: 1px solid black;">
+      <span cps:portlet="title" style="font-size: 120%">The title</span>
+      <div cps:portlet="body">The body of the portlet is here</div>
+    </div>
+  </div>
+
+If we have exactly one portlet to be rendered for that slot, whose
+title is "My portlet" and renders as ``<ul><li>m1</li><li>m2</li>``,
+the result will be::
+
+  <div style="float:left;">
+    <div style="border: 1px solid black;">
+      <span style="font-size: 120%">My portlet</span>
+      <div>
+        <ul><li>m1</li><li>m2</li>
+      </div>
+    </div>
+  </div>
+
+Notice how the sample content from the theme has been discarded : its
+sole purpose is to help the designer work offline in static site mode.
+It is actually advised to copy paste actual portlet content in there to
+continue the styling works.
+
+If we had two portlets, the other one ("Her content") rendering as
+``<div class="her">content</div>``, the result would then be::
+
+  <div style="float:left;">
+    <div style="border: 1px solid black;">
+      <span style="font-size: 120%">My portlet</span>
+      <div>
+        <ul><li>m1</li><li>m2</li>
+      </div>
+    </div>
+    <div style="border: 1px solid black;">
+      <span style="font-size: 120%">Her portlet</span>
+      <div>
+        <div class="her">content</div>
+      </div>
+    </div>
+  </div>
+
+That's the purpose of ``cps:portlet="frame"``: specifying what to
+repeat around the portlet itself. This is meant for decoration: in our
+case, an enclosure to get a border around the portlet. Of course you
+may use arbitrary markup.
+
+Portlet slots inclusion process
+-------------------------------
+Here's a more formal description of what happens:
+
+ 1. the themes engine looks for elements bearing the ``cps:slot``
+    attribute (the *slot element*). The value of that attribute is
+    taken to be a slot name. The engine grabs the ordered list of
+    rendered  portlets for that slot
+ 2. the themes engines looks for an element bearing the ``cps:portlet="frame"``
+    attribute and value (the *frame element*) within the slot element.
+ 3. the frame element is repeated as many times as there are portlets
+    to be rendered.
+ 4. in each of these repetitions of the frame element, the title and
+    rendering of the corresponding portlet are injected inside the
+    elements bearing ``cps:portlet="title"`` and
+    ``cps:portlet="body"`` respectively, discarding whatever sample content
+    they might have had in the theme page.
+
+Special cases and precisions:
+
+ - if there's no renderable portlet in that slot, the whole slot
+   element is ommitted ;
+ - there's no need for the frame element to be a direct or unique child of
+   the portlet element. Same for title and body elements.
+ - the theme engine does not care what tags are been used. It may even
+   be absurd : there's _currently_ no validation, but the w3c
+   validator would protest.
+ - designers may repeat manually the frame element with different
+   sample content for better end result simulation. The engine only
+   considers the first.
+
+The head element
+================
+
+TODO "à chaque jour suffit sa peine"
+See the MSIE specifics, though : http://trac.cps-cms.org/ticket/2019
+
+Options
+=======
+
+Page options
+------------
+Options are specified as attributes of the ``cps:options`` element.
+This element must be placed at toplevel, before the ``head`` element.
+Their scope is the page where they are specified.
+
+Available options:
+
+ - uri-absolute-path-rewrite: boolean (defaults to true).
+
+Attribute values for boolean options must be
+either "false" or "true". Case does not matter, nor leading
+or trailing whitespaces.
+
+Example::
+
+  <?xml version="1.0"?>
+  <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+  <html xmlns="http://www.w3.org/1999/xhtml" xmlns:cps="http://cps-cms.org/ns/theme" lang="fr" xml:lang="fr">
+    <cps:options uri-absolute-path-rewrite="false"/>
+    <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+
+
+Stylesheet options
+------------------
+Options for stylesheets are read from the ``stylesheet_options.xml``
+file, that must be at root of the theme hierarchy. The options
+element follows the same logic as in a theme page: it must be in the
+usual namespace, at toplevel in the root element.
+
+Example::
+
+  <?xml version="1.0"?>
+  <document xmlns="http://cps-cms.org/ns/theme">
+    <options uri-absolute-path-rewrite="false"/>
+  </document>
+
+The root element can be any, and as you see, it's shorter to place the
+whole file under the cps namespace.
+
+
+URI rewriting
+=============
+All URIs used to link static resources from theme pages and
+stylesheets are being rewritten at rendering time so that the
+resources can be served from the themes container, with no confusion with
+actual CPS content.
+
+You can see that in effect by simply looking at the HTML source of any
+page produced by CPS.
+
+General case
+------------
+
+ - An absolute URI, like 'http://www.example.com/logo.png' does not
+   get rewritten.
+ - A partial URI with absolute path (e.g, ``/logo.png``) is rewritten as
+   <absolute path of the theme>/<path>
+ - A partial relative URI (no leading slash) is rewritten as the
+   absolute path URI one gets applying the usual rules for relative
+   URIs *from the absolute URI of the referent (theme page, stylesheet)*.
+ - Partial relative URIs with two leading slashes are not supported.
+
+Examples with the current root filesystem container:
+ - for page ``front`` of `default`` theme,
+   with the CPS object being at root of the virtual
+   host, the URI ``images/logo.png`` becomes
+   ``.cps_themes/default/images/logo.png``, because the page absolute path
+   URI is ``/.cps_themes/default/front.html``
+ - for page ``pages/front`` and same as above, the result would be
+   ``/.cps_themes/default/pages/images/logo.png``, whereas
+   ``/images/logo.png`` would be rewritten as
+   ``/.cps_themes/default/images/logo.png``
+
+Pointing to the CPS portal : the cps URI scheme
+-----------------------------------------------
+
+In some cases, it's useful to escape the themes container and point to
+resources that are CPS content. This is especially useful for some
+themes that got exported from CPSSkins (see the "Exporting from
+CPSSkins" section)
+
+For this, there is a special class of URIs, built with the ``cps``
+scheme. The syntax is: ``cps://<relative path within cps portal>``.
+
+For instance, if you have an Image document in
+``sections/gallery/pict``, the link to the actual image content URI
+from this document looks like this: ``downloadFile/photo/img1.png``.
+If you want to use it from the theme, use the following URI:
+``cps://sections/gallery/pict/downloadFile/photo/img1.png``
+
+The rule is simply that ``cps://`` is replaced by the *current*
+absolute URI path of the portal in the current virtualhost.
+
+A given CPS portal may be accessed through different virtualhost
+and different protocols (http or https, for instance), that's why this
+``cps://`` is to be preferred to a full absolute URI. Another use-case
+is relocalibility without any change of the theme,
+from dev instance to preproduction to production.
+
+In case of virtual hosting pointing deeper in the cps site
+(e.g, to ``sections/sites/mysite` in the publication farm use-case for
+CPS),  ``cps://`` actually will point to the root of the virtual host,
+which doesn't inder tools such as ``portal_themes`` that will be
+catched anyway by acquisition.
+
+Leading slash problem
+---------------------
+The ``uri-absolute-path-rewrite`` option is meant to overcome the leading
+slash problem. The remainders of this section is directly extracted
+from ticket #2135 in CPS' trac, where this was first discussed.
+
+Some installations use static resources (images, video content) that
+are linked from the theme but are typically served at the reverse
+proxy level (at the ''edge side''). It's common practice in that case
+to use absolute path URIs to go outside of CPS.
+
+Practical example:
+
+  - The banner is some piece of flash content, say ``flash_banner.swf``
+  - It's been linked from the theme page as ``/media/flash_banner.swf``
+  - At the edge, URLs starting with ``/media`` are served directly
+    instead of being transformed into a reverse proxy request to
+    CPS.
+
+A sample Apache conf for this example would be::
+
+  ServerName mysite.net
+  DocumentRoot /var/www/mysite.net
+
+  ProxyPass /media !
+  <Directory /var/www/mysitite.net/media>
+   Order allow,deny
+   Allow from all
+  </Directory>
+
+  # Standard proxy stuff
+  ProxyPass / http://localhost:8080/VirtualHostBase/http/%{HTTP_HOST}:80/cps/VirtualHostRoot/
+  ProxyPassReverse / http://localhost:8080/
+
+On the other hand, The URI rewriting logic of CPSDesignerThemes is meant so that
+everything comes from CPS (the ''server side''). Absolute URIs such as
+``/media/flash_banner.swf`` get rewritten to the root of the theme
+(currently, that would be ``/.cps_themes/<themename>/media/flash_banner.swf``)
+
+This behaviour is important in the contract for CPSDesignerThemes :
+any existing web site seen from a browser perspective should be usable
+as a theme. Therefore, absolute URIs must correspond to the root of
+the theme. This will allow transitions from other CMSes or homogeneity
+from them, etc.
+
+To accomodate both use-cases, we need an option. The cleanest way of
+specifying it is to introduce a new element in our XML
+namespace. Proposal:
+
+default behaviour is to rewrite absolute path URIs
+we introduce a new element ``options`` in the CPSDesignerThemes
+namespace. To let absolute path URIs go through, put::
+
+  <cps:options uri-absolute-path-rewrite="False"/>.
+
+Other resources
+===============
+
+Issue tracker
+-------------
+
+CPS' issue tracker (http://trac.cps-cms.org) has lots of information
+about CPSDesignerThemes. Indeed, much of its behaviour has been drafted there.
+
+More examples & engine API
+--------------------------
+
+The files with `.txt` extension in ``CPSDesignerThemes/engine`` are
+python doctests that are run against all engine implementations that ship
+with the product. The corresponding theme fragments samples are in
+``CPSDesignerThemes/tests/theme1`` and siblings.
+
+These doctects are way more technical that the current document, but they
+are probably more complete and make up the ultimate reference,
+especially for developers.
+
+First announcement
+------------------
+Here's the original blog entry about this system, including a very short
+discussion of conceptual similarities with deliverance and ESI:
+http://www.racinet.fr/index.php?post/2009/06/10/A-new-themes-engine-for-CPS
+
+
+
+
+.. Local Variables:
+.. mode: rst
+.. End:
+.. vim: set filetype=rst:
