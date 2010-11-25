@@ -38,7 +38,9 @@ leveraged or not::
 
  Trying a simple rendering to show that the element is removed from
  there...
- >>> class FakePortal: pass
+ >>> class FakeRequest: pass
+ >>> class FakePortal:
+ ...     REQUEST = FakeRequest()
  >>> portal = FakePortal()
  >>> class FakePortletsTool:
  ...     def getPortlets(*args, **kw):
