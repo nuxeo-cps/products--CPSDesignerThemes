@@ -196,7 +196,7 @@ def test_suite():
     ENGINE_DOCTESTS_PATH = os.path.join(
         os.path.split(engine_module.__file__)[0], 'doc')
 
-    for PageEngine in (#ElementTreeEngine, TwoPhaseElementTreeEngine,
+    for PageEngine in (ElementTreeEngine, TwoPhaseElementTreeEngine,
                        LxmlEngine, TwoPhaseLxmlEngine):
         suite.addTest(unittest.makeSuite(engines2test_case()[PageEngine]))
         doctests = os.listdir(ENGINE_DOCTESTS_PATH)
