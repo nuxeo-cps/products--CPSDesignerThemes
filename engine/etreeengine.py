@@ -149,9 +149,9 @@ class ElementTreeEngine(BaseEngine):
         return options
 
     @classmethod
-    def parseOptionsFile(self, xml_file):
+    def parseOptionsFile(cls, xml_file):
         tree = ET.parse(xml_file)
-        return self._parseOptions(tree.getroot())
+        return cls._parseOptions(tree.getroot())
 
     def removeElement(self, elt):
         # In plain ElementTree, one cannot access parent from element.

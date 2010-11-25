@@ -64,6 +64,11 @@ class LxmlEngine(ElementTreeEngine):
         self.tree.xinclude()
 
     @classmethod
+    def parseOptionsFile(cls, xml_file):
+        tree = etree.parse(xml_file)
+        return cls._parseOptions(tree.getroot())
+
+    @classmethod
     def removeElement(self, elt):
         elt.getparent().remove(elt)
 
