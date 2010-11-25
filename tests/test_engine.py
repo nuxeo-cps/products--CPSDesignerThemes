@@ -22,6 +22,7 @@ from zope.testing import doctest
 import os
 import re
 
+from Products.CPSDesignerThemes import engine as engine_module
 from Products.CPSDesignerThemes.engine.etreeengine import (
     ElementTreeEngine,
     TwoPhaseElementTreeEngine,
@@ -35,6 +36,8 @@ from Products.CPSDesignerThemes.themecontainer import FSThemeContainer
 
 THEMES_PATH = os.path.join(INSTANCE_HOME, 'Products', 'CPSDesignerThemes',
                            'tests')
+
+
 def getThemesPath():
     return THEMES_PATH
 
@@ -190,23 +193,25 @@ def engines2test_case():
 def test_suite():
     suite = unittest.TestSuite()
 
+    ENGINE_DOCTESTS_PATH = os.path.join(
+        os.path.split(engine_module.__file__)[0], 'doc')
+
     for PageEngine in (#ElementTreeEngine, TwoPhaseElementTreeEngine,
                        LxmlEngine, TwoPhaseLxmlEngine):
         suite.addTest(unittest.makeSuite(engines2test_case()[PageEngine]))
-        for test_file in ('engine/portlets_merging.txt',
-                          'engine/heads_merging.txt',
-                          'engine/isolated_portlet.txt',
-                          'engine/options.txt',
-                          'engine/main_content_merging.txt',
-                          'engine/xinclude.txt',
-                          ):
+        doctests = os.listdir(ENGINE_DOCTESTS_PATH)
+        for test_file in doctests:
+            if not test_file.endswith('.txt'):
+                continue
+            if test_file == 'heads_merging_lxml.txt':
+                continue
             suite.addTest(
-                doctest.DocFileTest(test_file,
+                doctest.DocFileTest(os.path.join('engine', 'doc', test_file),
                                     package='Products.CPSDesignerThemes',
                                     optionflags=doctest.ELLIPSIS,
                                     globs=dict(PageEngine=PageEngine)))
 
-    suite.addTest(doctest.DocFileTest('engine/heads_merging_lxml.txt',
+    suite.addTest(doctest.DocFileTest('engine/doc/heads_merging_lxml.txt',
                                       package='Products.CPSDesignerThemes',
                                       optionflags=doctest.ELLIPSIS,
                                       globs=dict(PageEngine=LxmlEngine)))
