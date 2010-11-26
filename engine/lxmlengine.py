@@ -62,6 +62,7 @@ class LxmlEngine(ElementTreeEngine):
         self.root = self.tree.getroot()
         self.rewriteXiUris()
         self.tree.xinclude()
+        self.cleanXmlBaseAttrs()
 
     @classmethod
     def parseOptionsFile(cls, xml_file):

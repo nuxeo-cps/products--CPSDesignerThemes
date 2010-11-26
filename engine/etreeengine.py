@@ -51,7 +51,10 @@ from zope.interface import implements
 from Products.CMFCore.utils import getToolByName
 
 from Products.CPSDesignerThemes.interfaces import IThemeEngine
-from Products.CPSDesignerThemes.constants import NS_URI, NS_XHTML, NS_XINCLUDE
+from Products.CPSDesignerThemes.constants import (NS_URI,
+                                                  NS_XHTML,
+                                                  NS_XINCLUDE,
+                                                  NS_XML)
 from Products.CPSDesignerThemes.constants import XML_HEADER, XML_HEADER_NO_ENC
 from Products.CPSDesignerThemes.constants import BOOLEAN_OPTIONS
 from Products.CPSDesignerThemes.utils import rewrite_uri
@@ -117,6 +120,8 @@ class ElementTreeEngine(BaseEngine):
         root = self.root = self.tree.getroot()
 	self.rewriteXiUris()
 	ElementInclude.include(root)
+        self.cleanXmlBaseAttrs()
+
     #
     # Internal engine API implementation. For docstrings, see BaseEngine
     #
@@ -273,6 +278,11 @@ class ElementTreeEngine(BaseEngine):
             if uri is not None:
                 elt.attrib['href'] = self.container.rewriteXincludeUri(
                     uri, self.page_uri, absolute_for=self.theme_name)
+
+    def cleanXmlBaseAttrs(self):
+        base_attr = '{%s}base' % NS_XML
+        for elt in self.findByAttribute(self.root, base_attr):
+            del elt.attrib[base_attr]
 
     def extractSlotElements(self):
         return ((slot.attrib.pop(SLOT_ATTR), slot)

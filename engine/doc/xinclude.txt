@@ -51,6 +51,20 @@ case, a portlet can be merged exactly as for the
    </p>
   </div>
 
+The standard XInclude mechanism uses ``xml:base`` attributes to keep
+track of changes of base URIs. Some libraries do it only if needed. In
+this case the footer paragraph is loaded from
+``fragments/footer.html`` but the engine strips the (non XHTML
+compliant) ``xml:base`` attribute::
+
+  >>> print engine.dumpElement(engine.root[1][1]) # TODO direct ElementTree API
+  <p xmlns="http://www.w3.org/1999/xhtml"
+     xmlns:xi="http://www.w3.org/2001/XInclude">Footer</p>
+
+Note that it is normal to have all XML namespace declarations since we're
+dumping a single element. Any namespace stripping should occur during
+the final serialization anyway.
+
 .. Local Variables:
 .. mode: rst
 .. End:
