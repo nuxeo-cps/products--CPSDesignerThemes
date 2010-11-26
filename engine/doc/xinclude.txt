@@ -1,40 +1,57 @@
-====================
-Support for XInclude
-====================
+================
+XInclude support
+================
+
+:Author: Georges Racinet
+
+.. sectnum::    :depth: 4
+.. contents::   :depth: 4
 
 XInclude is a generic and powerful XML dialect designed to include
 entire documents or fragments into a main XML document.
 
-PREPARATIONS
->>> import os
->>> from lxml import usedoctest
->>> from Products.CPSDesignerThemes.tests.test_engine import get_engine
->>> from Products.CPSDesignerThemes.interfaces import IThemeEngine
+This page is a doctest, meaning that the examples are actually part of
+the test suite. This has some impact on the writing style, but also
+ensures that it's up-to-date.
 
-In the context of this test, we should have a predefined engine class
-(PageEngine). Let's demonstrate that:
->>> IThemeEngine.implementedBy(PageEngine)
-True
+Loading the example
+===================
 
->>> engine = get_engine(PageEngine, 'xinclude', page='master.html')
+We'll use lxml doctest mode::
+
+  >>> from lxml import usedoctest
+
+In the context of this test, we have a predefined engine class
+(PageEngine) that can be any of those shipping with CPSDesignerThemes.
+Let's use it to load the page at ``xinclude/master.html``::
+
+  >>> from Products.CPSDesignerThemes.tests.test_engine import get_engine
+  >>> engine = get_engine(PageEngine, 'xinclude', page='master.html')
+
+Demonstration
+=============
 
 Inclusions are processed before the cps specific directives. In our
 case, a portlet can be merged exactly as for the
-``theme1/simple_slot.html``  page
->>> PORTLET = ('Portlet One', '<ul id="portlet1"><li>foo</li></ul>')
->>> slot_name, slot = engine.extractSlotElements().next()
->>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET])
->>> print engine.dumpElement(slot)
-<div xmlns="http://www.w3.org/1999/xhtml">
- <p>
-  <span>Portlet One</span>
-  <div>
-   <ul id="portlet1">
-     <li>foo</li>
-   </ul>
+``theme1/simple_slot.html`` page::
+
+  >>> PORTLET = ('Portlet One', '<ul id="portlet1"><li>foo</li></ul>')
+  >>> slot_name, slot = engine.extractSlotElements().next()
+  >>> frame_parent, frame = engine.extractSlotFrame(slot)
+  >>> engine.mergePortlets(frame_parent, frame, [PORTLET])
+  >>> print engine.dumpElement(slot)
+  <div xmlns="http://www.w3.org/1999/xhtml">
+   <p>
+    <span>Portlet One</span>
+    <div>
+     <ul id="portlet1">
+       <li>foo</li>
+     </ul>
+    </div>
+   </p>
   </div>
- </p>
-</div>
 
-
+.. Local Variables:
+.. mode: rst
+.. End:
+.. vim: set filetype=rst:
