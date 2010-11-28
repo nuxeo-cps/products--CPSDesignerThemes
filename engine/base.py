@@ -18,6 +18,8 @@
 # $Id$
 
 import logging
+import re
+
 from copy import deepcopy
 from StringIO import StringIO # use TAL's faster StringIO ?
 
@@ -30,7 +32,7 @@ from Products.CPSUtil.crashshield import CrashShieldException
 from Products.CPSUtil import resourceregistry
 from Products.CPSPortlets.CPSPortlet import PORTLET_RESOURCE_CATEGORY
 from Products.CPSDesignerThemes.interfaces import IThemeEngine
-from Products.CPSDesignerThemes.constants import NS_URI
+from Products.CPSDesignerThemes.constants import NS_XHTML
 from Products.CPSDesignerThemes.utils import rewrite_uri
 
 METAL_HEAD_SLOTS = ( # the passed slots that end up in the <head> element
@@ -89,10 +91,11 @@ class BaseEngine(object):
     def __init__(self, html_file=None, theme_base_uri='', page_uri='',
                  cps_base_url=None, encoding=None, container=None,
                  theme_name='', page_name=''):
-        """Subclasses accept another argument: theme xml source.
+        """Does all preprocessing that's independent from context & request.
 
-        When we'll cache xml parsing and URI rewriting, this constructor will
-        take another argument, namely the preprocessed XML tree from cache
+        A freshly constructed IThemeEngine instance is a good candidate for
+        caching : it can serve as template to be deepcopied for each request.
+        TODO: refactor attributes that can be read on container
         """
         self.logger.debug("Engine : %s", self.__class__)
         self.container = container
@@ -100,13 +103,13 @@ class BaseEngine(object):
         self.page_uri = page_uri
         self.cps_base_url = cps_base_url
         # The engine object will be carried along, storing corresponding
-        # theme and page for various logging and/or user feedback.
-        # theme can also be used in XInclude URI rewriting
+        # theme and page names for various logging and/or user feedback.
+        # theme names can also be used in XInclude URI rewriting
         self.page_name = page_name
         self.theme_name = theme_name
         self.readTheme(html_file)
         # this is from this class point of view both input (portlets) and
-        # output (rendered htm) encoding
+        # output (rendered html) encoding
         self.encoding = encoding
         self.options = options = self.parseOptions()
         self.uri_absolute_path_rewrite = options.get(
@@ -258,6 +261,38 @@ class BaseEngine(object):
                         cps_global=head_element)
 
         return self.serialize()
+
+    # Human translation: any amount of whitespace, 'xmlns', possibly followed
+    # by ":prefix", equal sign,  simple or double quote, attribute value
+    # (any sequence of char, non greedy), same quote as the first one.
+    xmlns_re = re.compile(r'''\s*xmlns:?\w*=(?P<quote>['"]).*?(?P=quote)''')
+
+    @classmethod
+    def stripNameSpaces(cls, serialized):
+        """Remove all unwanted namespace declarations.
+
+        Problem found in the context of XInclude support (see #2152)
+        Most XML processing libraries don't provide an easy way to do that
+        because redundant xmlns declarations are valid and do no harm in the
+        XML world. But in XHTML, the only  element that can have an xmlns
+        declaration is the <html> document itself.
+
+        Note that this also breaks XHTML potential for extensibility. We'll
+        see for a smarter stripping if someone has a use-case someday.
+        """
+
+        i = serialized.find(NS_XHTML)
+        if i == -1:
+            # almost impossible at this point, except in the most stripped
+            # unit tests : we have relied so much on it already in the process
+            return serialized
+        cut = i + len(NS_XHTML)
+        return serialized[:cut] + cls.xmlns_re.sub('', serialized[cut:])
+
+    #
+    # Internal subclass API
+    #
+
 
     def readTheme(self, html_file):
         """Read the theme page from an open file.

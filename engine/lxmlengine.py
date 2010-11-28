@@ -216,9 +216,9 @@ class LxmlEngine(ElementTreeEngine):
 
         out = StringIO()
         self.tree.write(out)
-        # XXX GR couldn't find a way to change the nsmap
-        # to prevent now useless declaration
-        return out.getvalue().replace('xmlns:cps="%s"' % NS_URI, '', 1)
+        res = out.getvalue()
+        out.close() # release RAM does not harm
+        return self.stripNameSpaces(res)
 
     def serializeExport(self):
         self.protectEmptyElements('script', 'div', 'textarea')

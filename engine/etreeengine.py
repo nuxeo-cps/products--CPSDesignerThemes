@@ -101,15 +101,11 @@ class ElementTreeEngine(BaseEngine):
     """An engine based on ElementTree API
 
     http://effbot.org/zone/element-index.htm
-    GR: can't afford the effort to build lxml on my box.
 
-    This is a starting point implementation. XML format is still
-    likely to change at this point. There's room for optimisation, like
+    There's room for optimisation, like
     avoiding parsing the templates all over again. Therefore, in the future
     a given engine could persist in memory and be used for several
     context/request pairs.
-
-    On the other hand, this is already really fast.
     """
 
     implements(IThemeEngine)
@@ -642,7 +638,7 @@ class ElementTreeEngine(BaseEngine):
         out = StringIO()
         self.tree.write(out, default_namespace=NS_XHTML,
                         encoding=self.encoding)
-        return out.getvalue()
+        return self.stripNameSpaces(out.getvalue())
 
     def dumpElement(self, elt, encoding=None):
         tree = ET.ElementTree(elt)

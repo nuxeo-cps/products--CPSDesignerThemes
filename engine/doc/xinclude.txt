@@ -63,7 +63,13 @@ compliant) ``xml:base`` attribute::
 
 Note that it is normal to have all XML namespace declarations since we're
 dumping a single element. Any namespace stripping should occur during
-the final serialization anyway.
+the final serialization anyway, and that's what the engine does::
+
+  >>> ser = engine.serialize().split('\n')
+  >>> ser[0]
+  '<html xmlns="http://www.w3.org/1999/xhtml">'
+  >>> 'w3.org' in ''.join(ser[1:])
+  False
 
 .. Local Variables:
 .. mode: rst
