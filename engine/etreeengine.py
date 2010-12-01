@@ -82,6 +82,7 @@ REMOVE_ATTR = ns_prefix('remove')
 METAL_HEAD_SLOTS = ( # the passed slots that end up in the <head> element
     'base', 'head_slot', 'style_slot', 'javascript_head_slot')
 
+#TODO move to constants
 LINK_HTML_DOCUMENTS = {'img' : 'src',
                        'link'    : 'href',
                        'object'  : 'data',
@@ -95,6 +96,7 @@ HTML_ENTITIES = dict((n, unichr(v))
                      for n, v in htmlentitydefs.name2codepoint.items())
 
 # GR Duplicated from themecontainer.StyleSheet
+# another sign that rewriting should be handled by containers
 CSS_LINKS_RE = re.compile(r'url\((.*)\)')
 
 
