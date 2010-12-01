@@ -88,6 +88,7 @@ LINK_HTML_DOCUMENTS = {'img' : 'src',
                        'param' : 'value',
                        'script' : 'src',
                        'a': 'href',
+                       'area' : 'href',
                        }
 
 HTML_ENTITIES = dict((n, unichr(v))
