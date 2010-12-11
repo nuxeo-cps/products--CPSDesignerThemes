@@ -641,7 +641,11 @@ class ElementTreeEngine(BaseEngine):
         out = StringIO()
         self.tree.write(out, default_namespace=NS_XHTML,
                         encoding=self.encoding)
-        return self.stripNameSpaces(out.getvalue())
+        ser = self.stripNameSpaces(out.getvalue())
+	if ser.startswith('<?xml'): # no need to strip, lib produces valid XML
+	    end = ser.find('?>')
+            ser = ser[end+2:].strip()	
+	return ser
 
     def dumpElement(self, elt, encoding=None):
         tree = ET.ElementTree(elt)
