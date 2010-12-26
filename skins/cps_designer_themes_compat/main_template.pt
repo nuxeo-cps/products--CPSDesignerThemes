@@ -1,8 +1,5 @@
 <cpsdesigner-themes-compat>
-<!-- the number at the end of the tag name specifies the level in the tree
-     at which to record (defaults to 1)
-     Note that tal:block seems to count for 2 tags -->
-<metal:slot-recorder4 define-macro="master">
+<metal:block define-macro="master">
   <tal:block define="utool nocall:here/portal_url;
 	   	           void python:utool.getPortalObject().handleVoidResponses(here, request)"
 	             condition="not:void">
@@ -39,18 +36,36 @@
       <body tal:attributes="onload here/getOnLoad|string:setFocus();
         			class cpsskins_bodyclass;
 	        		style cpsskins_bodystyle"/>
+      <cps-designer-themes slot="base">
+       <!--metal:block define-slot="doctype"/-->
+      </cps-designer-themes>
+       <metal:block define-slot="base"/>
+      <cps-designer-themes slot="head_slot">
+       <metal:block define-slot="head_slot"/>
+      </cps-designer-themes>
+      <cps-designer-themes slot="style_slot">
+       <metal:block define-slot="style_slot"/>
+      </cps-designer-themes>
+      <cps-designer-themes slot="javascript_head_slot">
+       <metal:block define-slot="javascript_head_slot"/>
+      </cps-designer-themes>
 
-      <metal:block define-slot="doctype"/>
-      <metal:block define-slot="base"/>
-      <metal:block define-slot="head_slot"/>
-      <metal:block define-slot="style_slot"/>
-      <metal:block define-slot="javascript_head_slot"/>
-      <metal:block define-slot="body" tal:condition="emptybody"/>
-      <metal:block define-slot="header" />
-      <metal:block define-slot="main" />
-      <metal:block define-slot="sub" tal:condition="not:emptybody"/>
+      <cps-designer-themes slot="body" tal:condition="emptybody">
+       <metal:block define-slot="body">
+       </metal:block>
+      </cps-designer-themes>
+      <cps-designer-themes slot="header">
+       <metal:block define-slot="header" />
+      </cps-designer-themes>
+      <cps-designer-themes slot="main">
+       <metal:block define-slot="main" />
+      </cps-designer-themes>
+      <cps-designer-themes slot="sub">
+       <metal:block define-slot="sub" tal:condition="not:emptybody"/>
+      </cps-designer-themes>
     </tal:block>
   </tal:block>
-</metal:slot-recorder4>
+</metal:block>
+<cpsdthm-compat>
 
-</cpsdesigner-themes-compat>
+
