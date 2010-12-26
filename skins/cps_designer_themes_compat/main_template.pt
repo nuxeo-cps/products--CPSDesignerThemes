@@ -37,9 +37,9 @@
         			class cpsskins_bodyclass;
 	        		style cpsskins_bodystyle"/>
       <cps-designer-themes slot="base">
+       <metal:block define-slot="base"/>
        <!--metal:block define-slot="doctype"/-->
       </cps-designer-themes>
-       <metal:block define-slot="base"/>
       <cps-designer-themes slot="head_slot">
        <metal:block define-slot="head_slot"/>
       </cps-designer-themes>
