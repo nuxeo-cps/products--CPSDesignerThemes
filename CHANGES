@@ -6,7 +6,8 @@ New features
 -
 Bug fixes
 ~~~~~~~~~
--
+- #2152: strip all inner xmlns for XHTML validity
+- Fixed map areas URIs
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 
