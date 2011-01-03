@@ -38,7 +38,7 @@ case, a portlet can be merged exactly as for the
   >>> PORTLET = ('Portlet One', '<ul id="portlet1"><li>foo</li></ul>')
   >>> slot_name, slot = engine.extractSlotElements().next()
   >>> frame_parent, frame = engine.extractSlotFrame(slot)
-  >>> engine.mergePortlets(frame_parent, frame, [PORTLET])
+  >>> engine.mergePortlets(frame_parent, frame, [PORTLET], additional_css=False)
   >>> print engine.dumpElement(slot)
   <div xmlns="http://www.w3.org/1999/xhtml">
    <p>
