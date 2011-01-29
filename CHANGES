@@ -7,6 +7,7 @@ New features
 Bug fixes
 ~~~~~~~~~
 - Fixed unit tests
+- Some seemingly empty slots could be displayed
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 
