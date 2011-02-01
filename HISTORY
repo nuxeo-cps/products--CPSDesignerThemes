@@ -1,4 +1,22 @@
 ===========================================================
+Package: CPSDesignerThemes 0.6.3
+===========================================================
+First release built by: gracinet at: 2011-02-01T21:21:58
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
+~~~~~~~~~
+- Fixed unit tests
+- Some seemingly empty slots could be displayed
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
 Package: CPSDesignerThemes 0.6.2
 ===========================================================
 First release built by: gracinet at: 2011-01-04T02:44:08
