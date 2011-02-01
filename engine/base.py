@@ -72,7 +72,7 @@ def render_shield_portlet(portlet, context_obj=None):
                                 context_obj=context_obj)
     except CrashShieldException:
         rendered = '<blink>!!!</blink>'
-    return rendered
+    return rendered.strip()
 
 class BaseEngine(object):
     """Abstract base engine class

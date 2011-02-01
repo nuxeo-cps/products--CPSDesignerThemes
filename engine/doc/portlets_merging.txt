@@ -18,6 +18,7 @@ examples. The first element of each pair is the portlet title, the
 second is the portlet output itself.
 >>> PORTLET1 = ('Portlet One', '<ul id="portlet1"><li>foo</li></ul>')
 >>> PORTLET2 = ('Portlet Two', '<div id="portlet2">Hello, eggs</div>')
+>>> PORTLET3 = ('Portlet Three', '<div id="portlet3">Hello, spam</div>')
 
 
 Let's demonstrate how the engine looks for the 'cps:slot' attributes
@@ -26,7 +27,7 @@ the <p>:
 >>> engine = get_engine(PageEngine, 'theme1', page='simple_slot.html')
 >>> slot_name, slot = engine.extractSlotElements().next()
 >>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET1])
+>>> engine.mergePortlets(frame_parent, frame, [PORTLET1], additional_css=False)
 >>> print engine.dumpElement(slot)
 <div xmlns="http://www.w3.org/1999/xhtml">
  <p>
@@ -43,7 +44,8 @@ Now with two portlets:
 >>> engine = get_engine(PageEngine, 'theme1', page='simple_slot.html')
 >>> slot_name, slot = engine.extractSlotElements().next()
 >>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET1, PORTLET2])
+>>> engine.mergePortlets(frame_parent, frame, [PORTLET1, PORTLET2],
+...                      additional_css=False)
 >>> print engine.dumpElement(slot)
 <div xmlns="http://www.w3.org/1999/xhtml">
  <p>
@@ -62,15 +64,65 @@ Now with two portlets:
  </p>
 </div>
 
+With three of them, one can truly demonstrate the additional CSS
+classes that get applied if not disabled by the ``additional_css``
+keyword argument::
+>>> engine = get_engine(PageEngine, 'theme1', page='simple_slot.html')
+>>> slot_name, slot = engine.extractSlotElements().next()
+>>> frame_parent, frame = engine.extractSlotFrame(slot)
+>>> engine.mergePortlets(frame_parent, frame, [PORTLET1, PORTLET2, PORTLET3])
+>>> print engine.dumpElement(slot)
+<div xmlns="http://www.w3.org/1999/xhtml">
+ <p class="first_in_slot">
+  <span>Portlet One</span>
+  <div>
+   <ul id="portlet1">
+     <li>foo</li>
+   </ul>
+  </div>
+ </p>
+ <p>
+  <span>Portlet Two</span>
+  <div>
+   <div id="portlet2">Hello, eggs</div>
+  </div>
+ </p>
+ <p class="last_in_slot">
+  <span>Portlet Three</span>
+  <div>
+   <div id="portlet3">Hello, spam</div>
+  </div>
+ </p>
+</div>
+
+Of course additional CSS classes are correctly applied if there's only
+one portlet::
+>>> engine = get_engine(PageEngine, 'theme1', page='simple_slot.html')
+>>> slot_name, slot = engine.extractSlotElements().next()
+>>> frame_parent, frame = engine.extractSlotFrame(slot)
+>>> engine.mergePortlets(frame_parent, frame, [PORTLET1])
+>>> print engine.dumpElement(slot)
+<div xmlns="http://www.w3.org/1999/xhtml">
+ <p class="first_in_slot last_in_slot">
+  <span>Portlet One</span>
+  <div>
+   <ul id="portlet1">
+     <li>foo</li>
+   </ul>
+  </div>
+ </p>
+</div>
+
+
 Now with two slots, and one portlet per slot:
 >>> engine = get_engine(PageEngine, 'theme1', page='two_slots.html')
 >>> slots = engine.extractSlotElements()
 >>> slot_name, slot = engine.extractSlotElements().next()
 >>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET1])
+>>> engine.mergePortlets(frame_parent, frame, [PORTLET1], additional_css=False)
 >>> slot_name, slot = engine.extractSlotElements().next()
 >>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET2])
+>>> engine.mergePortlets(frame_parent, frame, [PORTLET2], additional_css=False)
 
 To demonstrate, we'll have to dump the whole page, this time
 >>> print engine.serialize()
@@ -139,7 +191,7 @@ CPSSkins'exporter. Let's try the title first:
 >>> engine = get_engine(PageEngine, 'theme1', page='portlet_remove_title.html')
 >>> slot_name, slot = engine.extractSlotElements().next()
 >>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET1,])
+>>> engine.mergePortlets(frame_parent, frame, [PORTLET1,], additional_css=False)
 >>> print engine.dumpElement(slot)
 <div xmlns="http://www.w3.org/1999/xhtml">
 <p>
@@ -157,7 +209,7 @@ Now cps:remove on the body:
 >>> extracted_slots = engine.extractSlotElements()
 >>> slot_name, slot = engine.extractSlotElements().next()
 >>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET1,])
+>>> engine.mergePortlets(frame_parent, frame, [PORTLET1,], additional_css=False)
 >>> print engine.dumpElement(slot)
 <div xmlns="http://www.w3.org/1999/xhtml">
  <p>
@@ -172,7 +224,7 @@ The engine must accept a missing cps:portlet='title' in slot:
 >>> engine = get_engine(PageEngine, 'theme1', page='no_portlet_title.html')
 >>> slot_name, slot = engine.extractSlotElements().next()
 >>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET1])
+>>> engine.mergePortlets(frame_parent, frame, [PORTLET1], additional_css=False)
 >>> print engine.dumpElement(slot)
 <div xmlns="http://www.w3.org/1999/xhtml">
  <p>
@@ -188,7 +240,7 @@ Similarly, the engine must accept a missing cps:portlet='body' in slot:
 >>> engine = get_engine(PageEngine, 'theme1', page='no_portlet_body.html')
 >>> slot_name, slot = engine.extractSlotElements().next()
 >>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET1])
+>>> engine.mergePortlets(frame_parent, frame, [PORTLET1], additional_css=False)
 >>> print engine.dumpElement(slot)
 <div xmlns="http://www.w3.org/1999/xhtml">
  <p>

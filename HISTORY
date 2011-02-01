@@ -1,4 +1,57 @@
 ===========================================================
+Package: CPSDesignerThemes 0.6.3
+===========================================================
+First release built by: gracinet at: 2011-02-01T21:21:58
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
+~~~~~~~~~
+- Fixed unit tests
+- Some seemingly empty slots could be displayed
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
+Package: CPSDesignerThemes 0.6.2
+===========================================================
+First release built by: gracinet at: 2011-01-04T02:44:08
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
+~~~~~~~~~
+- #2317: CSS classes for first and last portlet in slot
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
+Package: CPSDesignerThemes 0.6.1
+===========================================================
+First release built by: gracinet at: 2010-12-30T12:09:56
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
+~~~~~~~~~
+- #2152: strip all inner xmlns for XHTML validity
+- Fixed map areas URIs
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
 Package: CPSDesignerThemes 0.6.0
 ===========================================================
 First release built by: gracinet at: 2010-11-27T04:24:39

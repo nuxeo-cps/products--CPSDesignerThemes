@@ -546,11 +546,12 @@ class ElementTreeEngine(BaseEngine):
         except StopIteration:
             raise KeyError
 
-    def mergePortlets(self, frame_parent, frame, portlets_rendered):
+    def mergePortlets(self, frame_parent, frame, portlets_rendered,
+                      additional_css=True):
+        one_done = False
         for title, body in portlets_rendered:
             if not body:
                 continue
-
             ptl_elt = deepcopy(frame)
 
             elts = tuple(self.findByAttribute(ptl_elt, PORTLET_ATTR,
@@ -608,11 +609,26 @@ class ElementTreeEngine(BaseEngine):
                         elt.tail = ptl_elt.tail
                     else:
                         elt.tail += ptl_elt.tail
+            if not one_done:
+                if additional_css:
+                    self.addCssClass(ptl_elt, 'first_in_slot')
+                one_done = True
+
+        if one_done and additional_css:
+            self.addCssClass(ptl_elt, 'last_in_slot')
+
+    @classmethod
+    def addCssClass(cls, elt, css_class):
+        if 'class' in elt.attrib:
+            elt.attrib['class'] += ' ' + css_class
+        else:
+            elt.attrib['class'] = css_class
 
     def mergeIsolatedPortlet(self, elt, portlet_rendered, parent):
         frame_parent, frame = self.extractSlotFrame(elt)
         frame_remove = frame.get(REMOVE_ATTR) # now to avoid side-effects
-        self.mergePortlets(frame_parent, frame, (portlet_rendered,))
+        self.mergePortlets(frame_parent, frame, (portlet_rendered,),
+                           additional_css=False)
         if elt.attrib.pop(REMOVE_ATTR, False):
             # XXX make this a generic skipElement method
             i = parent.getchildren().index(elt)

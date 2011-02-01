@@ -95,7 +95,7 @@ class EngineTestCase(unittest.TestCase):
 
         rendered = WT_REGEXP.sub('', engine.dumpElement(slot))
         expected = WT_REGEXP.sub(
-            '', '<div xmlns="%s"><p>'
+            '', '<div xmlns="%s"><p class="first_in_slot last_in_slot">'
             '<span>%s</span><div>%s</div>'
             '</p></div>' % (NS_XHTML, portlet[0], portlet[1]))
         if not hasattr(self.EngineClass, 'secondPhase'):
