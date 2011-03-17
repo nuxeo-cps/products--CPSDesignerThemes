@@ -98,6 +98,10 @@ class EngineAdapter(object):
         To be implemented by subclasses."""
         raise NotImplementedError
 
+    security.declarePublic('getStyleSheetUris')
+    def getStyleSheetUris(self, **kw):
+        return self.getEngine().getStyleSheetUris(**kw)
+
     def getEngine(self, editing=False):
         """The fallback is up to the container."""
         engine = self.engine
