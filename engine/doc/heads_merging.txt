@@ -58,3 +58,13 @@ part and cps_global parts go straight while URIs from the theme get rewritten:
   </body>
 </html>
 
+There are facilities to get the stylesheet URIs referenced in the
+theme itself. This example occurs is after heads merging, but can be used
+before as well.
+
+  >>> print engine.getStyleSheetUris()
+  ['/thm_base/test.css']
+  >>> print engine.getStyleSheetUris(kind='rel_abs_path')
+  ['/thm_base/test.css']
+  >>> print engine.getStyleSheetUris(kind='rel_rel_path')
+  ['document.css']

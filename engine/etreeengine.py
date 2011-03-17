@@ -24,6 +24,7 @@ logger = logging.getLogger(
 import re
 from copy import deepcopy
 from StringIO import StringIO # use TAL's faster StringIO ?
+from urlparse import urlparse
 
 try:
     import cElementTree as ET
@@ -270,6 +271,33 @@ class ElementTreeEngine(BaseEngine):
             if style_elt.text:
                 style_elt.text = CSS_LINKS_RE.sub(self.styleAtImportRewriteUri,
                                               style_elt.text)
+
+    def getStyleSheetUris(self, kind='rel_abs_path'):
+        """Get stylesheet URIs, filtered by kind
+
+        kind can be:
+           - 'rel_abs_path'
+           - 'rel_rel_path'
+           - 'all'
+        For the first two kinds, only path relative URIs (no authority, see
+        RFC2396) are selected. The difference lies in the path being absolute
+        or relative.
+        """
+
+        res = []
+        for link_elt in self.root.findall(
+            './{%s}head/{%s}link' % (NS_XHTML, NS_XHTML)):
+            attr = link_elt.attrib
+            if attr.get('rel', '').lower() == 'stylesheet':
+                uri = attr['href']
+                scheme, authority, path  = urlparse(uri)[:3]
+                if kind.startswith('rel_'):
+                    if scheme or authority:
+                        continue
+                    if (kind != 'rel_rel_path') ^ path.startswith('/'):
+                        continue
+                res.append(uri)
+        return res
 
     def rewriteXiUris(self):
         for elt in self.root.findall('.//{%s}include' % NS_XINCLUDE):
