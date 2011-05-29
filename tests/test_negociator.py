@@ -58,14 +58,16 @@ class BaseNegociatorTest(ZopeTestCase.ZopeTestCase):
 
 class TestFixedFSThemeEngine(BaseNegociatorTest):
 
+
     def testLookupContainer(self):
         negociator = FixedFSThemeEngine(self.folder, self.app.REQUEST)
         container = negociator.lookupContainer()
         self.assertTrue(IThemeContainer.providedBy(container))
         self.assertEquals(container.getId(), 'container')
 
-    def testCharset(self):
+    def testCharsetUrl(self):
         negociator = FixedFSThemeEngine(self.folder, self.app.REQUEST)
+        self.assertEquals(negociator.cps_base_url, '/')
         self.assertEquals(negociator.encoding, 'latin-1')
 
         self.folder.default_charset = 'unicode'
