@@ -6,6 +6,7 @@ New features
 -
 Bug fixes
 ~~~~~~~~~
+- #2400: can render in the context of a view
 - #2329: API to list stylesheet from the theme page
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~

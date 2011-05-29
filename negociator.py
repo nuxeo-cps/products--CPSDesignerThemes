@@ -25,6 +25,8 @@ import warnings
 from zope.interface import implements
 from zope.component import adapts
 from zope.component import getMultiAdapter
+from zope.app.publisher.browser import BrowserView
+
 from Globals import InitializeClass
 from Acquisition import aq_base, aq_parent, aq_inner
 from AccessControl import ModuleSecurityInfo
@@ -76,7 +78,10 @@ class EngineAdapter(object):
                         "(302, 304...) quick handling might be broken.")
             void = False
 
-        self.context = context
+        if isinstance(context, BrowserView): # see #2400
+            self.context = context.context
+        else:
+            self.context = context
         self.request = request
         self.engine = None
 
@@ -272,6 +277,7 @@ class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
         Adapted from CPSSkins themes tool.
         """
         obj = startobj
+
         while 1:
             if obj.isPrincipiaFolderish and not obj.getId().startswith('.'):
                 return obj
