@@ -79,21 +79,13 @@ class EngineAdapter(object):
             void = False
 
         if isinstance(context, BrowserView): # see #2400
-            self.context = context.context
-        else:
-            self.context = context
+            context = context.context
+
+        self.context = context
         self.request = request
         self.engine = None
-
-        # portal-related stuff
-        utool = getToolByName(context, 'portal_url')
-        self.cps_base_url = utool.getBaseUrl()
-        enc = utool.getPortalObject().default_charset
-        if enc == 'unicode':
-            # XXX maybe better to introspect zpublisher conf
-            # TODO CPSUtil can do that now
-            enc = 'utf-8'
-        self.encoding = enc
+        self.encoding = get_final_encoding(context)
+        self.cps_base_url = getToolByName(context, 'portal_url').getBaseUrl()
 
     def getThemeAndPageName(self, editing=False):
         """Return the theme and page that should be rendered.
