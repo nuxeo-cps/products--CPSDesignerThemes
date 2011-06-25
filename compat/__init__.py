@@ -20,17 +20,14 @@
 """This module provides compatibility for old page templates.
 
 Namely, it makes it possible for ZPTs to be based on invocation of the
-'master' macro that normally sits in
+'master' macros that normally sit in
 CPSDefault/skins/cps_default/content_lib_master.pt
-and still workk with CPSDesigner themes.
 
-It does this currently by using an altered TAL interpretor that turns
-'metal:fill-slot' calls into recorders.
-The slot contents are in turn fed to the themes machinery instead of being
-streamlined right away. This works for first level fill-slots that occur
-within a metal:slot-recorder tag and a special version of 'master' leveraging
-that. It is very unlikely that another macro could be affected expect on
-purpose.
+or in main_template and still work with CPSDesigner themes.
+
+It does this currently by using a special version of main_template introducing
+specific <cps-designer-themes slot="theslot"> XML elements and parsing the
+produced rendering.
 
 Later Zope versions could be supported in a different way.
 This module's contract includes to choose the right compatibility method

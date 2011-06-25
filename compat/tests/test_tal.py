@@ -23,11 +23,10 @@ from zope import component
 from Testing import ZopeTestCase
 from Products.PageTemplates.ZopePageTemplate import ZopePageTemplate
 
+from Products.CPSDefault.tests.CPSTestCase import CPSZCMLLayer
 from Products.CPSDesignerThemes.testing import TestingNegociator
 
 ZopeTestCase.installProduct('CPSDesignerThemes')
-
-component.provideAdapter(TestingNegociator)
 
 class TestTal(unittest.TestCase):
     """Low level test case for the TAL patching"""
@@ -35,11 +34,15 @@ class TestTal(unittest.TestCase):
 MACRO_DEF_ID="macro_def"
 
 MACRO_DEF="""
-<metal:slot-recorder define-macro="mac">
+<cps-designer-themes-compat>
+ <metal:block define-macro="mac">
   Before
-  <metal:block define-slot="sl1">SL1</metal:block>
+  <cps-designer-themes slot="sl1">
+    <metal:block define-slot="sl1">SL1</metal:block>
+  </cps-designer-themes>
   After
-</metal:slot-recorder>
+ </metal:block>
+</cps-designer-themes-compat>
 """
 
 USE1="""
@@ -70,39 +73,44 @@ USE3="""
 STRIP_WT = re.compile(r'[\s\n]+')
 
 class TestZpt(ZopeTestCase.ZopeTestCase):
+
+    layer = CPSZCMLLayer
+
     """Please see what TestingEngine does."""
 
     def afterSetUp(self):
+        component.provideAdapter(TestingNegociator)
+
         md = ZopePageTemplate(MACRO_DEF_ID, text=MACRO_DEF)
         self.folder._setObject(md.getId(), md)
 
     def test_use1(self):
         use = ZopePageTemplate('use', text=USE1)
         self.folder._setObject('use', use)
-        result = STRIP_WT.sub(' ', self.folder.use()).strip()
-        self.assertEquals(result,
+        result = STRIP_WT.sub('', self.folder.use()).strip()
+        self.assertEquals(result, STRIP_WT.sub('',
                           '<html><body><slot name="sl1">'
                           '<span>slot contents</span> </slot>'
                           '<pt><div> Before After </div></pt>'
-                          '</body></html>')
+                          '</body></html>'))
 
     def test_use2(self):
         use = ZopePageTemplate('use', text=USE2)
         self.folder._setObject('use', use)
-        result = STRIP_WT.sub(' ', self.folder.use()).strip()
-        self.assertEquals(result,
+        result = STRIP_WT.sub('', self.folder.use()).strip()
+        self.assertEquals(result, STRIP_WT.sub('',
                           '<html><body><slot name="sl1"><div> '
                           'slot contents '
-                          '</div></slot><pt>Before After</pt></body></html>')
+                          '</div></slot><pt>Before After</pt></body></html>'))
 
     def test_use3(self):
         use = ZopePageTemplate('use', text=USE3)
         self.folder._setObject('use', use)
-        result = STRIP_WT.sub(' ', self.folder.use()).strip()
-        self.assertEquals(result,
+        result = STRIP_WT.sub('', self.folder.use()).strip()
+        self.assertEquals(result, STRIP_WT.sub('',
                           '<html><body><slot name="sl1"><div> '
                           'slot contents '
-                          '</div></slot><pt>Before After</pt></body></html>')
+                          '</div></slot><pt>Before After</pt></body></html>'))
 
 def test_suite():
     return unittest.TestSuite((

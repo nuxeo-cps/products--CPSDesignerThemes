@@ -1,9 +1,11 @@
 # (C) Copyright 2008 Georges Racinet
+#               2010 CPS-CMS Community <http://cps-cms.org/>
 # Author: Georges Racinet <georges@racinet.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as published
-# by the Free Software Foundation.
+# by the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -14,48 +16,46 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
-#
-# $Id$
 
+"""Intercept all page templates renderings to feed them to the themes engine.
+
+In the current state of implementation, this still relies on the old location
+of the PageTemplate package.
+Another improvement would be to limit this systematic interception to those
+templates for which it is meaningful, ie those that call a macro chain than
+ends with the main template
+"""
+
+import re
 from Products.PageTemplates.PageTemplate import PageTemplate
 from Products.PageTemplates.PageTemplate import PTRuntimeError
 from Products.PageTemplates.PageTemplate import PageTemplateTracebackSupplement
 from Products.PageTemplates.Expressions import getEngine
 from Products.CPSDesignerThemes.negociator import adapt
 
-from talslotrecorder import TALSlotRecordingInterpreter
+SLOTS_REGEXP=re.compile(r'<cps-designer-themes slot="(.*?)">(.*?)'
+                        '</cps-designer-themes>', re.DOTALL)
 
-def pt_render(self, source=0, extra_context={}):
-    """Render this Page Template"""
-    if not self._v_cooked:
-        self._cook()
+orig_pt_render = PageTemplate.pt_render
 
-    __traceback_supplement__ = (PageTemplateTracebackSupplement, self)
+def slots_record(matchobj, slots):
+    """Remove matches and record them in slots dict."""
+    slots[matchobj.group(1)] = matchobj.group(2)
+    return ''
 
-    if self._v_errors:
-        e = str(self._v_errors)
-        raise PTRuntimeError, (
-            'Page Template %s has errors: %s' % (self.id, e))
-    output = self.StringIO()
+def pt_render(self, *args, **kwargs):
+    pt_output = orig_pt_render(self, *args, **kwargs)
+    slots = {}
+    def record(matchobj):
+        return slots_record(matchobj, slots)
+
+    pt_output = SLOTS_REGEXP.sub(record, pt_output)
+    if not slots:
+        return pt_output
+
     c = self.pt_getContext()
-    c.update(extra_context)
-
-    interp = TALSlotRecordingInterpreter(self._v_program, self._v_macros,
-                                         getEngine().getContext(c),
-                                         output,
-                                         tal=not source, strictinsert=0)
-
-    interp()
-
-    slots = interp.getRecordedSlots()
-    if slots is not None:
-        # We're assuming the sole use of <metal:slot-recorder>
-        # is to pass to the rendering theme engine
-        engine = adapt(c['context'], c['request'])
-        return engine.renderCompat(metal_slots=slots,
-                                   pt_output=output.getvalue())
-
-    return output.getvalue()
-
+    engine = adapt(c['context'], c['request'])
+    return engine.renderCompat(metal_slots=slots,
+                               pt_output=pt_output)
 
 PageTemplate.pt_render = pt_render

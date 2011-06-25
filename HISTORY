@@ -1,4 +1,21 @@
 ===========================================================
+Package: CPSDesignerThemes 0.7.0-Zope-2.10
+===========================================================
+First release built by: gracinet at: 2011-02-01T21:53:44
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+- merge of CPS-3.5.2-rc2 version
+Bug fixes
+~~~~~~~~~
+-
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
 Package: CPSDesignerThemes 0.6.3
 ===========================================================
 First release built by: gracinet at: 2011-02-01T21:21:58
