@@ -35,6 +35,10 @@ def rewrite_uri(absolute_base='', referer_uri='/index.html', uri='',
     >>> rewrite_uri(absolute_base='/cps/container/thm', uri='http://example.com/style.css')
     'http://example.com/style.css'
 
+    Same for relative URI with authority part (terminology of RFC 2396)
+    >>> rewrite_uri(absolute_base='/cps/container/thm', uri='//example.com/style.css')
+    '//example.com/style.css'
+
     Same for anchor in current page
     >>> rewrite_uri(absolute_base='/cps/container/thm', uri='#content')
     '#content'
@@ -80,8 +84,8 @@ def rewrite_uri(absolute_base='', referer_uri='/index.html', uri='',
             raise ValueError("Need the CPS base URL to use the cps:// scheme")
         return cps_base_url + uri[6:]
 
-    if parsed[1]: # probably impossible (scheme is empty), but...
-        raise ValueError("Invalid URI : " + uri)
+    if parsed[1]: # host and no scheme : absolute URI with same scheme
+        return uri
 
     path = parsed[2]
     if not path: # typically, pure fragment URI (#header)

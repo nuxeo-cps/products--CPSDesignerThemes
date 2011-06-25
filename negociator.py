@@ -25,6 +25,8 @@ import warnings
 from zope.interface import implements
 from zope.component import adapts
 from zope.component import getMultiAdapter
+from zope.app.publisher.browser import BrowserView
+
 from Globals import InitializeClass
 from Acquisition import aq_base, aq_parent, aq_inner
 from AccessControl import ModuleSecurityInfo
@@ -76,19 +78,14 @@ class EngineAdapter(object):
                         "(302, 304...) quick handling might be broken.")
             void = False
 
+        if isinstance(context, BrowserView): # see #2400
+            context = context.context
+
         self.context = context
         self.request = request
         self.engine = None
-
-        # portal-related stuff
-        utool = getToolByName(context, 'portal_url')
-        self.cps_base_url = utool.getBaseUrl()
-        enc = utool.getPortalObject().default_charset
-        if enc == 'unicode':
-            # XXX maybe better to introspect zpublisher conf
-            # TODO CPSUtil can do that now
-            enc = 'utf-8'
-        self.encoding = enc
+        self.encoding = get_final_encoding(context)
+        self.cps_base_url = getToolByName(context, 'portal_url').getBaseUrl()
 
     def getThemeAndPageName(self, editing=False):
         """Return the theme and page that should be rendered.
@@ -97,6 +94,10 @@ class EngineAdapter(object):
 
         To be implemented by subclasses."""
         raise NotImplementedError
+
+    security.declarePublic('getStyleSheetUris')
+    def getStyleSheetUris(self, **kw):
+        return self.getEngine().getStyleSheetUris(**kw)
 
     def getEngine(self, editing=False):
         """The fallback is up to the container."""
@@ -268,6 +269,7 @@ class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
         Adapted from CPSSkins themes tool.
         """
         obj = startobj
+
         while 1:
             if obj.isPrincipiaFolderish and not obj.getId().startswith('.'):
                 return obj
