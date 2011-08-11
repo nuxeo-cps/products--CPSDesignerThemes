@@ -1,5 +1,10 @@
+====================================
 Merging logic for the <head> element
 ====================================
+
+Definitions
+===========
+
 The engine has to use three different sources to dump the <head>
 element:
  - the theme page itself
@@ -8,7 +13,8 @@ element:
  - "head content": what comes from the current zope page template, for example
    cpsdocument_edit_form
 
-PREPARATIONS
+Preparations
+============
 >>> import os
 >>> from lxml import usedoctest
 >>> from Products.CPSDesignerThemes.tests.test_engine import get_engine
@@ -32,6 +38,9 @@ Let's define the needed fragments to demonstrate:
 ...  </head>
 ...  <body></body>
 ... </html>""", 'ASCII')
+
+Basic Merging demonstration
+===========================
 
 Now let's see how our sources get merged. See how the head_content
 part and cps_global parts go straight while URIs from the theme get rewritten:
@@ -59,7 +68,8 @@ part and cps_global parts go straight while URIs from the theme get rewritten:
 </html>
 
 There are facilities to get the stylesheet URIs referenced in the
-theme itself. This example occurs is after heads merging, but can be used
+theme itself. This example occurs is after heads merging (hence has
+the stylesheets from cps_global and head_content), but can be used
 before as well.
 
   >>> print engine.getStyleSheetUris()
@@ -68,3 +78,62 @@ before as well.
   ['/thm_base/test.css']
   >>> print engine.getStyleSheetUris(kind='rel_rel_path')
   ['document.css']
+
+Title merging
+=============
+
+A <title> element in cps_global takes precedence over the one from the
+theme::
+
+ >>> cps_global, thm_body = PageEngine.parseHeadBody("""
+ ... <html xmlns="http://www.w3.org/1999/xhtml">
+ ...  <head>
+ ...    <title>Glob title</title>
+ ...  </head>
+ ...  <body></body>
+ ... </html>""", 'ASCII')
+ >>> engine = get_engine(PageEngine, 'theme1', page='simple_head.html',
+ ...  	                cps_base_url='/cps_portal/')
+ >>> engine.encoding = 'UTF-8'
+ >>> engine.mergeHeads(head_content=head_content, cps_global=cps_global)
+ >>> print engine.serialize() # TODO JS ordering as well
+ <html xmlns="http://www.w3.org/1999/xhtml">
+   <head>
+    <meta content="CPSDesignerThemes" name="engine" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Glob title</title>
+    <link href="/cps_portal/portal_themes/default/icons/cps_favicon_4.png"
+          rel="icon" type="image/png" />
+    <link href="/thm_base/test.css" rel="Stylesheet" type="text/css" />
+    <link href="document.css" rel="Stylesheet" type="text/css" />
+    <script src="/thm_base/eye_candi.js" type="text/javascript"> </script>
+    <script src="/cpsdocument.js"></script>
+   </head>
+   <body>
+   </body>
+ </html>
+
+And a <title> element in ``head_content`` takes precedence over both::
+
+ >>> head_content = "<title>Head content title</title>"
+ >>> engine = get_engine(PageEngine, 'theme1', page='simple_head.html',
+ ...  	                cps_base_url='/cps_portal/')
+ >>> engine.encoding = 'UTF-8'
+ >>> engine.mergeHeads(head_content=head_content, cps_global=cps_global)
+ >>> print engine.serialize()
+ <html xmlns="http://www.w3.org/1999/xhtml">
+   <head>
+    <meta content="CPSDesignerThemes" name="engine" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Head content title</title>
+    <link href="/cps_portal/portal_themes/default/icons/cps_favicon_4.png"
+          rel="icon" type="image/png" />
+    <link href="/thm_base/test.css" rel="Stylesheet" type="text/css" />
+    <script src="/thm_base/eye_candi.js" type="text/javascript"> </script>
+   </head>
+   <body>
+   </body>
+ </html>
+
+
+

@@ -462,11 +462,47 @@ class ElementTreeEngine(BaseEngine):
         head.insert(0, self.parseFragment(
             '<meta name="engine" content="CPSDesignerThemes" />'))
 
+    @classmethod
+    def mergeTitle(self, theme_head, head_elts=()):
+        """Replace the <title> from theme_head by the first found in head_elts.
+
+        If no <title> is found in theme_head, nothing is done.
+        If a <title> is found in one of head_elts, it is removed.
+        """
+
+        # implementation avoids xpath and cut/paste of elements
+        # to work the same in elementtree and lxml
+        tag = '{%s}%s' % (NS_XHTML, 'title')
+
+        for title_elt in theme_head.getchildren():
+            if title_elt.tag == tag:
+                break
+        else:
+            return
+
+        for helt in head_elts:
+            if helt is None:
+                continue
+
+            # find <title> in helt, and don't stay in a loop, for we'll remove
+            # the one we may find.
+            for elt in helt:
+                if elt.tag == tag:
+                    title_elt.text = elt.text
+                    helt.remove(elt)
+                    return
+
+
     def mergeHeads(self, head_content='', cps_global=None):
         """See base class for docstring."""
-        js_acc = self.makeSimpleElement('js-acc')
 
         in_theme = self.tree.find(HEAD)
+        parsed = self.parseFragment(head_content, enclosing='head',
+                                    encoding=self.encoding)
+
+        self.mergeTitle(in_theme, (parsed, cps_global))
+
+        js_acc = self.makeSimpleElement('js-acc')
         self._accumulateJavaScript(in_theme, js_acc)
         msie_cond = self._cutMsieConditionals(in_theme)
 
@@ -476,8 +512,6 @@ class ElementTreeEngine(BaseEngine):
                 self._cutMsieConditionals(cps_global)
             offset = self._mergeElement(len(in_theme), in_theme, cps_global)
 
-        parsed = self.parseFragment(head_content, enclosing='head',
-                                    encoding=self.encoding)
         self._accumulateJavaScript(parsed, js_acc)
         if msie_cond is not None:
             self._cutMsieConditionals(parsed)
