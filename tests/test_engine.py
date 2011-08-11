@@ -45,13 +45,15 @@ PORTLET1 = ('portlet1', '<ul id="portlet1"><li>foo</li></ul>')
 
 WT_REGEXP = re.compile(r'[\n ]*')
 
-def get_engine(EngineClass, theme, page='index.html', cps_base_url=None):
+def get_engine(EngineClass, theme, page='index.html', cps_base_url=None,
+               lang=''):
     container = FSThemeContainer('cont_id')
     container.getFSPath = getThemesPath
     f = open(os.path.join(THEMES_PATH, theme, page), 'r')
     return EngineClass(html_file=f, container=container,
                        theme_base_uri='/thm_base', encoding='iso-8859-15',
                        theme_name=theme, page_name=page,
+                       lang=lang,
                        page_uri='/'+page, cps_base_url=cps_base_url)
 
 class EngineTestCase(unittest.TestCase):

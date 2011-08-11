@@ -135,5 +135,16 @@ And a <title> element in ``head_content`` takes precedence over both::
    </body>
  </html>
 
+Language attributes
+===================
+
+It's not really part of heads merging, but we have a capability to set
+language attributes on the <html> element. This is done upon engine
+instantiation::
+
+ >>> engine = get_engine(PageEngine, 'theme1', page='simple_head.html',
+ ...  	                cps_base_url='/cps_portal/', lang='fr')
+ >>> engine.serialize().split('\n')[0]
+ '<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr">'
 
 

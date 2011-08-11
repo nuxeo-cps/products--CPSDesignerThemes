@@ -89,7 +89,7 @@ class BaseEngine(object):
         'Products.CPSDesignerThemes.engine.BaseEngine')
 
     def __init__(self, html_file=None, theme_base_uri='', page_uri='',
-                 cps_base_url=None, encoding=None, container=None,
+                 cps_base_url=None, encoding=None, container=None, lang='',
                  theme_name='', page_name=''):
         """Does all preprocessing that's independent from context & request.
 
@@ -115,6 +115,8 @@ class BaseEngine(object):
         self.uri_absolute_path_rewrite = options.get(
             'uri-absolute-path-rewrite', True)
         self.rewriteUris()
+        if lang:
+            self.setLanguageAttrs(lang)
 
     def renderCompat(self, metal_slots=None, pt_output='',
                      context=None, request=None):

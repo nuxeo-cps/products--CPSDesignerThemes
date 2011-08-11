@@ -48,11 +48,17 @@ class FakeUrlTool(Implicit):
         content_phy = content.getPhysicalPath()
         return content_phy[len(portal_phy):]
 
+class FakeTranslationService(Implicit):
+
+    def getSelectedLanguage(self):
+        return 'de'
+
 class BaseNegociatorTest(ZopeTestCase.ZopeTestCase):
 
     def afterSetUp(self):
         self.app.REQUEST.set('_cps_void_response', False)
         self.folder.portal_url = FakeUrlTool().__of__(self.folder)
+        self.folder._setOb('translation_service', FakeTranslationService())
         self.folder.default_charset = 'latin-1'
         self.folder._setObject('container', FSThemeContainer('container'))
 

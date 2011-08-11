@@ -380,6 +380,10 @@ class ElementTreeEngine(BaseEngine):
             body.attrib.update(attrib)
             self.appendFragment(body, body_content)
 
+    def setLanguageAttrs(self, lang):
+        attrib = self.root.attrib
+        attrib['lang'] = attrib['{%s}%s' % (NS_XML, 'lang')] = lang
+
     @classmethod
     def _appendTextBefore(self, offset, target, text):
         """Appends text to element before element at offset in target.

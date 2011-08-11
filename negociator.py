@@ -86,6 +86,8 @@ class EngineAdapter(object):
         self.engine = None
         self.encoding = get_final_encoding(context)
         self.cps_base_url = getToolByName(context, 'portal_url').getBaseUrl()
+        trans = getToolByName(context, 'translation_service')
+        self.lang = trans.getSelectedLanguage()
 
     def getThemeAndPageName(self, editing=False):
         """Return the theme and page that should be rendered.
@@ -110,7 +112,7 @@ class EngineAdapter(object):
         logger.debug("Requested theme: %r page: %r", theme, page)
         engine = self.engine = self.lookupContainer().getPageEngine(
             theme, page, cps_base_url=self.cps_base_url, fallback=True,
-            encoding=self.encoding)
+            encoding=self.encoding, lang=self.lang)
         return engine
 
     def renderCompat(self, **kw):

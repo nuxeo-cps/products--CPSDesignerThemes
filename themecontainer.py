@@ -336,7 +336,7 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
         return page
 
     def getPageEngine(self, theme, page, cps_base_url=None, fallback=False,
-                      encoding=None):
+                      encoding=None, lang=''):
         if page is None:
             page = self.default_page
         if theme is None:
@@ -368,6 +368,7 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
                           encoding=encoding,
                           theme_name=t,
                           page_name=p,
+                          lang=lang
                           )
 
     def invalidate(self, theme, page=None):
