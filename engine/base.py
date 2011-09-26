@@ -21,7 +21,7 @@ import logging
 import re
 
 from copy import deepcopy
-from StringIO import StringIO # use TAL's faster StringIO ?
+from cStringIO import StringIO
 
 from zope.interface import implements
 

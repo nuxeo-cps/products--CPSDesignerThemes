@@ -18,7 +18,7 @@
 # $Id$
 
 import logging
-from StringIO import StringIO
+from cStringIO import StringIO
 from Products.CMFCore.utils import getToolByName
 from Products.CPSDesignerThemes.constants import NS_XHTML, NS_URI
 from Products.CPSDesignerThemes.engine import get_engine_class

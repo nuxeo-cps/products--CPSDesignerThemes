@@ -23,7 +23,7 @@ logger = logging.getLogger(
 
 import re
 from copy import deepcopy
-from StringIO import StringIO # use TAL's faster StringIO ?
+from cStringIO import StringIO
 from urlparse import urlparse
 
 try:
