@@ -18,7 +18,7 @@
 # $Id$
 
 import logging
-from cStringIO import StringIO
+from StringIO import StringIO
 from Products.CMFCore.utils import getToolByName
 from Products.CPSDesignerThemes.constants import NS_XHTML, NS_URI
 from Products.CPSDesignerThemes.engine import get_engine_class
@@ -37,6 +37,7 @@ def cps_url_scheme(uri, cps_base_url='', **kw):
 class ExportEngine(EngineClass):
 
     def __init__(self, html_file, cps_base_url=None):
+        html_file.seek(0)
         self.readTheme(html_file)
 
         self.cps_base_url = cps_base_url
