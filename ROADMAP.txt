@@ -113,8 +113,9 @@ Open ideas /questions
        index_fr.html is the default page for french version, or in a
        dynamical way (reducing duplication) with good old
        i18n:translate attributes
-     - do we need a custom validator for the theme itself ? Is that even
+     - Do we need a custom validator for the theme itself ? Is that even
        possible for additional namespace to declare new attributes on XHTML ?
+       It should be possible to do that with XHTML 1.1.
 
 .. Local Variables:
 .. mode: rst
