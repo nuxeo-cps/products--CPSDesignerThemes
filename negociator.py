@@ -31,10 +31,13 @@ from Globals import InitializeClass
 from Acquisition import aq_base, aq_parent, aq_inner
 from AccessControl import ModuleSecurityInfo
 from AccessControl import ClassSecurityInfo
+from zExceptions import BadRequest
+
 from Products.CMFCore.utils import getToolByName
 from Products.CPSUtil.text import get_final_encoding
 
 from themecontainer import FSThemeContainer
+from exceptions import AttackError
 
 from OFS.interfaces import IObjectManager
 from zope.publisher.interfaces.http import IHTTPRequest
@@ -110,9 +113,12 @@ class EngineAdapter(object):
         theme, page = self.getThemeAndPageName(editing=editing)
 
         logger.debug("Requested theme: %r page: %r", theme, page)
-        engine = self.engine = self.lookupContainer().getPageEngine(
-            theme, page, cps_base_url=self.cps_base_url, fallback=True,
-            encoding=self.encoding, lang=self.lang)
+        try:
+            engine = self.engine = self.lookupContainer().getPageEngine(
+                theme, page, cps_base_url=self.cps_base_url, fallback=True,
+                encoding=self.encoding, lang=self.lang)
+        except AttackError, e:
+            raise BadRequest(e)
         return engine
 
     def renderCompat(self, **kw):

@@ -40,6 +40,7 @@ from Products.CPSUtil.PropertiesPostProcessor import PropertiesPostProcessor
 from engine import get_engine_class
 from utils import rewrite_uri, normalize_uri_path
 from constants import NS_URI
+from exceptions import AttackError
 
 from interfaces import IResourceTraverser
 
@@ -335,12 +336,24 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
             return page + '.html'
         return page
 
+    def validateThemeAndPageNames(self, theme, page):
+        """Forbid attacks such as use of .. """
+
+        pardir = os.path.pardir
+        for s in (theme, page):
+            if pardir in s:
+                raise AttackError('%r is forbidden '
+                                  'in a theme or page name' % pardir)
+
     def getPageEngine(self, theme, page, cps_base_url=None, fallback=False,
                       encoding=None, lang=''):
         if page is None:
             page = self.default_page
         if theme is None:
             theme = self.default_theme
+
+        self.validateThemeAndPageNames(theme, page)
+
         alternatives = ((theme, page),
                         (theme, self.default_page),
                         (self.default_theme, self.default_page))
