@@ -1,5 +1,5 @@
-<cpsdesigner-themes-compat>
 <metal:block define-macro="master">
+<cpsdesigner-themes-compat>
   <tal:block define="utool nocall:here/portal_url;
 	   	           void python:utool.getPortalObject().handleVoidResponses(here, request)"
 	             condition="not:void">
@@ -65,7 +65,7 @@
       </cps-designer-themes>
     </tal:block>
   </tal:block>
+<cpsdesigner-themes-compat>
 </metal:block>
-<cpsdthm-compat>
 
 
