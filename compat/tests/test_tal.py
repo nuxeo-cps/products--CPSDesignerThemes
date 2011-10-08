@@ -34,24 +34,22 @@ class TestTal(unittest.TestCase):
 MACRO_DEF_ID="macro_def"
 
 MACRO_DEF="""
-<cps-designer-themes-compat>
- <metal:block define-macro="mac">
+<metal:block define-macro="mac">
+ <cpsdesigner-themes-compat>
   Before
   <cps-designer-themes slot="sl1">
     <metal:block define-slot="sl1">SL1</metal:block>
   </cps-designer-themes>
   After
- </metal:block>
-</cps-designer-themes-compat>
+ </cpsdesigner-themes-compat>
+</metal:block>
 """
 
 USE1="""
-<div>
 <metal:block use-macro="here/%s/macros/mac">
   <metal:block fill-slot="sl1"><span tal:content="string:slot contents"/>
   </metal:block>
 </metal:block>
-</div>
 """ % MACRO_DEF_ID
 
 USE2="""
@@ -91,7 +89,7 @@ class TestZpt(ZopeTestCase.ZopeTestCase):
         self.assertEquals(result, STRIP_WT.sub('',
                           '<html><body><slot name="sl1">'
                           '<span>slot contents</span> </slot>'
-                          '<pt><div> Before After </div></pt>'
+                          '<pt>Before After</pt>'
                           '</body></html>'))
 
     def test_use2(self):
