@@ -12,7 +12,7 @@
               ttool here/portal_trees;
               wtool here/portal_workflow;
               context_url python:here.getContextUrl(utool=utool);
-              base_url here/cpsskins_getBaseUrl;
+              base_url utool/getBaseUrl;
               here_url here/absolute_url;
               member mtool/getAuthenticatedMember;
               isAnon mtool/isAnonymousUser;
@@ -25,17 +25,13 @@
               cpsmcat nocall:here/translation_service;
               locale here/translation_service/getSelectedLanguage;
               in_ws here/isInWorkspace;
-              dummy python: request.set('cpsskins_cmfactions', actions);
 ">
 
-      <metal:block use-macro="here/cpsskins_global_defines/macros/defines"/>
       <head>
           <metal:block use-macro="here/header_lib_header/macros/header|here/header_lib/macros/header"/>
       </head>
 
-      <body tal:attributes="onload here/getOnLoad|string:setFocus();
-        			class cpsskins_bodyclass;
-	        		style cpsskins_bodystyle"/>
+      <body tal:attributes="onload here/getOnLoad|string:setFocus();" />
       <cps-designer-themes slot="base">
        <metal:block define-slot="base"/>
        <!--metal:block define-slot="doctype"/-->
