@@ -51,6 +51,10 @@ but symbolic links are followed, so that
 the system administrator can actually put the themes directory
 anywhere and make a link in the Zope instance.
 
+A good news is that Mercurial knows how to deal with symbolink links (on all
+systems, not just Unices) and it's thus very easy and practical to have in a
+product's theme container a symlink to the ``CPSDefault/themes/default`` theme.
+
 If you have a ZEO setup, then the themes should be deployed on
 all clients machines. The themes directory can be shared among
 instances on the same server, e.g., by using symbolic links.

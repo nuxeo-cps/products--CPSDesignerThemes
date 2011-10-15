@@ -21,7 +21,7 @@ import logging
 import re
 
 from copy import deepcopy
-from StringIO import StringIO # use TAL's faster StringIO ?
+from cStringIO import StringIO
 
 from zope.interface import implements
 
@@ -30,6 +30,7 @@ from Products.CMFCore.utils import getToolByName
 from Products.CPSUtil.crashshield import shield_apply
 from Products.CPSUtil.crashshield import CrashShieldException
 from Products.CPSUtil import resourceregistry
+from Products.CPSCore.utils import bhasattr
 from Products.CPSPortlets.CPSPortlet import PORTLET_RESOURCE_CATEGORY
 from Products.CPSDesignerThemes.interfaces import IThemeEngine
 from Products.CPSDesignerThemes.constants import NS_XHTML
@@ -107,6 +108,8 @@ class BaseEngine(object):
         # theme names can also be used in XInclude URI rewriting
         self.page_name = page_name
         self.theme_name = theme_name
+        if bhasattr(html_file, 'seek'):
+            html_file.seek(0)
         self.readTheme(html_file)
         # this is from this class point of view both input (portlets) and
         # output (rendered html) encoding

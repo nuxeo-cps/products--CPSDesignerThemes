@@ -17,12 +17,14 @@
 #
 # $Id$
 
+import os
 import unittest
 from zope.testing import doctest
 from Testing.ZopeTestCase import ZopeTestCase
 import Acquisition
 from ZPublisher.HTTPResponse import HTTPResponse
 from Products.CPSDesignerThemes.themecontainer import FSThemeContainer
+from Products.CPSDesignerThemes.exceptions import AttackError
 
 class LoggerResponse(HTTPResponse):
 
@@ -50,8 +52,18 @@ class TestFsContainer(ZopeTestCase):
         self.app.REQUEST.RESPONSE = LoggerResponse()
 
     def testSecurity(self):
+        attack = os.path.join(os.path.pardir, 'htaccess')
         self.assertRaises(ValueError, self.container.manage_changeProperties,
-                    relative_path='../htaccess')
+                    relative_path=attack)
+
+    def testSecurity2(self):
+        # see #2463
+        parent = os.path.pardir
+        attack = os.path.join(parent, parent, 'secret')
+        get_engine = self.container.getPageEngine
+        self.assertRaises(AttackError, get_engine, attack, None)
+        self.assertRaises(AttackError, get_engine, None, attack)
+        self.assertRaises(AttackError, get_engine, attack, attack)
 
     def testListAllThemes(self):
         self.assertEquals(self.container.listAllThemes(), (

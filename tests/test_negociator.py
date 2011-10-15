@@ -17,13 +17,16 @@
 #
 # $Id$
 
+import os
 import unittest
 from Testing import ZopeTestCase
 
 from Acquisition import Implicit
 from OFS.Folder import Folder
+from zExceptions import BadRequest
 
 from Products.CPSDesignerThemes.themecontainer import FSThemeContainer
+from Products.CPSDesignerThemes.exceptions import AttackError
 from Products.CPSDesignerThemes.negociator import FixedFSThemeEngine
 from Products.CPSDesignerThemes.negociator import CPSSkinsThemeNegociator
 from Products.CPSDesignerThemes.negociator import (
@@ -86,6 +89,9 @@ class TestFixedFSThemeEngine(BaseNegociatorTest):
         negociator = FixedFSThemeEngine(self.folder, request)
         self.assertEquals(negociator.renderCompat(), '')
 
+
+
+
 class TestCPSSkinsNegociator(BaseNegociatorTest):
     """Adaptation from CPSSkins tests."""
 
@@ -135,6 +141,15 @@ class TestCPSSkinsNegociator(BaseNegociatorTest):
         self.REQUEST.cookies[CPSSKINS_THEME_COOKIE_ID] = 'theme+page'
         theme = self.getRequestedThemeAndPageName()
         self.assert_(theme == ('theme', 'page'))
+
+    def test_attack_reraising(self):
+        # see #2463, here we test only the exc reraising
+        neg = CPSSkinsThemeNegociator(self.folder, self.REQUEST)
+        container = neg.lookupContainer()
+        def raiser(*a, **kw):
+            raise AttackError("We're under attack")
+        container.getPageEngine = raiser
+        self.assertRaises(BadRequest, neg.getEngine)
 
     # Deactivated tests related to the themes editor.
     # Maybe will have to do something similar later for the portlets editor.

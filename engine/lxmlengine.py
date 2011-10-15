@@ -19,7 +19,7 @@
 
 import logging
 from copy import deepcopy
-from StringIO import StringIO # use TAL's faster StringIO ?
+from cStringIO import StringIO
 
 from lxml import html, etree
 

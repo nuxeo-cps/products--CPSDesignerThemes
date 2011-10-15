@@ -1,4 +1,38 @@
 ===========================================================
+Package: CPSDesignerThemes 0.8.1-CPS-3.5
+===========================================================
+First release built by: gracinet at: 2011-10-06T00:46:39
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
+~~~~~~~~~
+- #2463: Better response to attacks on theme negociation
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
+Package: CPSDesignerThemes 0.8.0-CPS-3.5
+===========================================================
+First release built by: gracinet at: 2011-09-28T20:54:54
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+- Creation of the stable CPS-3.5 branch
+Bug fixes
+~~~~~~~~~
+-
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
 Package: CPSDesignerThemes 0.7.2
 ===========================================================
 First release built by: gracinet at: 2011-09-23T00:28:31
