@@ -25,6 +25,7 @@
               cpsmcat nocall:here/translation_service;
               locale here/translation_service/getSelectedLanguage;
               in_ws here/isInWorkspace;
+              dummy python: request.set('cpsskins_cmfactions', actions);
 ">
 
       <head>
