@@ -35,7 +35,7 @@ from interfaces import IThemeContainer
 from Products.CMFCore.utils import SimpleItemWithProperties
 from Products.CMFCore.utils import getToolByName
 from Products.CMFCore.FSImage import FSImage
-from Products.CPSUtil.PropertiesPostProcessor import PropertiesPostProcessor
+from Products.CPSUtil.property import PropertiesPostProcessor
 
 from engine import get_engine_class
 from utils import rewrite_uri, normalize_uri_path
