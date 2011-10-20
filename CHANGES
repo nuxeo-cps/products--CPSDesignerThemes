@@ -6,7 +6,7 @@ New features
 -
 Bug fixes
 ~~~~~~~~~
--
+- #2465: Uninterpreted zpts in error logs and too much of catching
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 

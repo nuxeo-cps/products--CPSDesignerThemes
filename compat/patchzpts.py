@@ -35,6 +35,8 @@ from Products.CPSDesignerThemes.negociator import adapt
 
 SLOTS_REGEXP=re.compile(r'<cps-designer-themes slot="(.*?)">(.*?)'
                         '</cps-designer-themes>', re.DOTALL)
+STARTER_REGEXP = re.compile(r'\s*<cpsdesigner-themes-compat>')
+ENDER = '</cpsdesigner-themes-compat>'
 
 orig_pt_render = PageTemplate.pt_render
 
@@ -45,6 +47,11 @@ def slots_record(matchobj, slots):
 
 def pt_render(self, *args, **kwargs):
     pt_output = orig_pt_render(self, *args, **kwargs)
+    match = STARTER_REGEXP.match(pt_output)
+    if match is None:
+        return pt_output
+    pt_output = pt_output[match.end():pt_output.rfind(ENDER)]
+
     slots = {}
     def record(matchobj):
         return slots_record(matchobj, slots)
