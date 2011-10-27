@@ -216,7 +216,7 @@ class BaseEngine(object):
         return self.serialize()
 
     def mergeSlot(self, slot_elt, portlets, context=None, request=None,
-                  additional_css=True):
+                  additional_css=True, main_content=''):
         # in themes exported from CPSSkins, the main content
         # is supposed to be in a special portlet
         portlets = (portlet.portal_type == 'Main Content Portlet' and \
@@ -249,7 +249,8 @@ class BaseEngine(object):
         # portlet slots
         for slot_name, slot_elt in self.extractSlotElements():
             portlets = ptool.getPortlets(context, slot_name)
-            self.renderSlot(slot, portlets, context=context, request=request)
+            self.mergeSlot(slot_elt, portlets, main_content=main_content,
+                           context=context, request=request)
 
         # isolated portlets
         for ptl_id, elt, parent in self.extractIsolatedPortletElements():
