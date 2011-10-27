@@ -2,248 +2,286 @@
 Merging logic for the portlets
 ==============================
 
-PREPARATIONS
->>> import os
->>> from lxml import usedoctest
->>> from Products.CPSDesignerThemes.tests.test_engine import get_engine
->>> from Products.CPSDesignerThemes.interfaces import IThemeEngine
+PREPARATIONS::
+
+ >>> import os
+ >>> from lxml import usedoctest
+ >>> from Products.CPSDesignerThemes.tests.test_engine import get_engine
+ >>> from Products.CPSDesignerThemes.interfaces import IThemeEngine
 
 In the context of this test, we should have a predefined engine class
-(PageEngine). Let's demonstrate that:
->>> IThemeEngine.implementedBy(PageEngine)
-True
+(PageEngine). Let's demonstrate that::
 
-We'll keep the output of some basic portlets around to feed the
-examples. The first element of each pair is the portlet title, the
-second is the portlet output itself.
->>> PORTLET1 = ('Portlet One', '<ul id="portlet1"><li>foo</li></ul>')
->>> PORTLET2 = ('Portlet Two', '<div id="portlet2">Hello, eggs</div>')
->>> PORTLET3 = ('Portlet Three', '<div id="portlet3">Hello, spam</div>')
+ >>> IThemeEngine.implementedBy(PageEngine)
+ True
+
+For the sake of these examples, we'll need a very minimal portlet
+implementation::
+
+ >>> class FakePortlet:
+ ...
+ ...     portal_type = 'Fake Portlet'
+ ...
+ ...     def __init__(self, pid, rendered):
+ ...         self.id = pid
+ ...         self.rendered = rendered
+ ...
+ ...     def getId(self):
+ ...         return self.id
+ ...
+ ...     def title_or_id(self):
+ ...         return self.id
+ ...
+ ...     def render_cache(self, *a, **kw):
+ ...         return self.rendered
+
+We'll keep a few basic portlets around to feed the examples::
+
+ >>> PORTLET1 = FakePortlet('Portlet One', '<ul id="portlet1"><li>foo</li></ul>')
+ >>> PORTLET2 = FakePortlet('Portlet Two', '<div id="portlet2">Hello, eggs</div>')
+ >>> PORTLET3 = FakePortlet('Portlet Three', '<div id="portlet3">Hello, spam</div>')
 
 
 Let's demonstrate how the engine looks for the 'cps:slot' attributes
 and merges the portlets in there. In this case, the frame element is
-the <p>:
->>> engine = get_engine(PageEngine, 'theme1', page='simple_slot.html')
->>> slot_name, slot = engine.extractSlotElements().next()
->>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET1], additional_css=False)
->>> print engine.dumpElement(slot)
-<div xmlns="http://www.w3.org/1999/xhtml">
- <p>
-  <span>Portlet One</span>
-  <div>
-   <ul id="portlet1">
-     <li>foo</li>
-   </ul>
-  </div>
- </p>
-</div>
+the <p>::
 
-Now with two portlets:
->>> engine = get_engine(PageEngine, 'theme1', page='simple_slot.html')
->>> slot_name, slot = engine.extractSlotElements().next()
->>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET1, PORTLET2],
-...                      additional_css=False)
->>> print engine.dumpElement(slot)
-<div xmlns="http://www.w3.org/1999/xhtml">
- <p>
-  <span>Portlet One</span>
-  <div>
-   <ul id="portlet1">
-     <li>foo</li>
-   </ul>
-  </div>
- </p>
- <p>
-  <span>Portlet Two</span>
-  <div>
-   <div id="portlet2">Hello, eggs</div>
-  </div>
- </p>
-</div>
-
-With three of them, one can truly demonstrate the additional CSS
-classes that get applied if not disabled by the ``additional_css``
-keyword argument::
->>> engine = get_engine(PageEngine, 'theme1', page='simple_slot.html')
->>> slot_name, slot = engine.extractSlotElements().next()
->>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET1, PORTLET2, PORTLET3])
->>> print engine.dumpElement(slot)
-<div xmlns="http://www.w3.org/1999/xhtml">
- <p class="first_in_slot">
-  <span>Portlet One</span>
-  <div>
-   <ul id="portlet1">
-     <li>foo</li>
-   </ul>
-  </div>
- </p>
- <p>
-  <span>Portlet Two</span>
-  <div>
-   <div id="portlet2">Hello, eggs</div>
-  </div>
- </p>
- <p class="last_in_slot">
-  <span>Portlet Three</span>
-  <div>
-   <div id="portlet3">Hello, spam</div>
-  </div>
- </p>
-</div>
-
-Of course additional CSS classes are correctly applied if there's only
-one portlet::
->>> engine = get_engine(PageEngine, 'theme1', page='simple_slot.html')
->>> slot_name, slot = engine.extractSlotElements().next()
->>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET1])
->>> print engine.dumpElement(slot)
-<div xmlns="http://www.w3.org/1999/xhtml">
- <p class="first_in_slot last_in_slot">
-  <span>Portlet One</span>
-  <div>
-   <ul id="portlet1">
-     <li>foo</li>
-   </ul>
-  </div>
- </p>
-</div>
-
-
-Now with two slots, and one portlet per slot:
->>> engine = get_engine(PageEngine, 'theme1', page='two_slots.html')
->>> slots = engine.extractSlotElements()
->>> slot_name, slot = engine.extractSlotElements().next()
->>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET1], additional_css=False)
->>> slot_name, slot = engine.extractSlotElements().next()
->>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET2], additional_css=False)
-
-To demonstrate, we'll have to dump the whole page, this time
->>> print engine.serialize()
- <body xmlns="http://www.w3.org/1999/xhtml">
-   <div>
-     <p>
-       <span>Portlet One</span>
-       <div>
-         <ul id="portlet1">
-	   <li>foo</li>
-	 </ul>
-       </div>
-     </p>
-   </div>
-   <div>
-     <p class="slot2">
-       <span>Portlet Two</span>
-       <div>
-          <div id="portlet2">Hello, eggs</div>
-       </div>
-     </p>
-   </div>
- </body>
-
-
-If the frame has a cps:remove attribute, the frame enclosing tag will
-be omitted.
->>> engine = get_engine(PageEngine, 'theme1', page='slot_remove_simple.html')
->>> slot_name, slot = engine.extractSlotElements().next()
->>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET1])
->>> print engine.dumpElement(slot)
-<div xmlns="http://www.w3.org/1999/xhtml">
- <span>Portlet One</span>
- <div>
-  <ul id="portlet1">
-    <li>foo</li>
-  </ul>
- </div>
-</div>
-
-Now let's see how the frame repetition works in conjuction with the
-cps:remove attribute:
->>> engine = get_engine(PageEngine, 'theme1', page='slot_remove_simple.html')
->>> slot_name, slot = engine.extractSlotElements().next()
->>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET1, PORTLET2])
->>> print engine.dumpElement(slot)
-<div xmlns="http://www.w3.org/1999/xhtml">
- <span>Portlet One</span>
- <div>
-  <ul id="portlet1">
-    <li>foo</li>
-  </ul>
- </div>
- <span>Portlet Two</span>
- <div>
-  <div id="portlet2">Hello, eggs</div>
- </div>
-</div>
-
-Similarly, if either the element bearing the cps:portlet="title" or
-the cps:porlet="body" also has a "cps:remove", it is omitted. This is
-mostly useful to ease the work of automatic themes generator, like
-CPSSkins'exporter. Let's try the title first:
->>> engine = get_engine(PageEngine, 'theme1', page='portlet_remove_title.html')
->>> slot_name, slot = engine.extractSlotElements().next()
->>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET1,], additional_css=False)
->>> print engine.dumpElement(slot)
-<div xmlns="http://www.w3.org/1999/xhtml">
-<p>
- Portlet One
- <div>
-  <ul id="portlet1">
-    <li>foo</li>
-  </ul>
- </div>
-</p>
-</div>
-
-Now cps:remove on the body:
->>> engine = get_engine(PageEngine, 'theme1', page='portlet_remove_body.html')
->>> extracted_slots = engine.extractSlotElements()
->>> slot_name, slot = engine.extractSlotElements().next()
->>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET1,], additional_css=False)
->>> print engine.dumpElement(slot)
-<div xmlns="http://www.w3.org/1999/xhtml">
- <p>
-  <span>Portlet One</span>
-  <ul id="portlet1">
-    <li>foo</li>
-  </ul>
- </p>
-</div>
-
-The engine must accept a missing cps:portlet='title' in slot:
->>> engine = get_engine(PageEngine, 'theme1', page='no_portlet_title.html')
->>> slot_name, slot = engine.extractSlotElements().next()
->>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET1], additional_css=False)
->>> print engine.dumpElement(slot)
-<div xmlns="http://www.w3.org/1999/xhtml">
- <p>
+ >>> engine = get_engine(PageEngine, 'theme1', page='simple_slot.html')
+ >>> slot_name, slot = engine.extractSlotElements().next()
+ >>> engine.mergeSlot(slot, [PORTLET1], additional_css=False)
+ >>> print engine.dumpElement(slot)
+ <div xmlns="http://www.w3.org/1999/xhtml">
+  <p>
+   <span>Portlet One</span>
    <div>
     <ul id="portlet1">
       <li>foo</li>
     </ul>
    </div>
- </p>
-</div>
+  </p>
+ </div>
 
-Similarly, the engine must accept a missing cps:portlet='body' in slot:
->>> engine = get_engine(PageEngine, 'theme1', page='no_portlet_body.html')
->>> slot_name, slot = engine.extractSlotElements().next()
->>> frame_parent, frame = engine.extractSlotFrame(slot)
->>> engine.mergePortlets(frame_parent, frame, [PORTLET1], additional_css=False)
->>> print engine.dumpElement(slot)
-<div xmlns="http://www.w3.org/1999/xhtml">
- <p>
+Now with two portlets::
+
+ >>> engine = get_engine(PageEngine, 'theme1', page='simple_slot.html')
+ >>> slot_name, slot = engine.extractSlotElements().next()
+ >>> engine.mergeSlot(slot, [PORTLET1, PORTLET2], additional_css=False)
+ >>> print engine.dumpElement(slot)
+ <div xmlns="http://www.w3.org/1999/xhtml">
+  <p>
+   <span>Portlet One</span>
+   <div>
+    <ul id="portlet1">
+      <li>foo</li>
+    </ul>
+   </div>
+  </p>
+  <p>
+   <span>Portlet Two</span>
+   <div>
+    <div id="portlet2">Hello, eggs</div>
+   </div>
+  </p>
+ </div>
+
+With three of them, one can truly demonstrate the additional CSS
+classes that get applied if not disabled by the ``additional_css``
+keyword argument::
+
+ >>> engine = get_engine(PageEngine, 'theme1', page='simple_slot.html')
+ >>> slot_name, slot = engine.extractSlotElements().next()
+ >>> engine.mergeSlot(slot, [PORTLET1, PORTLET2, PORTLET3])
+ >>> print engine.dumpElement(slot)
+ <div xmlns="http://www.w3.org/1999/xhtml">
+  <p class="first_in_slot">
+   <span>Portlet One</span>
+   <div>
+    <ul id="portlet1">
+      <li>foo</li>
+    </ul>
+   </div>
+  </p>
+  <p>
+   <span>Portlet Two</span>
+   <div>
+    <div id="portlet2">Hello, eggs</div>
+   </div>
+  </p>
+  <p class="last_in_slot">
+   <span>Portlet Three</span>
+   <div>
+    <div id="portlet3">Hello, spam</div>
+   </div>
+  </p>
+ </div>
+
+Of course additional CSS classes are correctly applied if there's only
+one portlet::
+
+ >>> engine = get_engine(PageEngine, 'theme1', page='simple_slot.html')
+ >>> slot_name, slot = engine.extractSlotElements().next()
+ >>> engine.mergeSlot(slot, [PORTLET1])
+ >>> print engine.dumpElement(slot)
+ <div xmlns="http://www.w3.org/1999/xhtml">
+  <p class="first_in_slot last_in_slot">
+   <span>Portlet One</span>
+   <div>
+    <ul id="portlet1">
+      <li>foo</li>
+    </ul>
+   </div>
+  </p>
+ </div>
+
+If there's no portlet to merge, or if all their renderings are empty,
+the slot is completely skipped. To demonstrate this, we have to
+produce minimal portlets objects::
+
+ >>> engine = get_engine(PageEngine, 'theme1', page='simple_slot.html')
+ >>> slot_name, slot = engine.extractSlotElements().next()
+ >>> engine.mergeSlot(slot, [])
+ >>> body = engine.getHtmlElementsByName('body')[0]
+ >>> print engine.dumpElement(body)
+ <body xmlns="http://www.w3.org/1999/xhtml"></body>
+
+Now with portlets with empty or pure whitespace renderings::
+
+ >>> engine = get_engine(PageEngine, 'theme1', page='simple_slot.html')
+ >>> slot_name, slot = engine.extractSlotElements().next()
+ >>> engine.mergeSlot(slot, [FakePortlet('title', ' '),
+ ...                         FakePortlet('title2', '')])
+ >>> body = engine.getHtmlElementsByName('body')[0]
+ >>> print engine.dumpElement(body)
+ <body xmlns="http://www.w3.org/1999/xhtml"></body>
+
+Now with two slots, and one portlet per slot::
+
+ >>> engine = get_engine(PageEngine, 'theme1', page='two_slots.html')
+ >>> slots = engine.extractSlotElements()
+ >>> slot_name, slot = engine.extractSlotElements().next()
+ >>> engine.mergeSlot(slot, [PORTLET1], additional_css=False)
+ >>> slot_name, slot = engine.extractSlotElements().next()
+ >>> engine.mergeSlot(slot, [PORTLET2], additional_css=False)
+
+ To demonstrate, we'll have to dump the whole page, this time
+ >>> print engine.serialize()
+  <body xmlns="http://www.w3.org/1999/xhtml">
+    <div>
+      <p>
+        <span>Portlet One</span>
+        <div>
+          <ul id="portlet1">
+ 	   <li>foo</li>
+ 	 </ul>
+       </div>
+      </p>
+    </div>
+    <div>
+      <p class="slot2">
+        <span>Portlet Two</span>
+        <div>
+           <div id="portlet2">Hello, eggs</div>
+        </div>
+      </p>
+    </div>
+  </body>
+
+
+If the frame has a cps:remove attribute, the frame enclosing tag will
+be omitted::
+
+ >>> engine = get_engine(PageEngine, 'theme1', page='slot_remove_simple.html')
+ >>> slot_name, slot = engine.extractSlotElements().next()
+ >>> engine.mergeSlot(slot, [PORTLET1])
+ >>> print engine.dumpElement(slot)
+ <div xmlns="http://www.w3.org/1999/xhtml">
   <span>Portlet One</span>
+  <div>
+   <ul id="portlet1">
+     <li>foo</li>
+   </ul>
+  </div>
+ </div>
+
+Now let's see how the frame repetition works in conjuction with the
+cps:remove attribute::
+
+ >>> engine = get_engine(PageEngine, 'theme1', page='slot_remove_simple.html')
+ >>> slot_name, slot = engine.extractSlotElements().next()
+ >>> engine.mergeSlot(slot, [PORTLET1, PORTLET2])
+ >>> print engine.dumpElement(slot)
+ <div xmlns="http://www.w3.org/1999/xhtml">
+  <span>Portlet One</span>
+  <div>
+   <ul id="portlet1">
+     <li>foo</li>
+   </ul>
+  </div>
+  <span>Portlet Two</span>
+  <div>
+   <div id="portlet2">Hello, eggs</div>
+  </div>
+ </div>
+
+Similarly, if either the element bearing the cps:portlet="title" or
+the cps:porlet="body" also has a "cps:remove", it is omitted. This is
+mostly useful to ease the work of automatic themes generator, like
+CPSSkins'exporter. Let's try the title first::
+
+ >>> engine = get_engine(PageEngine, 'theme1', page='portlet_remove_title.html')
+ >>> slot_name, slot = engine.extractSlotElements().next()
+ >>> engine.mergeSlot(slot, [PORTLET1,], additional_css=False)
+ >>> print engine.dumpElement(slot)
+ <div xmlns="http://www.w3.org/1999/xhtml">
+ <p>
+  Portlet One
+  <div>
+   <ul id="portlet1">
+     <li>foo</li>
+   </ul>
+  </div>
  </p>
-</div>
+ </div>
+
+Now cps:remove on the portlet body::
+
+ >>> engine = get_engine(PageEngine, 'theme1', page='portlet_remove_body.html')
+ >>> slot_name, slot = engine.extractSlotElements().next()
+ >>> engine.mergeSlot(slot, [PORTLET1,], additional_css=False)
+ >>> print engine.dumpElement(slot)
+ <div xmlns="http://www.w3.org/1999/xhtml">
+  <p>
+   <span>Portlet One</span>
+   <ul id="portlet1">
+     <li>foo</li>
+   </ul>
+  </p>
+ </div>
+
+The engine must accept a missing cps:portlet='title' in slot::
+
+ >>> engine = get_engine(PageEngine, 'theme1', page='no_portlet_title.html')
+ >>> slot_name, slot = engine.extractSlotElements().next()
+ >>> engine.mergeSlot(slot, [PORTLET1], additional_css=False)
+ >>> print engine.dumpElement(slot)
+ <div xmlns="http://www.w3.org/1999/xhtml">
+  <p>
+    <div>
+     <ul id="portlet1">
+       <li>foo</li>
+     </ul>
+    </div>
+  </p>
+ </div>
+
+Similarly, the engine must accept a missing cps:portlet='body' in slot::
+
+ >>> engine = get_engine(PageEngine, 'theme1', page='no_portlet_body.html')
+ >>> slot_name, slot = engine.extractSlotElements().next()
+ >>> engine.mergeSlot(slot, [PORTLET1], additional_css=False)
+ >>> print engine.dumpElement(slot)
+ <div xmlns="http://www.w3.org/1999/xhtml">
+  <p>
+   <span>Portlet One</span>
+  </p>
+ </div>

@@ -178,7 +178,7 @@ class LxmlEngine(ElementTreeEngine):
 
         frames = tuple(self.findByAttribute(slot, PORTLET_ATTR, value='frame'))
         if not frames:
-            raise ValueError("No frame in the slot")
+            return None, None
 
         frame = frames[0]
         frame_parent = frame.getparent()
