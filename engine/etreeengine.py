@@ -165,6 +165,9 @@ class ElementTreeEngine(BaseEngine):
                 parent.remove(elt)
                 break
 
+    def getHtmlElementsByName(self, name):
+        return self.root.findall('.//{%s}%s' % (NS_XHTML, name))
+
     @classmethod
     def findByAttribute(self, elt, attr_name, value=None, with_parent=False):
         """Shameless implementation of search by attribute.

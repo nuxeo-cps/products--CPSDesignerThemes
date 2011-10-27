@@ -215,6 +215,26 @@ class BaseEngine(object):
 
         return self.serialize()
 
+    def mergeSlot(self, slot_elt, portlets, context=None, request=None):
+        # in themes exported from CPSSkins, the main content
+        # is supposed to be in a special portlet
+        portlets = (portlet.portal_type == 'Main Content Portlet' and \
+                    MainContentPortlet(portlet, main_content) or portlet
+                    for portlet in portlets)
+
+        frame_parent, frame = self.extractSlotFrame(slot_elt)
+        rendered = self.renderPortlets(portlets,
+                                       context=context, request=request,
+                                       i18n=self.isPortletTitleI18n(slot_elt
+                                                                    ))
+        # dropping portlets with empty rendering
+        rendered = [(title, body) for title, body in rendered if body]
+        if not rendered:
+            self.removeElement(slot_elt)
+        else:
+            self.mergePortlets(frame_parent, frame, rendered)
+
+
     def render(self, main_content='', head_content='',
                body_element=None, head_element=None,
                context=None, request=None):
@@ -227,22 +247,7 @@ class BaseEngine(object):
         # portlet slots
         for slot_name, slot_elt in self.extractSlotElements():
             portlets = ptool.getPortlets(context, slot_name)
-            # in themes exported from CPSSkins, the main content
-            # is supposed to be in a special portlet
-            portlets = (portlet.portal_type == 'Main Content Portlet' and \
-                        MainContentPortlet(portlet, main_content) or portlet
-                        for portlet in portlets)
-
-            frame_parent, frame = self.extractSlotFrame(slot_elt)
-            rendered = self.renderPortlets(portlets,
-                                           context=context, request=request,
-                                           i18n=self.isPortletTitleI18n(slot_elt
-                                                                        ))
-            # dropping portlets with empty rendering
-            rendered = [(title, body) for title, body in rendered if body]
-            if not rendered:
-                self.removeElement(slot_elt)
-            self.mergePortlets(frame_parent, frame, rendered)
+            self.renderSlot(slot, portlets, context=context, request=request)
 
         # isolated portlets
         for ptl_id, elt, parent in self.extractIsolatedPortletElements():
@@ -417,6 +422,10 @@ class BaseEngine(object):
         In cases where a "parent" is known, there is usually
         a natural and fast way of doing this.
         """
+        raise NotImplementedError
+
+    def getHtmlElementsByName(self, name):
+        """Uniform access to elements from the XHTML namespace by tag name."""
         raise NotImplementedError
 
     @classmethod

@@ -113,6 +113,36 @@ one portlet::
  </p>
 </div>
 
+If there's no portlet to merge, or if all their renderings are empty,
+the slot is completely skipped. To demonstrate this, we have to
+produce minimal portlets objects (TODO rewrite more doctests with this
+mock obkect and mergeSlot() ?)
+>>> class FakePortlet:
+...     portal_type = 'Fake Portlet'
+...     def __init__(self, pid, rendered):
+...         self.id = pid
+...         self.rendered = rendered
+...     def getId(self):
+...         return self.id
+...     def title_or_id(self):
+...         return self.id
+...     def render_cache(self, *a, **kw):
+...         return self.rendered
+>>> engine = get_engine(PageEngine, 'theme1', page='simple_slot.html')
+>>> slot_name, slot = engine.extractSlotElements().next()
+>>> engine.mergeSlot(slot, [])
+>>> body = engine.getHtmlElementsByName('body')[0]
+>>> print engine.dumpElement(body)
+<body xmlns="http://www.w3.org/1999/xhtml"></body>
+
+Now with portlets with empty or pure whitespace renderings::
+>>> engine = get_engine(PageEngine, 'theme1', page='simple_slot.html')
+>>> slot_name, slot = engine.extractSlotElements().next()
+>>> engine.mergeSlot(slot, [FakePortlet('title', ' '),
+...                         FakePortlet('title2', '')])
+>>> body = engine.getHtmlElementsByName('body')[0]
+>>> print engine.dumpElement(body)
+<body xmlns="http://www.w3.org/1999/xhtml"></body>
 
 Now with two slots, and one portlet per slot:
 >>> engine = get_engine(PageEngine, 'theme1', page='two_slots.html')
