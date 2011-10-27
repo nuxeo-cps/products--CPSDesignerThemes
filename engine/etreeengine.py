@@ -686,6 +686,30 @@ class ElementTreeEngine(BaseEngine):
         if one_done and additional_css:
             self.addCssClass(ptl_elt, 'last_in_slot')
 
+    def mergePortletsNoFrame(self, slot_elt, portlets_rendered, **kw):
+        """Merge the portlets in the slot, without frames
+
+        portlets_rendered is a pair (title, body).
+        Implementation detail: insertion of a frame element in the tree, with
+        the slot contents copied in there. Since the lack of frame is expected
+        to be actually the most common case, it may be better for performance
+        to do it the other way round and have mergePortlets (with frames) call
+        this method.
+        """
+
+        # Do as if there had been a frame (with cps:remove=true)
+        frame = self.makeSimpleElement('temp')
+        frame.attrib[PORTLET_ATTR] = 'frame'
+        frame.attrib[REMOVE_ATTR] = 'true'
+        frame.tail = frame.text = ''
+
+        for child in slot_elt.getchildren():
+            slot_elt.remove(child)
+            frame.append(child)
+        self.mergePortlets(slot_elt, frame, portlets_rendered, **kw)
+
+
+
     @classmethod
     def addCssClass(cls, elt, css_class):
         if 'class' in elt.attrib:

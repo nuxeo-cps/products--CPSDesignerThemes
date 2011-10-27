@@ -232,9 +232,14 @@ class BaseEngine(object):
         rendered = [(title, body) for title, body in rendered if body]
         if not rendered:
             self.removeElement(slot_elt)
-        else:
+            return
+
+        if frame is not None:
             self.mergePortlets(frame_parent, frame, rendered,
                                additional_css=additional_css)
+        else:
+            self.mergePortletsNoFrame(slot_elt, rendered,
+                                      additional_css=additional_css)
 
 
     def render(self, main_content='', head_content='',
@@ -408,6 +413,12 @@ class BaseEngine(object):
 
         portlets_rendered is a pair (title, body)
         frame's parent is passed because it's needed for frame repetition"""
+        raise NotImplementedError
+
+    def mergePortletsNoFrame(self, slot_elt, portlets_rendered, **kw):
+        """Merge the portlets in the slot, without frames
+
+        portlets_rendered is a pair (title, body)."""
         raise NotImplementedError
 
     @classmethod
