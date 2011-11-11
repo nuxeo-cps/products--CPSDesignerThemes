@@ -63,14 +63,14 @@ def find_by_attribute(elt, attr_name, value=None):
 
     raise NotImplementedError
 
-def render_shield_portlet(portlet, context_obj=None):
+def render_shield_portlet(portlet, context_obj=None, request=None):
     """Render the portlet within the crash shield.
     Take javascript needs into account.
     """
     try:
         __traceback_info__="portlet id: " + portlet.getId()
         rendered = shield_apply(portlet, 'render_cache',
-                                context_obj=context_obj)
+                                context_obj=context_obj, REQUEST=request)
     except CrashShieldException:
         rendered = '<blink>!!!</blink>'
     return rendered.strip()
@@ -163,7 +163,7 @@ class BaseEngine(object):
                                          head_content=head_content,
                                          head_element=head_element,
                                          body_element=body_element,
-                                         context=context, request=None)
+                                         context=context, request=request)
 
         main_content = ''
         for slot in ('header', 'main', 'sub'):
@@ -173,7 +173,7 @@ class BaseEngine(object):
                            head_element=head_element,
                            head_content=head_content,
                            body_element=body_element,
-                           context=context, request=None)
+                           context=context, request=request)
 
     @classmethod
     def parseHeadBody(self, pt_output, encoding):
@@ -201,7 +201,8 @@ class BaseEngine(object):
                return mcat(portlet.title_or_id())
 
         return ( (titleI18n(portlet),
-                  render_shield_portlet(portlet, context_obj=context))
+                  render_shield_portlet(portlet, context_obj=context,
+                                        request=request))
                  for portlet in portlets if portlet is not None)
 
     def renderSimpleBody(self, body_content='', head_content='',
@@ -226,8 +227,8 @@ class BaseEngine(object):
         frame_parent, frame = self.extractSlotFrame(slot_elt)
         rendered = self.renderPortlets(portlets,
                                        context=context, request=request,
-                                       i18n=self.isPortletTitleI18n(slot_elt
-                                                                    ))
+                                       i18n=self.isPortletTitleI18n(slot_elt))
+
         # dropping portlets with empty rendering
         rendered = [(title, body) for title, body in rendered if body]
         if not rendered:
