@@ -3,10 +3,10 @@ Requires
 -
 New features
 ~~~~~~~~~~~~
-- #2366: now frame elements are optional
+-
 Bug fixes
 ~~~~~~~~~
-- #2465: Uninterpreted zpts in error logs and too much of catching
+-
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 
