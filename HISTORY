@@ -1,4 +1,21 @@
 ===========================================================
+Package: CPSDesignerThemes 0.10.1-CPS-3.5
+===========================================================
+First release built by: gracinet at: 2011-12-19T15:40:23
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
+~~~~~~~~~
+- #2500: replaced engine meta tag by the (correct) generator
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
 Package: CPSDesignerThemes 0.10.0-CPS-3.5
 ===========================================================
 First release built by: gracinet at: 2011-11-23T19:44:30
