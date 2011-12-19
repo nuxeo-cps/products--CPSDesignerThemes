@@ -467,7 +467,7 @@ class ElementTreeEngine(BaseEngine):
 
         # engine
         head.insert(0, self.parseFragment(
-            '<meta name="engine" content="CPSDesignerThemes" />'))
+            '<meta name="generator" content="CPSDesignerThemes" />'))
 
     @classmethod
     def mergeTitle(self, theme_head, head_elts=()):

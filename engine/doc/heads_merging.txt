@@ -51,7 +51,7 @@ part and cps_global parts go straight while URIs from the theme get rewritten:
 >>> print engine.serialize() # TODO JS ordering as well
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-   <meta content="CPSDesignerThemes" name="engine" />
+   <meta content="CPSDesignerThemes" name="generator" />
    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
    <title>The title from the theme</title>
    <link href="/cps_portal/portal_themes/default/icons/cps_favicon_4.png"
@@ -99,7 +99,7 @@ theme::
  >>> print engine.serialize() # TODO JS ordering as well
  <html xmlns="http://www.w3.org/1999/xhtml">
    <head>
-    <meta content="CPSDesignerThemes" name="engine" />
+    <meta content="CPSDesignerThemes" name="generator" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>Glob title</title>
     <link href="/cps_portal/portal_themes/default/icons/cps_favicon_4.png"
@@ -123,7 +123,7 @@ And a <title> element in ``head_content`` takes precedence over both::
  >>> print engine.serialize()
  <html xmlns="http://www.w3.org/1999/xhtml">
    <head>
-    <meta content="CPSDesignerThemes" name="engine" />
+    <meta content="CPSDesignerThemes" name="generator" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>Head content title</title>
     <link href="/cps_portal/portal_themes/default/icons/cps_favicon_4.png"

@@ -6,7 +6,7 @@ New features
 -
 Bug fixes
 ~~~~~~~~~
--
+- #2500: replaced engine meta tag by the (correct) generator
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 
