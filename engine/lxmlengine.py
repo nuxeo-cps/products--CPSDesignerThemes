@@ -33,6 +33,7 @@ from base import BaseEngine
 from twophase import TwoPhaseEngine
 from etreeengine import ElementTreeEngine
 from etreeengine import PORTLET_ATTR
+from etreeengine import URI_ATTR
 from etreeengine import LINK_HTML_DOCUMENTS
 from etreeengine import CSS_LINKS_RE
 from exceptions import FragmentParseError
@@ -123,7 +124,8 @@ class LxmlEngine(ElementTreeEngine):
         for tag, attr in LINK_HTML_DOCUMENTS.items():
             for elt in from_elt.iterfind('.//{%s}%s' % (NS_XHTML, tag)):
                 uri = elt.attrib.get(attr)
-                if uri is None:
+                keep = elt.attrib.pop(URI_ATTR, '').strip().lower()
+                if uri is None or keep == 'keep':
                     continue
                 try:
                     new_uri = rewriter_func(uri=uri,

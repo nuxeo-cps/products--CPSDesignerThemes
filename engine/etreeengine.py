@@ -75,6 +75,7 @@ META = '{%s}meta' % NS_XHTML
 OPTIONS = ns_prefix('options')
 
 PORTLET_ATTR = ns_prefix('portlet')
+URI_ATTR = ns_prefix('uri')
 PORTLET_TITLE_I18N_ATTR = ns_prefix('translate-titles')
 SLOT_ATTR = ns_prefix('slot')
 ISOLATED_PORTLET_ATTR = ns_prefix('isolated-portlet')
@@ -256,7 +257,8 @@ class ElementTreeEngine(BaseEngine):
         for tag, attr in LINK_HTML_DOCUMENTS.items():
             for elt in self.root.findall('.//{%s}%s' % (NS_XHTML, tag)):
                 uri = elt.attrib.get(attr)
-                if uri is None:
+                keep = elt.attrib.pop(URI_ATTR, '').strip().lower()
+                if uri is None or keep == 'keep':
                     continue
                 try:
                     # GR TODO REFACTOR move rewriter_func logic to the container
