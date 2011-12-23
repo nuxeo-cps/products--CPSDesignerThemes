@@ -1,4 +1,21 @@
 ===========================================================
+Package: CPSDesignerThemes 0.10.2-CPS-3.5
+===========================================================
+First release built by: gracinet at: 2011-12-23T19:23:53
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
+~~~~~~~~~
+- #2505: element-level control of URI rewriting with cps:uri attribute
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
 Package: CPSDesignerThemes 0.10.1-CPS-3.5
 ===========================================================
 First release built by: gracinet at: 2011-12-19T15:40:23
