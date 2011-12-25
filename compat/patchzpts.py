@@ -28,9 +28,6 @@ ends with the main template
 
 import re
 from Products.PageTemplates.PageTemplate import PageTemplate
-from Products.PageTemplates.PageTemplate import PTRuntimeError
-from Products.PageTemplates.PageTemplate import PageTemplateTracebackSupplement
-from Products.PageTemplates.Expressions import getEngine
 from Products.CPSDesignerThemes.negociator import adapt
 
 SLOTS_REGEXP=re.compile(r'<cps-designer-themes slot="(.*?)">(.*?)'
