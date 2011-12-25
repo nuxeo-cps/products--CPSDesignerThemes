@@ -25,7 +25,7 @@ import warnings
 from zope.interface import implements
 from zope.component import adapts
 from zope.component import getMultiAdapter
-from zope.app.publisher.browser import BrowserView
+from zope.publisher.browser import BrowserView
 
 from Globals import InitializeClass
 from Acquisition import aq_base, aq_parent, aq_inner
