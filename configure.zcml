@@ -33,9 +33,6 @@
 
   <!-- Five specifics -->
 
-  <!-- necessary for ZMI export -->
-  <five:traversable class=".themecontainer.FSThemeContainer"/>
-
   <five:implements class=".themecontainer.FSThemeContainer"
 		   interface=".interfaces.IThemeContainer" />
 
