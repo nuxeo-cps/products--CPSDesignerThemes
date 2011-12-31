@@ -1,0 +1,70 @@
+<metal:block define-macro="master">
+<cpsdesigner-themes-compat>
+  <tal:block define="utool nocall:here/portal_url;
+	   	           void python:utool.getPortalObject().handleVoidResponses(here, request)"
+	             condition="not:void">
+    <tal:block
+      define="showthirdcol showthirdcol|python:1;
+              emptybody emptybody|request/emptybody|nothing;
+              mtool here/portal_membership;
+              utool nocall:here/portal_url;
+              atool here/portal_actions;
+              ttool here/portal_trees;
+              wtool here/portal_workflow;
+              context_url python:here.getContextUrl(utool=utool);
+              base_url here/cpsskins_getBaseUrl;
+              here_url here/absolute_url;
+              member mtool/getAuthenticatedMember;
+              isAnon mtool/isAnonymousUser;
+              isHomeless python:isAnon or member.getProperty('homeless', 0);
+              isHomeless python:(isHomeless == '0' and [0] or [isHomeless])[0];
+              actions python:atool.listFilteredActionsFor(here);
+              wf_state python:wtool.getInfoFor(here,'review_state','');
+              uname python: isAnon and 'Guest' or member.getUserName();
+              checkPerm nocall: mtool/checkPermission;
+              cpsmcat nocall:here/translation_service;
+              locale here/translation_service/getSelectedLanguage;
+              in_ws here/isInWorkspace;
+              dummy python: request.set('cpsskins_cmfactions', actions);
+">
+
+      <metal:block use-macro="here/cpsskins_global_defines/macros/defines"/>
+      <head>
+      </head>
+
+      <body tal:attributes="onload here/getOnLoad|string:setFocus();
+        			class cpsskins_bodyclass;
+	        		style cpsskins_bodystyle"/>
+      <cps-designer-themes slot="base">
+       <metal:block define-slot="base"/>
+       <!--metal:block define-slot="doctype"/-->
+      </cps-designer-themes>
+      <cps-designer-themes slot="head_slot">
+       <metal:block define-slot="head_slot"/>
+      </cps-designer-themes>
+      <cps-designer-themes slot="style_slot">
+       <metal:block define-slot="style_slot"/>
+      </cps-designer-themes>
+      <cps-designer-themes slot="javascript_head_slot">
+       <metal:block define-slot="javascript_head_slot"/>
+      </cps-designer-themes>
+
+      <cps-designer-themes slot="body" tal:condition="emptybody">
+       <metal:block define-slot="body">
+       </metal:block>
+      </cps-designer-themes>
+      <cps-designer-themes slot="header">
+       <metal:block define-slot="header" />
+      </cps-designer-themes>
+      <cps-designer-themes slot="main">
+       <metal:block define-slot="main" />
+      </cps-designer-themes>
+      <cps-designer-themes slot="sub">
+       <metal:block define-slot="sub" tal:condition="not:emptybody"/>
+      </cps-designer-themes>
+    </tal:block>
+  </tal:block>
+<cpsdesigner-themes-compat>
+</metal:block>
+
+

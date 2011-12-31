@@ -75,6 +75,7 @@ META = '{%s}meta' % NS_XHTML
 OPTIONS = ns_prefix('options')
 
 PORTLET_ATTR = ns_prefix('portlet')
+URI_ATTR = ns_prefix('uri')
 PORTLET_TITLE_I18N_ATTR = ns_prefix('translate-titles')
 SLOT_ATTR = ns_prefix('slot')
 ISOLATED_PORTLET_ATTR = ns_prefix('isolated-portlet')
@@ -249,27 +250,30 @@ class ElementTreeEngine(BaseEngine):
                                        cps_base_url=self.cps_base_url,
                                        absolute_rewrite=abs_rewrite)
 
+    def _rewriteElementUri(self, elt, attr, rewriter_func):
+        """Rewrite the URI for an attribute of an element."""
+        uri = elt.attrib.get(attr)
+        keep = elt.attrib.pop(URI_ATTR, '').strip().lower()
+        if uri is None or keep == 'keep':
+            return
+        try:
+            new_uri = rewriter_func(uri=uri,
+                absolute_base=self.theme_base_uri,
+                referer_uri=self.page_uri,
+                cps_base_url=self.cps_base_url,
+                absolute_rewrite= self.uri_absolute_path_rewrite)
+        except KeyError:
+            raise ValueError(
+                "Missing attribute %s on <%s> element" % (attr, tag))
+        elt.attrib[attr] = new_uri
+
     def rewriteUris(self, rewriter_func=None):
         if rewriter_func is None:
             rewriter_func=rewrite_uri
         abs_rewrite = self.uri_absolute_path_rewrite
         for tag, attr in LINK_HTML_DOCUMENTS.items():
             for elt in self.root.findall('.//{%s}%s' % (NS_XHTML, tag)):
-                uri = elt.attrib.get(attr)
-                if uri is None:
-                    continue
-                try:
-                    # GR TODO REFACTOR move rewriter_func logic to the container
-                    # this would be more logical and provide more flexibility
-                    new_uri = rewriter_func(uri=uri,
-                                            absolute_base=self.theme_base_uri,
-                                            referer_uri=self.page_uri,
-                                            cps_base_url=self.cps_base_url,
-                                            absolute_rewrite=abs_rewrite)
-                except KeyError:
-                    raise ValueError(
-                        "Missing attribute %s on <%s> element" % (attr, tag))
-                elt.attrib[attr] = new_uri
+                self._rewriteElementUri(elt, attr, rewriter_func)
         for style_elt in self.root.findall('.//{%s}%s' % (NS_XHTML, 'style')):
             if style_elt.text:
                 style_elt.text = CSS_LINKS_RE.sub(self.styleAtImportRewriteUri,
@@ -467,7 +471,7 @@ class ElementTreeEngine(BaseEngine):
 
         # engine
         head.insert(0, self.parseFragment(
-            '<meta name="engine" content="CPSDesignerThemes" />'))
+            '<meta name="generator" content="CPSDesignerThemes" />'))
 
     @classmethod
     def mergeTitle(self, theme_head, head_elts=()):

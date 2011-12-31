@@ -35,7 +35,7 @@ stylesheets (main use-case for conditional statements):
 >>> print first
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-   <meta content="CPSDesignerThemes" name="engine" />
+   <meta content="CPSDesignerThemes" name="generator" />
    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
    <title>The title from the theme</title>
    <link href="/cps_portal/portal_themes/default/icons/cps_favicon_4.png"
@@ -73,7 +73,7 @@ happens at this point, the latter are simply ignored (see #2019 for rationale):
 >>> print engine.serialize()
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-   <meta content="CPSDesignerThemes" name="engine" />
+   <meta content="CPSDesignerThemes" name="generator" />
    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
    <title>The title from the theme</title>
    <link href="/cps_portal/portal_themes/default/icons/cps_favicon_4.png"
