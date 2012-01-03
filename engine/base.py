@@ -27,8 +27,6 @@ from zope.interface import implements
 
 from Products.CMFCore.utils import getToolByName
 
-from Products.CPSUtil.crashshield import shield_apply
-from Products.CPSUtil.crashshield import CrashShieldException
 from Products.CPSUtil import resourceregistry
 from Products.CPSCore.utils import bhasattr
 from Products.CPSPortlets.CPSPortlet import PORTLET_RESOURCE_CATEGORY
@@ -63,17 +61,6 @@ def find_by_attribute(elt, attr_name, value=None):
 
     raise NotImplementedError
 
-def render_shield_portlet(portlet, context_obj=None):
-    """Render the portlet within the crash shield.
-    Take javascript needs into account.
-    """
-    try:
-        __traceback_info__="portlet id: " + portlet.getId()
-        rendered = shield_apply(portlet, 'render_cache',
-                                context_obj=context_obj)
-    except CrashShieldException:
-        rendered = '<blink>!!!</blink>'
-    return rendered.strip()
 
 class BaseEngine(object):
     """Abstract base engine class
@@ -201,7 +188,7 @@ class BaseEngine(object):
                return mcat(portlet.title_or_id())
 
         return ( (titleI18n(portlet),
-                  render_shield_portlet(portlet, context_obj=context))
+                  portlet.render_cache(context_obj=context).strip())
                  for portlet in portlets if portlet is not None)
 
     def renderSimpleBody(self, body_content='', head_content='',

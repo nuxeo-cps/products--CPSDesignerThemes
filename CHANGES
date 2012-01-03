@@ -6,7 +6,7 @@ New features
 -
 Bug fixes
 ~~~~~~~~~
--
+- #2513: crash shield invocation not the concern of CPSDesignerThemes any more
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 
