@@ -28,13 +28,15 @@ from AccessControl import ClassSecurityInfo
 import Acquisition
 from OFS.Image import Image, File
 
+from zope.app.publisher.fileresource import Image as ResourceImage
 from zope.interface import implements
 from engine import get_engine_class
 from interfaces import IThemeContainer
 
 from Products.CMFCore.utils import SimpleItemWithProperties
-from Products.CMFCore.utils import getToolByName
 from Products.CMFCore.FSImage import FSImage
+from Products.CMFCore.utils import getToolByName
+from Products.CPSUtil.http import is_modified_since
 from Products.CPSUtil.property import PropertiesPostProcessor
 
 from engine import get_engine_class
@@ -46,54 +48,72 @@ from interfaces import IResourceTraverser
 
 _marker = object()
 
-IMG_EXTENSIONS = ('gif', 'jpg', 'jpeg', 'png', 'bmp')
+IMG_EXTENSIONS = ('gif', 'jpg', 'jpeg', 'png', 'bmp', 'svg')
 
 EngineClass = get_engine_class()
 
-def add_caching_headers(response):
+def add_caching_headers(response, lastmod=None):
     """Does the same thing as DTML directives in, e.g, default.css
 
     TODO: use of meta_type and Cache policy manager is better, but
     the file classes below are probably temporary anyway."""
-    now = DateTime()
-
     response.setHeader('Cache-Control',
                        'public, max-age=36000, must-revalidate')
-    response.setHeader('Last-Modified', (now - 14).toZone('GMT').rfc822())
-    response.setHeader('Expires', (now + 1).toZone('GMT').rfc822())
+    lastmod = DateTime(lastmod).toZone('GMT').rfc822()
+    response.setHeader('Last-Modified', lastmod or DateTime())
 
 
+class OpenFile(object):
+    """Wrapper for Zope File/Image objects limitations
 
-class OpenImage(Image):
-    # Just for proof of concept
+    On one hand, OFS.Image.File is not meant for transient objects (cannot
+    set _p_mtime on which If-Modified-Since depends).
+
+    On the other hand, zope.app.publisher.fileresource requires more adapting
+    and is less complete (304 ok, 206 is not).
+
+    To be rechecked on Zope > 2.10
+    """
+
+    base_class = File
+
     security = ClassSecurityInfo()
+
+    def __init__(self, name, title, path):
+        self.name = name
+        self.title = title
+        self.path = path
+
+    def construct_obj(self):
+        f = open(self.path, 'rb')
+        obj = self.base_class(self.name, self.title, f)
+        f.close() # ASAP
+        return obj
 
     security.declarePublic('index_html')
     def index_html(self, REQUEST, RESPONSE):
         """Rewrap for caching headers"""
-        add_caching_headers(RESPONSE)
-        res = Image.index_html(self, REQUEST, RESPONSE)
-        add_caching_headers(RESPONSE)
-        return res
+        lastmod = os.path.getmtime(self.path)
+        if not is_modified_since(REQUEST, lastmod):
+            return '' # don't even read the file
 
-
-InitializeClass(OpenImage)
-
-class OpenFile(File):
-    # Just for proof of concept
-    security = ClassSecurityInfo()
-
-    security.declarePublic('index_html')
-    def index_html(self, REQUEST, RESPONSE):
-        """Rewrap for caching headers"""
-        add_caching_headers(RESPONSE)
-        res = File.index_html(self, REQUEST, RESPONSE)
-        add_caching_headers(RESPONSE)
+        res = self.construct_obj().index_html(REQUEST, RESPONSE)
+        add_caching_headers(RESPONSE, lastmod=lastmod)
         return res
 
 InitializeClass(OpenFile)
 
-class StyleSheet(File):
+
+class OpenImage(OpenFile):
+    """Same wrapper as OpenFile, but for OFS.Image.Image objects."""
+    base_class = Image
+
+InitializeClass(OpenImage)
+
+
+class StyleSheet(OpenFile):
+    """Special case of style sheets, with URI rewriting."""
+
     security = ClassSecurityInfo()
 
     links_re = re.compile(r'url\((.*)\)')
@@ -116,15 +136,12 @@ class StyleSheet(File):
             options = {}
         self.absolute_rewrite = options.get('uri-absolute-path-rewrite', True)
 
-    security.declarePublic('index_html')
-    def index_html(self, REQUEST, RESPONSE):
-        """ugly proof of concept by changing self.data on the fly."""
-        raw_data = self.data
-        self.data = self.links_re.sub(self.rewriteUrl, self.data)
-        res = File.index_html(self, REQUEST, RESPONSE)
-        add_caching_headers(RESPONSE)
-        self.data = raw_data
-        return res
+    def construct_obj(self):
+        f = open(self.path, 'r')
+        rewritten = self.links_re.sub(self.rewriteUrl, f.read())
+        f.close()
+        return File(self.name, self.title, rewritten, content_type='text/css')
+
 
 class ResourceTraverser(Acquisition.Explicit):
     """To access resources through traversal.
@@ -182,23 +199,19 @@ class ResourceTraverser(Acquisition.Explicit):
                                                             name)))
         elif os.path.isfile(path):
             ext = name.rsplit('.', 1)[-1]
+
             # TODO other types
             if ext in IMG_EXTENSIONS:
-                # FSimage roots everything in Products
-                # return FSImage(name, path)
-                f = open(path, 'rb')
-                return OpenImage(name, name, f)
+                return OpenImage(name, name, path)
             elif ext == 'css':
-                f = open(path, 'r')
-                ss = StyleSheet(name, name, f)
+                ss = StyleSheet(name, name, path)
                 ss.setOptions(self.stylesheet_options)
                 ss.setUris(theme_base=self.theme_base_uri,
                            cps_base_url=self.cps_base_url,
                            relative='/'.join((self.relative_uri, name)))
                 return ss
             else:
-                f = open(path, 'rb')
-                return OpenFile(name, name, f)
+                return OpenFile(name, name, path)
 
         elif default is _marker:
             # ends up normally in 404
