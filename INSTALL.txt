@@ -4,15 +4,11 @@ CPSDesignerThemes INSTALL
 
 :Author: Georges Racinet
 
-:Revision: $Id$
-
 .. sectnum::    :depth: 4
 .. contents::   :depth: 4
 
 Dependencies
 ============
-
-CPSSkins >= 2.16.1
 
 At least one of these XML processing libraries is required:
 
@@ -55,8 +51,12 @@ future. Even if you deactivate the testing of lxml engines, lxml will still be
 required, because it's been used by the testing infrastructure itself (to check
 the output produced by the tested engine).
 
+Also, CPSSkins >= 2.16.1 is required to test the export
+
+
 CPSSkins Export dependencies
 ============================
+CPSSkins >= 2.16.1
 
 Recommended: ``tidy``. If tidy is present, the output of the export
 will be automatically formatted.

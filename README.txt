@@ -4,8 +4,6 @@ CPSDesignerThemes README
 
 :Author: Georges Racinet
 
-:Revision: $Id$
-
 .. sectnum::    :depth: 4
 .. contents::   :depth: 4
 
