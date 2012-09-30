@@ -1,4 +1,21 @@
 ===========================================================
+Package: CPSDesignerThemes 0.11.2
+===========================================================
+First release built by: gracinet at: 2012-09-30T10:15:40
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
+~~~~~~~~~
+- General merge from CPS-3.5 branch
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
 Package: CPSDesignerThemes 0.11.1
 ===========================================================
 First release built by: gracinet at: 2012-05-27T21:00:41
