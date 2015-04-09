@@ -18,6 +18,7 @@
               isAnon mtool/isAnonymousUser;
               isHomeless python:isAnon or member.getProperty('homeless', 0);
               isHomeless python:(isHomeless == '0' and [0] or [isHomeless])[0];
+              cps_theme_page python:modules['Products.CPSDesignerThemes.negociator'].adapt(context, request).negociate();
               actions python:atool.listFilteredActionsFor(here);
               wf_state python:wtool.getInfoFor(here,'review_state','');
               uname python: isAnon and 'Guest' or member.getUserName();

@@ -27,8 +27,9 @@ from zExceptions import BadRequest
 
 from Products.CPSDesignerThemes.themecontainer import FSThemeContainer
 from Products.CPSDesignerThemes.exceptions import AttackError
-from Products.CPSDesignerThemes.negociator import FixedFSThemeEngine
 from Products.CPSDesignerThemes.negociator import CPSSkinsThemeNegociator
+from Products.CPSDesignerThemes.negociator import EngineAdapter
+from Products.CPSDesignerThemes.negociator import RootContainerFinder
 from Products.CPSDesignerThemes.negociator import (
     CPSSKINS_LOCAL_THEME_ID, CPSSKINS_THEME_COOKIE_ID
     )
@@ -56,6 +57,13 @@ class FakeTranslationService(Implicit):
     def getSelectedLanguage(self):
         return 'de'
 
+
+class FakeThemeEngine(RootContainerFinder, EngineAdapter):
+
+    def getThemeAndPageName(self, editing=False):
+        return 'testtheme', 'testpage'
+
+
 class BaseNegociatorTest(ZopeTestCase.ZopeTestCase):
 
     def afterSetUp(self):
@@ -65,31 +73,41 @@ class BaseNegociatorTest(ZopeTestCase.ZopeTestCase):
         self.folder.default_charset = 'latin-1'
         self.folder._setObject('container', FSThemeContainer('container'))
 
-class TestFixedFSThemeEngine(BaseNegociatorTest):
 
+class TestEngineAdapter(BaseNegociatorTest):
+
+    def getNegociator(self):
+        return FakeThemeEngine(self.folder, self.app.REQUEST)
 
     def testLookupContainer(self):
-        negociator = FixedFSThemeEngine(self.folder, self.app.REQUEST)
-        container = negociator.lookupContainer()
+        container = self.getNegociator().lookupContainer()
         self.assertTrue(IThemeContainer.providedBy(container))
         self.assertEquals(container.getId(), 'container')
 
     def testCharsetUrl(self):
-        negociator = FixedFSThemeEngine(self.folder, self.app.REQUEST)
+        negociator = self.getNegociator()
         self.assertEquals(negociator.cps_base_url, '/')
         self.assertEquals(negociator.encoding, 'latin-1')
 
         self.folder.default_charset = 'unicode'
-        negociator = FixedFSThemeEngine(self.folder, self.app.REQUEST)
+        negociator = self.getNegociator()
         self.assertEquals(negociator.encoding, 'utf-8')
 
     def testVoidResponse(self):
         request = self.app.REQUEST
         request._cps_void_response = True
-        negociator = FixedFSThemeEngine(self.folder, request)
-        self.assertEquals(negociator.renderCompat(), '')
+        self.assertEquals(self.getNegociator().renderCompat(), '')
 
+    def testNegociation(self):
+        negociator = self.getNegociator()
+        self.assertEquals(negociator.negociate(), ('testtheme', 'testpage'))
 
+        # caching is in effect
+        def not_called(editing=False):
+            self.fail("Should not have been called")
+
+        negociator.getThemeAndPageName = not_called
+        self.assertEquals(negociator.negociate(), ('testtheme', 'testpage'))
 
 
 class TestCPSSkinsNegociator(BaseNegociatorTest):
@@ -283,6 +301,6 @@ class TestCPSSkinsNegociator(BaseNegociatorTest):
 
 def test_suite():
     return unittest.TestSuite((
-        unittest.makeSuite(TestFixedFSThemeEngine),
+        unittest.makeSuite(TestEngineAdapter),
         unittest.makeSuite(TestCPSSkinsNegociator),
         ))

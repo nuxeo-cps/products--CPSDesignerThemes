@@ -53,6 +53,7 @@ CPSSKINS_THEME_COOKIE_ID = 'cpsskins_theme'
 CPSDESIGNER_THEME_COOKIE_ID = 'cpsdesigner_theme'
 CPSSKINS_LOCAL_THEME_ID = '.cpsskins_theme'
 CPSDESIGNER_LOCAL_THEME_ID = '.cps_themes_bindings'
+REQUEST_NEGOCIATED_THEME_MARKER = 'cps_negociated_theme_page'
 
 security.declarePublic('adapt')
 def adapt(context, request):
@@ -100,6 +101,24 @@ class EngineAdapter(object):
         To be implemented by subclasses."""
         raise NotImplementedError
 
+    security.declarePublic('negociate')
+    def negociate(self, editing=False):
+        """Does the whole negociation, cache result in request and return it.
+
+        Subclasses should not override this, the proper method for override
+        is :meth:`getThemeAndPageName`.
+        """
+        negociated = getattr(self.request, REQUEST_NEGOCIATED_THEME_MARKER,
+                             None)
+        if negociated is not None:
+            return negociated
+
+        negociated = self.getThemeAndPageName(editing=editing)
+        logger.debug("Requested theme: %r page: %r",
+                     negociated[0], negociated[1])
+        setattr(self.request, REQUEST_NEGOCIATED_THEME_MARKER, negociated)
+        return negociated
+
     security.declarePublic('getStyleSheetUris')
     def getStyleSheetUris(self, **kw):
         return self.getEngine().getStyleSheetUris(**kw)
@@ -110,9 +129,7 @@ class EngineAdapter(object):
         if engine is not None:
             return engine
 
-        theme, page = self.getThemeAndPageName(editing=editing)
-
-        logger.debug("Requested theme: %r page: %r", theme, page)
+        theme, page = self.negociate(editing=editing)
         try:
             engine = self.engine = self.lookupContainer().getPageEngine(
                 theme, page, cps_base_url=self.cps_base_url, fallback=True,
@@ -174,14 +191,6 @@ class RootContainerFinder:
             raise KeyError('No theme container found')
         return containers[0]
 
-class FixedFSThemeEngine(RootContainerFinder, EngineAdapter):
-    """For unit tests only"""
-
-    def getEngine(self):
-        """XXX this method is never called and would not work. Leftover ?"""
-        theme, page = self.getRequestedThemeAndPageName()
-        return self.lookupContainer().getPageEngine(
-            'default', 'index', cps_base_url=self.cps_base_url, fallback=True)
 
 class CPSSkinsThemeNegociator(RootContainerFinder, EngineAdapter):
     """Negociator with same rules as CPSSkins with a root container.

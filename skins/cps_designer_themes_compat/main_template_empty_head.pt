@@ -14,6 +14,7 @@
               context_url python:here.getContextUrl(utool=utool);
               base_url here/cpsskins_getBaseUrl;
               here_url here/absolute_url;
+              cps_theme_page python:modules['Products.CPSDesignerThemes.negociator'].adapt(context, request).negociate();
               member mtool/getAuthenticatedMember;
               isAnon mtool/isAnonymousUser;
               isHomeless python:isAnon or member.getProperty('homeless', 0);
