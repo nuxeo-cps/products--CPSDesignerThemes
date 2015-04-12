@@ -14,8 +14,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
-#
-# $Id$
 
 import os
 import re
@@ -28,13 +26,10 @@ from AccessControl import ClassSecurityInfo
 import Acquisition
 from OFS.Image import Image, File
 
-from zope.app.publisher.fileresource import Image as ResourceImage
 from zope.interface import implements
-from engine import get_engine_class
 from interfaces import IThemeContainer
 
 from Products.CMFCore.utils import SimpleItemWithProperties
-from Products.CMFCore.FSImage import FSImage
 from Products.CMFCore.utils import getToolByName
 from Products.CPSUtil.http import is_modified_since
 from Products.CPSUtil.property import PropertiesPostProcessor
@@ -49,6 +44,9 @@ from interfaces import IResourceTraverser
 _marker = object()
 
 IMG_EXTENSIONS = ('gif', 'jpg', 'jpeg', 'png', 'bmp', 'svg')
+
+HTML_PAGE_REGEXP = re.compile(
+    r'<(html|HTML)[^>]*xmlns[^=>]*=[\'"]%s[^>]*>' % NS_URI)
 
 EngineClass = get_engine_class()
 
@@ -65,12 +63,11 @@ def add_caching_headers(response, lastmod=None):
 
 
 class TransientFile(File):
-    """Circumvent the fact that _p_mtime is not writable for Persistent objects.
+    """Circumvent that _p_mtime is not writable for Persistent objects.
 
     OFS.Image.File inherits from Persistent, of which ``_p_mtime`` is a
     C-level read-only attribute, but adding a regular (even
     class-level) definition for the attribute gives it back to regular Python.
-
 
     Previous ways of doing (setting the Last-Modified header after calling
     OFS.Image.File.index_html() did not work for content that writes directly
@@ -92,11 +89,14 @@ class OpenFile(object):
     some caching proxy. Hence going through mature (implementing all kinds of
     requests) but very inefficient ``OFS.Image`` objects is acceptable.
 
-    On one hand, OFS.Image.File is not meant for transient objects (cannot
-    set _p_mtime on which If-Modified-Since depends).
+    On one hand, ``OFS.Image.File`` is not meant for transient objects (cannot
+    set _p_mtime on which If-Modified-Since depends) and will create
+    subtransactions even it's not attached to the DB.
 
-    On the other hand, zope.app.publisher.fileresource requires more adapting
-    and is less complete (304 ok, 206 is not).
+    On the other hand, ``zope.app.publisher.fileresource`` requires more
+    adapting and is less complete (304 ok, 206 is not).
+
+    Finally, ``Products.CMFCore.FSFile`` supports less kinds of HTTP requests.
 
     To be rechecked on Zope > 2.10
     """
@@ -118,6 +118,7 @@ class OpenFile(object):
         return obj
 
     security.declarePublic('index_html')
+
     def index_html(self, REQUEST, RESPONSE):
         """Rewrap for caching headers"""
         # avoid reading the file to build a OFS.Image.File object
@@ -151,10 +152,10 @@ class StyleSheet(OpenFile):
 
     def rewriteUrl(self, match_obj):
         return 'url(%s)' % rewrite_uri(self.theme_base_uri,
-                                         self.relative_uri,
-                                         cps_base_url=self.cps_base_url,
-                                         absolute_rewrite=self.absolute_rewrite,
-                                         uri=match_obj.group(1))
+                                       self.relative_uri,
+                                       cps_base_url=self.cps_base_url,
+                                       absolute_rewrite=self.absolute_rewrite,
+                                       uri=match_obj.group(1))
 
     def setUris(self, theme_base='/', relative='main.css', cps_base_url=None):
         self.relative_uri = relative
@@ -180,14 +181,15 @@ class ResourceTraverser(Acquisition.Explicit):
     TODO explore the idea of replacing this by DirectoryView from CMFCore.
     TODO at least use a more modern traversal style"""
 
-    logger = logging.getLogger('Products.CPSDesignerThemes.themecontainer.ResourceTraverser')
+    logger = logging.getLogger(
+        'Products.CPSDesignerThemes.themecontainer.ResourceTraverser')
     implements(IResourceTraverser)
 
     def __init__(self, path, theme_base_uri='/', relative_uri='/',
                  cps_base_url=None, stylesheet_options=None):
         self.path = path
         self.theme_base_uri = theme_base_uri
-        self.relative_uri=relative_uri
+        self.relative_uri = relative_uri
         self.cps_base_url = cps_base_url
         self.stylesheet_options = stylesheet_options
 
@@ -214,20 +216,21 @@ class ResourceTraverser(Acquisition.Explicit):
                 cps_base_url = getToolByName(self, 'portal_url').getBaseUrl()
                 ss_opt = os.path.join(path, 'stylesheet_options.xml')
                 if os.path.isfile(ss_opt):
-                    stylesheet_options=self.parseOptions(ss_opt)
+                    stylesheet_options = self.parseOptions(ss_opt)
                 else:
-                    stylesheet_options=None
+                    stylesheet_options = None
                 return ResourceTraverser(
                     path,
                     cps_base_url=cps_base_url,
                     theme_base_uri='/'.join((self.getBaseUri(), name)),
                     relative_uri='', stylesheet_options=stylesheet_options)
             # general case
-            return ResourceTraverser(path, theme_base_uri=self.theme_base_uri,
-                                     cps_base_url=self.cps_base_url,
-                                     stylesheet_options=self.stylesheet_options,
-                                     relative_uri='/'.join((self.relative_uri,
-                                                            name)))
+            return ResourceTraverser(
+                path, theme_base_uri=self.theme_base_uri,
+                cps_base_url=self.cps_base_url,
+                stylesheet_options=self.stylesheet_options,
+                relative_uri='/'.join((self.relative_uri, name)),
+            )
         elif os.path.isfile(path):
             ext = name.rsplit('.', 1)[-1]
 
@@ -248,6 +251,7 @@ class ResourceTraverser(Acquisition.Explicit):
             # ends up normally in 404
             raise KeyError(name)
 
+
 class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
                        ResourceTraverser):
     """A non persistent theme container that using a filesystem directory.
@@ -258,7 +262,7 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
     any absolute path would be a security hole
     """
 
-    meta_type="Filesystem Theme Container"
+    meta_type = "Filesystem Theme Container"
 
     implements(IThemeContainer)
 
@@ -306,7 +310,7 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
         """Override: this persistent class musn't store an absolute path.
         See #2045
         """
-        return os.path.join(INSTANCE_HOME, self.relative_path)
+        return os.path.join(INSTANCE_HOME, self.relative_path)  # noqa
 
     def getBaseUri(self):
         return self.absolute_url_path()
@@ -352,7 +356,7 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
         uri = normalize_uri_path(uri)
         if uri.startswith('/'):
             base_uri = normalize_uri_path(referer_uri).split('/')[:-1]
-            steps =  len(base_uri)
+            steps = len(base_uri)
             if base_uri[0] == '':
                 steps -= 1
             res = urlparse.urljoin('../' * steps, uri[1:])
@@ -414,19 +418,20 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
                     theme, p, page_path)
         else:
             raise ValueError("Could not find suitable themes and page for"
-                              " the required %s and %s in %s" % (
-                theme, page, self.getFSPath()))
+                             " the required %s and %s in %s" % (
+                                 theme, page, self.getFSPath()))
 
         PageEngine = get_engine_class()
-        return PageEngine(html_file=page_path, container=self,
-                          theme_base_uri=self.absolute_url_path() + '/' + theme,
-                          page_uri='/' + page_rpath,
-                          cps_base_url=cps_base_url,
-                          encoding=encoding,
-                          theme_name=t,
-                          page_name=p,
-                          lang=lang
-                          )
+        return PageEngine(
+            html_file=page_path, container=self,
+            theme_base_uri=self.absolute_url_path() + '/' + theme,
+            page_uri='/' + page_rpath,
+            cps_base_url=cps_base_url,
+            encoding=encoding,
+            theme_name=t,
+            page_name=p,
+            lang=lang
+        )
 
     def invalidate(self, theme, page=None):
         """No cache yet."""
@@ -441,7 +446,10 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
             if os.path.isdir(os.path.join(path, f)):
                 # could use a richer theme descriptor object
                 res.append(
-                    (f, dict(id=f, title=f, default=f==self.default_theme)))
+                    (f, dict(id=f,
+                             title=f,
+                             default=(f == self.default_theme),
+                             )))
         res.sort()
         return tuple(d for _, d in res)
 
@@ -456,14 +464,12 @@ class FSThemeContainer(PropertiesPostProcessor, SimpleItemWithProperties,
         fobj = open(fpath)
         extract = fobj.read(1000)
         fobj.close()
-        return re.search(r'<(html|HTML)[^>]*xmlns[^=>]*=[\'"]%s[^>]*>' % NS_URI,
-                         extract) is not None
+        return HTML_PAGE_REGEXP.search(extract) is not None
 
     def listAllPagesFor(self, theme):
         path = os.path.join(self.getFSPath(), theme)
-        return tuple(dict(title=f, id=f,
-                          default=f==self.computePageFileName(
-                                                self.default_page))
+        default_page = self.computePageFileName(self.default_page)
+        return tuple(dict(title=f, id=f, default=(f == default_page))
                      for f in os.listdir(path)
                      if self.isPageFile(os.path.join(path, f)))
 
