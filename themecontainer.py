@@ -52,6 +52,7 @@ IMG_EXTENSIONS = ('gif', 'jpg', 'jpeg', 'png', 'bmp', 'svg')
 
 EngineClass = get_engine_class()
 
+
 def add_caching_headers(response, lastmod=None):
     """Does the same thing as DTML directives in, e.g, default.css
 
@@ -63,8 +64,33 @@ def add_caching_headers(response, lastmod=None):
     response.setHeader('Last-Modified', lastmod or DateTime())
 
 
+class TransientFile(File):
+    """Circumvent the fact that _p_mtime is not writable for Persistent objects.
+
+    OFS.Image.File inherits from Persistent, of which ``_p_mtime`` is a
+    C-level read-only attribute, but adding a regular (even
+    class-level) definition for the attribute gives it back to regular Python.
+
+
+    Previous ways of doing (setting the Last-Modified header after calling
+    OFS.Image.File.index_html() did not work for content that writes directly
+    to RESPONSE, which happens if the file has several chunks of data, because
+    it'd be too late).
+    """
+
+    _p_mtime = 0
+
+
+class TransientImage(TransientFile, Image):
+    """Transient Image"""
+
+
 class OpenFile(object):
     """Wrapper for Zope File/Image objects limitations
+
+    In any case, these resources should be almost always served at the edge by
+    some caching proxy. Hence going through mature (implementing all kinds of
+    requests) but very inefficient ``OFS.Image`` objects is acceptable.
 
     On one hand, OFS.Image.File is not meant for transient objects (cannot
     set _p_mtime on which If-Modified-Since depends).
@@ -75,7 +101,7 @@ class OpenFile(object):
     To be rechecked on Zope > 2.10
     """
 
-    base_class = File
+    base_class = TransientFile
 
     security = ClassSecurityInfo()
 
@@ -87,26 +113,31 @@ class OpenFile(object):
     def construct_obj(self):
         f = open(self.path, 'rb')
         obj = self.base_class(self.name, self.title, f)
-        f.close() # ASAP
+        f.close()  # ASAP
+        obj._p_mtime = os.path.getmtime(self.path)
         return obj
 
     security.declarePublic('index_html')
     def index_html(self, REQUEST, RESPONSE):
         """Rewrap for caching headers"""
+        # avoid reading the file to build a OFS.Image.File object
+        # if content is not stale (OFS.Image.File would issue a 304 but
+        # it's way faster to do this right away without having to load the
+        # data first in a File object).
         lastmod = os.path.getmtime(self.path)
-        if not is_modified_since(REQUEST, lastmod):
-            return '' # don't even read the file
-
-        res = self.construct_obj().index_html(REQUEST, RESPONSE)
+        # Main caching headers must be supplied in all cases
         add_caching_headers(RESPONSE, lastmod=lastmod)
-        return res
+        if not is_modified_since(REQUEST, lastmod):
+            return ''
+
+        return self.construct_obj().index_html(REQUEST, RESPONSE)
 
 InitializeClass(OpenFile)
 
 
 class OpenImage(OpenFile):
     """Same wrapper as OpenFile, but for OFS.Image.Image objects."""
-    base_class = Image
+    base_class = TransientImage
 
 InitializeClass(OpenImage)
 
